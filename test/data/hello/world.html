@@ -1,0 +1,77 @@
+<html>
+<body>
+<my-root></my-root>
+<script type="module">
+  import {WebComponent} from "./lib.js";
+
+  class Root extends HTMLElement {
+    constructor() {
+      super();
+      const app = new App();
+      app.setAttribute("name", "noname");
+      console.log("noname");
+      setTimeout(() => {
+        app.setAttribute("name", "othername");
+        console.log("othername");
+        this.removeChild(app);
+        this.appendChild(app);
+        setTimeout(() => {
+          app.setAttribute("name", "othername2");
+          console.log("othername2");
+        }, 1000);
+      }, 1000);
+      this.appendChild(app);
+      console.log("root cto");
+    }
+
+    connectedCallback() {
+      console.log("root connected");
+    }
+
+    adoptedCallback() {
+      console.log("root adopted");
+    }
+
+  }
+
+  class App extends WebComponent {
+    constructor() {
+      super();
+      this.name = "bla1";
+      console.log("app");
+    }
+
+    render() {
+      return `<hello-world data="{name}"></hello-world><p>{props.name}</p>`
+    }
+  }
+
+  class Hello extends WebComponent {
+
+    pref(ref) {
+      setTimeout(() => {
+        console.dir(ref.textContent);
+        ref.innerHTML = "lolololololo";
+      }, 5000);
+    }
+
+    click(ev) {
+      alert("click");
+      this.setState({
+        clicked: true,
+        clickedCount: this.state.clickedCount ? this.state.clickedCount + 1 : 1
+      })
+    }
+
+    render() {
+      return `<p data-ref="{pref}" data-on-click="{click}" data-click="{click}">blabla {props.data} {state.clicked} {state.clickedCount}</p>`;
+    }
+  }
+
+  customElements.define("hello-world", Hello);
+  customElements.define("my-app", App);
+  customElements.define("my-root", Root);
+
+</script>
+</body>
+</html>

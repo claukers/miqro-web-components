@@ -1,0 +1,10 @@
+{
+  "check-coverage": false,
+  "lines": 10,
+  "statements": 30,
+  "functions": 10,
+  "branches": 10,
+  "all": true,
+  "extension": [".ts"],
+  "reporter": ["html", "lcov", "text"]
+}

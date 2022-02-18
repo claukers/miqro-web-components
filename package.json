@@ -1,0 +1,27 @@
+{
+  "name": "@miqro/web-components",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepare": "npm run build",
+    "prebuild": "rm -Rf dist/;",
+    "build": "tsc",
+    "pretest:file": "npm run build",
+    "test": "npm run pretest:file && LOG_LEVEL=debug NODE_ENV=test miqro-test test/*.test.js -n ",
+    "test:file": "LOG_LEVEL=debug NODE_ENV=test miqro-test"
+  },
+  "author": "claukers",
+  "license": "ISC",
+  "devDependencies": {
+    "@miqro/test": "^0.0.10",
+    "typescript": "^4.5.4"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+  }
+}
