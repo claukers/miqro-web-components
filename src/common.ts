@@ -94,6 +94,9 @@ export function renderOnElement(component: IComponent, element: Element | Shadow
           }
           hookElementEvents(child, props);
         }
+        if (component.afterRender) {
+          component.afterRender();
+        }
       }
     }
   }
@@ -107,6 +110,8 @@ export interface IComponent<P extends ComponentProps = ComponentProps, S extends
   render(): string | void;
 
   setProps?(props: Partial<P>): void;
+
+  afterRender?(): void;
 
 }
 

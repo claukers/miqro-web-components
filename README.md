@@ -64,6 +64,10 @@ when needed.
 Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
 re-render of all child elements.
 
+### this.afterRender()
+
+this callback will be called if the ```this.innerHtml``` is replaced with the template rendered from ```this.render()```.
+
 ### ***Important Notice***
 
 when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.callback()```

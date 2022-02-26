@@ -59,6 +59,12 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
   public didUnMount() {
   }
 
+  /*
+  will be called on after render is called
+   */
+  public afterRender() {
+  }
+
   public emit(event: string): void {
     return this._emitter.emit(event, this);
   }
