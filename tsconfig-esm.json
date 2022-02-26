@@ -9,7 +9,7 @@
     "module": "es2022",
     //"moduleResolution": "es2021",
     "target": "es2021",
-    "outDir": "./dist/",
+    "outDir": "./dist/esm",
     "removeComments": false,
     "noImplicitAny": true,
     "sourceMap": false,

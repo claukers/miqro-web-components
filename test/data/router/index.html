@@ -1,0 +1,44 @@
+<html>
+<body>
+<path-router data-default-element="my-404">
+  <path-route data-path="/" data-element="my-home"></path-route>
+  <path-route data-path="/about" data-element="my-about"></path-route>
+</path-router>
+<script type="module">
+  import {Component, Route, Router, historyPushPath} from "./lib";
+
+  customElements.define("my-home", class extends Component {
+    render() {
+      return `<p>home</p><route-link path="/naoisfjadsk"><a href="#">not found link</a></route-link><route-link path="/about"><a href="#">about link</a></route-link>`;
+    }
+  });
+  customElements.define("my-404", class extends Component {
+    render() {
+      return `<p>not found</p><route-link path="/"><a href="#">home link</a></route-link>`;
+    }
+  });
+  customElements.define("my-about", class extends Component {
+    render() {
+      return `<p>about</p><route-link path="/#fromabout?query1=1"><a href="#">home link</a></route-link>`;
+    }
+  });
+  customElements.define("path-route", Route);
+  customElements.define("path-router", Router);
+  customElements.define("route-link", class extends Component {
+    constructor() {
+      super();
+      this.clickListener = (ev) => {
+        ev.preventDefault();
+        historyPushPath(this.props.path);
+      };
+    }
+    willMount() {
+      this.addEventListener("click", this.clickListener);
+    }
+    didUnMount() {
+      this.removeEventListener("click", this.clickListener);
+    }
+  });
+</script>
+</body>
+</html>

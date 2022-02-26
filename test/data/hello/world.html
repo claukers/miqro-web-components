@@ -2,76 +2,70 @@
 <body>
 <my-root></my-root>
 <script type="module">
-  import {WebComponent} from "./lib.js";
+  import {ShadowRootComponent} from "./lib";
 
   class Root extends HTMLElement {
     constructor() {
       super();
-      const app = new App();
+      const app = document.createElement("my-app");
+      app.setAttribute("id", "MyApp");
       app.setAttribute("name", "noname");
-      console.log("noname");
-      setTimeout(() => {
-        app.setAttribute("name", "othername");
-        console.log("othername");
-        this.removeChild(app);
-        this.appendChild(app);
-        setTimeout(() => {
-          app.setAttribute("name", "othername2");
-          console.log("othername2");
-        }, 1000);
-      }, 1000);
       this.appendChild(app);
-      console.log("root cto");
     }
-
-    connectedCallback() {
-      console.log("root connected");
-    }
-
-    adoptedCallback() {
-      console.log("root adopted");
-    }
-
   }
 
-  class App extends WebComponent {
-    constructor() {
-      super();
-      this.name = "bla1";
-      console.log("app");
+  class App extends ShadowRootComponent {
+
+    reach5(ev) {
+      console.log("app::reach5");
+      console.log("app got data");
+      this.setState({
+        reach5: true
+      });
     }
 
     render() {
-      return `<hello-world data="{name}"></hello-world><p>{props.name}</p>`
+      return !this.state.reach5 ? `<hello-world data-on-custom="{reach5}" data="{props.name}"></hello-world><p class="bla">{props.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
     }
   }
 
-  class Hello extends WebComponent {
+  class Bla extends ShadowRootComponent {
+    render() {
+      return `<p id="asd">private data</p>`;
+    }
+  }
 
-    pref(ref) {
-      setTimeout(() => {
-        console.dir(ref.textContent);
-        ref.innerHTML = "lolololololo";
-      }, 5000);
+  class Hello extends ShadowRootComponent {
+
+    constructor() {
+      super();
+      this.registerEvent("custom");
     }
 
-    click(ev) {
-      alert("click");
+    click12(ev) {
+      console.log("hello::click");
       this.setState({
         clicked: true,
         clickedCount: this.state.clickedCount ? this.state.clickedCount + 1 : 1
-      })
+      });
+      if(this.state.clickedCount === 5) {
+        this.emit("custom");
+      }
     }
 
     render() {
-      return `<p data-ref="{pref}" data-on-click="{click}" data-click="{click}">blabla {props.data} {state.clicked} {state.clickedCount}</p>`;
+      return `<style> p { color: blue; } </style><p data-ref="{pref}" data-on-click="{click12}">blabla {props.data} {state.clicked} {state.clickedCount}</p>`;
     }
   }
 
   customElements.define("hello-world", Hello);
   customElements.define("my-app", App);
+  customElements.define("my-bla", Bla);
   customElements.define("my-root", Root);
 
+  setTimeout(()=>{
+    debugger;
+  }, 5000);
 </script>
 </body>
 </html>

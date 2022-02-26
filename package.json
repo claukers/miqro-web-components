@@ -2,12 +2,20 @@
   "name": "@miqro/web-components",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "commonjs",
+  "exports": {
+    "node": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "default": "./dist/cjs/index.js"
+  },
+  "types": "./dist/cjs/index.d.ts",
+  "main": "./dist/cjs/index.js",
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -Rf dist/;",
-    "build": "tsc",
+    "build": "tsc -p tsconfig-cjs.json && tsc -p tsconfig-esm.json",
     "pretest:file": "npm run build",
     "test": "npm run pretest:file && LOG_LEVEL=debug NODE_ENV=test miqro-test test/*.test.js -n ",
     "test:file": "LOG_LEVEL=debug NODE_ENV=test miqro-test"
