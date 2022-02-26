@@ -86,8 +86,10 @@ export function renderOnElement(component: IComponent, element: Element | Shadow
         for (let i = 0; i < childElements.length; i++) {
           const child = childElements[i];
           const props = renderElementProps(child, component);
+          // only call setProps when object or function is set
           const asIComponent = (child as unknown as IComponent);
-          if (asIComponent.setProps) {
+          const objectFunctionCount = Object.keys(props).map(p => props[p]).filter(p => typeof p === "object" || typeof p === "function").length;
+          if (asIComponent.setProps && objectFunctionCount) {
             asIComponent.setProps(props);
           }
           hookElementEvents(child, props);

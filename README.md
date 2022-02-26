@@ -2,7 +2,7 @@
 
 helpers for creating dynamic HTMLElements with a basic template system influenced by React.
 
-# Component class
+## Component class
 
 the ```Component``` class extends from ```HTMLElement``` and it is the base for creating custom HTMLElements.
 
@@ -22,9 +22,12 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-## lifecycle
+## Component lifecycle
 
-the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()``` and ```disconnectedCallback()```, it also creates a ```MutationObserver``` to watch all attribute changes. It uses this callbacks to populate ```this.props``` and ```this.state``` and call ```this.render``` to render the template when necessary, the standard ```attributeChangedCallback``` it is not used to watch attributes. 
+the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()```
+and ```disconnectedCallback()```, it also creates a ```MutationObserver``` to watch all attribute changes. It uses this
+callbacks to populate ```this.props``` and ```this.state``` and call ```this.render``` to render the template when
+necessary, the standard ```attributeChangedCallback``` it is not used to watch attributes.
 
 ### this.willMount()
 
@@ -36,11 +39,12 @@ this callback is called when the standard **connectedCallback** is called and **
 
 ### this.didUnMount()
 
-this callback is called when the standard **disconnectedCallback** is called and ***after*** the local observer is diconnected.
+this callback is called when the standard **disconnectedCallback** is called and ***after*** the local observer is
+diconnected.
 
 ### this.didUpdate(prevProps, prevState)
 
-this callback is called when the ```props``` or ```state``` of the component changes. 
+this callback is called when the ```props``` or ```state``` of the component changes.
 
 can be overridden to stop the component render by returing false. by default it returns true for all changes.
 
@@ -62,7 +66,8 @@ re-render of all child elements.
 
 ### ***Important Notice***
 
-when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.callback()``` to maintain the ```Component's``` normal lifecycle.
+when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.callback()```
+to maintain the ```Component's``` normal lifecycle.
 
 example
 
@@ -70,38 +75,19 @@ example
 import {Component} from "@miqro/web-components";
 
 class MyComponent extends Component {
-    connectedCallback() {
-        // do my stuff before render and this.props population
-        // remember to call super to not alter the Component's lifecyle
-        super.connectedCallback(); 
-        // do my stuff after render and this.props population
-    }
+  connectedCallback() {
+    // do my stuff before render and this.props population
+    // remember to call super to not alter the Component's lifecyle
+    super.connectedCallback();
+    // do my stuff after render and this.props population
+  }
 }
 ```
 
-## this.props
+## Component Events
 
-```this.props``` is extension to the standard element attributes that allows object and function passing with templates without eval.
-
-```this.props``` will be populate on the ```Component``` by watching changes to the element's attributes with a MutationObserver, and by calling ```this.setProps(props: Partial<P>)```. ```this.setProps``` will be called when the current ```Component``` is being rendered by another component. This will effectively call render again if ```this.didUpdate``` is not implemented.
-
-this second call to ```this.setProps``` exists to extend the current ```element.getAttribute(name): string``` to allow object passing as attributes.
-
-### ***Important Notice with using passing objects and functions to this.props***
-
-if you intend to pass objects in the templates as element attributes consider implementing ```didUpdate()``` and check if the prop pass as object is object or string, because in the first ```render()``` or ```didUpdate``` the prop you try to pass as an object will be the string key value as for example ```{state.parentObject}```. 
-
-That means that if you pass an object or function as the element attributes, when the element mounts the value in ```this.props``` will be initially populated with the key not the object or function itself. After the element is mounted and rendered ```this.setProps(...)``` will be called with the correct value in ```this.props```. 
-
-## this.state
-
-### this.setState(...arg...)
-
-will alter ```this.state``` with ``arg`` and will call ```didUpdate(prevProps, prevState)``` and ``this.render()`` if ```didUpdate(prevProps, prevState)``` returned true.
-
-## Events
-
-the ```Component``` class can auto attach ```addEventListener(...)``` to a function of the instance using the template system.
+the ```Component``` class can auto attach ```addEventListener(...)``` to a function of the instance using the template
+system.
 
 ### listen to standard and custom events
 
@@ -178,52 +164,10 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-## disable attr watching
+## Router class
 
-all attribute watching is **independent** of the standard way of watching attribute changes in WebComponents using ```attributeChangedCallback(...)```.
-
-by default all attr changes to the HTMLElement are observed with a ```MutationObserver``` to disable call disconnect on ```constructor``` and ```willMount```.
-
-```typescript
-import {Component} from "@miqro/web-components";
-
-customElements.define("my-element", class extends Component {
-  constructor() {
-    super();
-    this._observer.disconnect();
-    /*
-    // reconect the ones to want
-    // render will be called by this observer
-    // see MutationObserver on mdm for more information
-    this._observer.observe(this, {
-      attributes: ...,
-      ...
-    });
-     */
-  }
-  
-  willMount() {
-    this._observer.disconnect();
-    /*
-    // reconect the ones to want
-    // render will be called by this observer
-    // see MutationObserver on mdm for more information
-    this._observer.observe(this, {
-      attributes: ...,
-      ...
-    });
-     */
-  }
-
-  render() {
-    return "<p>{props.text}</p>"
-  }
-})
-```
-
-# Router class
-
-the ```Router``` class extends from ```Component``` and watches changes on the ```popstate``` event on window. If the change matches a ```Route``` child element it will render that element. 
+the ```Router``` class extends from ```Component``` and watches changes on the ```popstate``` event on window. If the
+change matches a ```Route``` child element it will render that element.
 
 ```html
 
@@ -258,11 +202,12 @@ the ```Router``` class extends from ```Component``` and watches changes on the `
 </html>
 ```
 
-## history.pushState
+### history.pushState
 
 the ```Router``` class attaches a listener on ```popstate``` event to listen to url changes.
 
-to change the path without reloading the page use the standard ```window.history.pushState(null, null as any, path);``` or the helper ```historyPushPath(path)``` to trigger programmatically.
+to change the path without reloading the page use the standard ```window.history.pushState(null, null as any, path);```
+or the helper ```historyPushPath(path)``` to trigger programmatically.
 
 ```typescript
 window.history.pushState(null, null as any, "/about");
@@ -278,10 +223,89 @@ import {historyPushPath} from "@miqro/web-components";
 historyPushPath("/about");
 ```
 
-# Integrating with standard WebComponents API
+## Component props and state
 
-the ```Component``` class is just a standard WebComponent element, it extends ```HTMLElement``` so integrating
-it into standard WebComponent projects is straight forward.
+a ```Component``` instance has ```this.props``` and ```this.state``` attributes that you can use to render a template.
+
+### this.props
+
+```this.props``` is extension to the standard element attributes that allows object and function passing with templates
+without eval.
+
+```this.props``` will be populate on the ```Component``` by watching changes to the element's attributes with a
+MutationObserver, and by calling ```this.setProps(props: Partial<P>)```. ```this.setProps``` will be called when the
+current ```Component``` is being rendered by another component. This will effectively call render again
+if ```this.didUpdate``` is not implemented.
+
+this second call to ```this.setProps``` exists to extend the current ```element.getAttribute(name): string``` to allow
+object passing as attributes and only is used if a function or an object is pass to the element.
+
+### ***Important Notice with passing objects and functions to this.props ( not recommended )***
+
+**Passing objects and functions is supported, but it is not recommend.**
+
+if you intend to pass objects in the templates as element attributes consider implementing ```didUpdate()``` and check
+if the prop pass as object is object or string, because in the first ```render()``` or ```didUpdate``` the prop you try
+to pass as an object will be the string key value as for example ```{state.parentObject}```.
+
+That means that if you pass an object or function as the element attributes, when the element mounts the value
+in ```this.props``` will be initially populated with the key not the object or function itself. After the element is
+mounted and rendered ```this.setProps(...)``` will be called with the correct value in ```this.props```.
+
+### this.state
+
+will alter ```this.state``` with ``arg`` and will call ```didUpdate(prevProps, prevState)``` and ``this.render()``
+if ```didUpdate(prevProps, prevState)``` returned true.
+
+### disable attr watching
+
+all attribute watching is **independent** of the standard way of watching attribute changes in WebComponents
+using ```attributeChangedCallback(...)```.
+
+by default all attr changes to the HTMLElement are observed with a ```MutationObserver``` to disable call disconnect
+on ```constructor``` and ```willMount```.
+
+```typescript
+import {Component} from "@miqro/web-components";
+
+customElements.define("my-element", class extends Component {
+  constructor() {
+    super();
+    this._observer.disconnect();
+    /*
+    // reconect the ones to want
+    // render will be called by this observer
+    // see MutationObserver on mdm for more information
+    this._observer.observe(this, {
+      attributes: ...,
+      ...
+    });
+     */
+  }
+
+  willMount() {
+    this._observer.disconnect();
+    /*
+    // reconect the ones to want
+    // render will be called by this observer
+    // see MutationObserver on mdm for more information
+    this._observer.observe(this, {
+      attributes: ...,
+      ...
+    });
+     */
+  }
+
+  render() {
+    return "<p>{props.text}</p>"
+  }
+})
+```
+
+## Integrating with standard WebComponents API
+
+the ```Component``` class is just a standard WebComponent element, it extends ```HTMLElement``` so integrating it into
+standard WebComponent projects is straight forward.
 
 ```html
 

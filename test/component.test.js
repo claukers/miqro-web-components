@@ -85,7 +85,9 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
     return true;
   });
 
-  class C extends Component {
+  strictEqual(fakes.Event.new.callCount, 0);
+  strictEqual(fakeDidUpdate.callCount, 0);
+  const instance = new (class extends Component {
     constructor() {
       super();
       this.state = {
@@ -126,11 +128,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
     didUnMount() {
       return fakeDidUnMount();
     }
-  }
-
-  strictEqual(fakes.Event.new.callCount, 0);
-  strictEqual(fakeDidUpdate.callCount, 0);
-  const instance = new C();
+  })();
 
   strictEqual(fakeChild.addEventListener.callCount, 0);
   strictEqual(typeof instance.props, "object");
@@ -151,6 +149,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakeRender.callCount, 0);
 
   strictEqual(fakeDidUpdate.callCount, 0);
+  instance.isConnected = true;
   await instance.connectedCallback();
   strictEqual(fakeDidUpdate.callCount, 0);
 
@@ -187,7 +186,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakeRender.callCount, 2);
   strictEqual(fakes.Element.querySelectorAll.callCount, 2);
 
-
+  instance.isConnected = false;
   await instance.disconnectedCallback();
   strictEqual(fakeDidUpdate.callCount, 1);
   strictEqual(fakes.Event.new.callCount, 1);
@@ -211,7 +210,9 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
 }, testOptions);
 
 it("happy path lifecycle props as object", async () => {
-  class C extends Component {
+
+
+  const instance = new (class extends Component {
     constructor() {
       super();
       this.state = {
@@ -228,9 +229,7 @@ it("happy path lifecycle props as object", async () => {
     render() {
       return "";
     }
-  }
-
-  const instance = new C();
+  })();
 
   const fakeSetProps = fake((p) => {
     strictEqual(p["data-custom-object"].attr1, 1);
@@ -245,7 +244,7 @@ it("happy path lifecycle props as object", async () => {
     return "";
   });
 
-  const fakeChild = new class extends Component {
+  const fakeChild = new (class extends Component {
     setProps(p) {
       fakeSetProps(p);
       const oldProps = this.props;
@@ -261,7 +260,7 @@ it("happy path lifecycle props as object", async () => {
     render() {
       return fakeRender(this.props);
     }
-  }
+  })()
 
   fakeChild.querySelectorAll = fake(() => {
     return [];
@@ -283,6 +282,7 @@ it("happy path lifecycle props as object", async () => {
   strictEqual(fakeSetProps.callCount, 0);
   strictEqual(fakeRender.callCount, 0);
 
+  instance.isConnected = true;
   instance.connectedCallback();
 
   strictEqual(instance.innerHTML, "");

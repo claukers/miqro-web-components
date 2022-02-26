@@ -16,9 +16,8 @@
     "prepare": "npm run build",
     "prebuild": "rm -Rf dist/;",
     "build": "tsc && tsc -p tsconfig-esm.json",
-    "pretest:file": "npm run build",
-    "test": "npm run pretest:file && LOG_LEVEL=debug NODE_ENV=test miqro-test test/*.test.js -n ",
-    "test:file": "LOG_LEVEL=debug NODE_ENV=test miqro-test"
+    "pretest": "npm run build",
+    "test": "LOG_LEVEL=debug NODE_ENV=test miqro-test test/*.test.js -n "
   },
   "author": "claukers",
   "license": "ISC",
