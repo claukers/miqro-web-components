@@ -1,4 +1,5 @@
 /* eslint-disable  @typescript-eslint/explicit-module-boundary-types */
+
 function get(obj: any, attrPath: string | any, defaultValue?: any): any | undefined {
   if (!obj || typeof obj !== "object") {
     return defaultValue !== undefined ? defaultValue : undefined
@@ -18,9 +19,9 @@ function get(obj: any, attrPath: string | any, defaultValue?: any): any | undefi
   return value;
 }
 
-export function renderElementProps(element: Element, values?: any): { [attr: string]: string | Function; } {
+export function renderElementProps(element: Element, values?: any): ComponentProps {
   const propNames = element.getAttributeNames();
-  const props: { [attr: string]: string | Function; } = {};
+  const props: ComponentProps = {};
   for (const propName of propNames) {
     const value = element.getAttribute(propName);
     if (values && value && value.charAt(0) === "{" && value.charAt(value.length - 1) === "}") {
@@ -62,16 +63,18 @@ function renderTemplate(str: string, values: any): string {
     const value = get(values, path);
     if (typeof value === "function") {
       return match; // leave as {name} because renderTemplate doesn't allow functions
-    } else if (value === undefined) {
+    } else if (typeof value == "string" || typeof value === "boolean" || typeof value === "number") {
+      return String(value);
+    } else if (value == undefined) {
       return "";
     } else {
-      return String(value);
+      return match;
     }
   });
 }
 
 export function renderOnElement(component: IComponent, element: Element | ShadowRoot): void {
-  // console.debug("renderOnElement [%s] props [%o] state [%o]", element.nodeName, component.props, component.state);
+  // console.log("renderOnElement [%s] props [%o] state [%o]", element.nodeName, component.props, component.state);
   if (component.render) {
     const renderOutput = component.render();
     if (typeof renderOutput === "string") {
@@ -83,6 +86,10 @@ export function renderOnElement(component: IComponent, element: Element | Shadow
         for (let i = 0; i < childElements.length; i++) {
           const child = childElements[i];
           const props = renderElementProps(child, component);
+          const asIComponent = (child as unknown as IComponent);
+          if (asIComponent.setProps) {
+            asIComponent.setProps(props);
+          }
           hookElementEvents(child, props);
         }
       }
@@ -97,10 +104,12 @@ export interface IComponent<P extends ComponentProps = ComponentProps, S extends
 
   render(): string | void;
 
+  setProps?(props: Partial<P>): void;
+
 }
 
 export type ComponentState = { [p: string]: any };
 
-export type ComponentProps = { [p: string]: string };
+export type ComponentProps = { [p: string]: any };
 
 

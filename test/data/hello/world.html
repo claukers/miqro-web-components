@@ -16,6 +16,13 @@
 
   class App extends ShadowRootComponent {
 
+    constructor() {
+      super();
+      this.state.obj = {
+        attr1: 1
+      };
+    }
+
     reach5(ev) {
       console.log("app::reach5");
       console.log("app got data");
@@ -25,7 +32,7 @@
     }
 
     render() {
-      return !this.state.reach5 ? `<hello-world data-on-custom="{reach5}" data="{props.name}"></hello-world><p class="bla">{props.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
+      return !this.state.reach5 ? `<hello-world data-on-custom="{reach5}" data="{props.name}" data-obj="{state.obj}"></hello-world><p class="bla">{props.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
     }
   }
 
@@ -54,7 +61,7 @@
     }
 
     render() {
-      return `<style> p { color: blue; } </style><p data-ref="{pref}" data-on-click="{click12}">blabla {props.data} {state.clicked} {state.clickedCount}</p>`;
+      return `<style> p { color: blue; } </style><p data-ref="{pref}" data-on-click="{click12}">blabla {props.data} {state.clicked} {state.clickedCount} attr 1 {props.data-obj.attr1} </p>`;
     }
   }
 

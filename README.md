@@ -1,6 +1,6 @@
 # @miqro/web-components
 
-helpers for creating dynamic HTMLElements with a basic templates
+helpers for creating dynamic HTMLElements with a basic template system influenced by React.
 
 # Component class
 
@@ -22,7 +22,7 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-## Component lifecycle
+## lifecycle
 
 the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()``` and ```disconnectedCallback()```, it also creates a ```MutationObserver``` to watch all attribute changes. It uses this callbacks to populate ```this.props``` and ```this.state``` and call ```this.render``` to render the template when necessary, the standard ```attributeChangedCallback``` it is not used to watch attributes. 
 
@@ -60,9 +60,9 @@ when needed.
 Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
 re-render of all child elements.
 
-### **Important Notice**
+### ***Important Notice***
 
-when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.callback()``` to not alter the ```Component's``` lifecycle.
+when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.callback()``` to maintain the ```Component's``` normal lifecycle.
 
 example
 
@@ -71,23 +71,118 @@ import {Component} from "@miqro/web-components";
 
 class MyComponent extends Component {
     connectedCallback() {
+        // do my stuff before render and this.props population
         // remember to call super to not alter the Component's lifecyle
         super.connectedCallback(); 
+        // do my stuff after render and this.props population
     }
 }
 ```
 
-## this.setState(...arg...)
+## this.props
 
-```this.setState(arg: Partial<State>)```
+```this.props``` is extension to the standard element attributes that allows object and function passing with templates without eval.
+
+```this.props``` will be populate on the ```Component``` by watching changes to the element's attributes with a MutationObserver, and by calling ```this.setProps(props: Partial<P>)```. ```this.setProps``` will be called when the current ```Component``` is being rendered by another component. This will effectively call render again if ```this.didUpdate``` is not implemented.
+
+this second call to ```this.setProps``` exists to extend the current ```element.getAttribute(name): string``` to allow object passing as attributes.
+
+### ***Important Notice with using passing objects and functions to this.props***
+
+if you intend to pass objects in the templates as element attributes consider implementing ```didUpdate()``` and check if the prop pass as object is object or string, because in the first ```render()``` or ```didUpdate``` the prop you try to pass as an object will be the string key value as for example ```{state.parentObject}```. 
+
+That means that if you pass an object or function as the element attributes, when the element mounts the value in ```this.props``` will be initially populated with the key not the object or function itself. After the element is mounted and rendered ```this.setProps(...)``` will be called with the correct value in ```this.props```. 
+
+## this.state
+
+### this.setState(...arg...)
 
 will alter ```this.state``` with ``arg`` and will call ```didUpdate(prevProps, prevState)``` and ``this.render()`` if ```didUpdate(prevProps, prevState)``` returned true.
+
+## Events
+
+the ```Component``` class can auto attach ```addEventListener(...)``` to a function of the instance using the template system.
+
+### listen to standard and custom events
+
+use ```data-on-...``` attribute to automatically call ```addEventListener(...)``` on the element.
+
+````html
+
+<html>
+<body>
+<app></app>
+<script type="module">
+  import {Component} from "@miqro/web-components";
+
+  customElements.define("app", class extends Component {
+    // event handler
+    userClick() {
+      console.log("app got custom event");
+    }
+
+    render() {
+      // attach event handler using data-on-user-click-me={userClick}
+      return `<my-component data-on-user-click-me={userClick}></my-component>`;
+    }
+  });
+
+  customElements.define("my-component", class extends Component {
+    // event handler
+    click() {
+      this.setState({
+        clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
+      });
+      this.emit("user-click-me");
+    }
+
+    render() {
+      // using using data-on-click={click} to call attach to "click" event
+      return `<div><a href="#" data-on-click="{click}">click me</a><p>{state.clickCount}</p></div>`
+    }
+  });
+</script>
+</body>
+</html>
+````
+
+### emit events
+
+when ```this.emit(eventName)``` is called it will invoke internally ```this.dispatchEvent(event)``` where ```event``` by
+default be a cached instance of ```new Event("myEvent", {composed: true, bubbles: false, cancelable: false })```. to
+change this behavior call ```this.registerEvent("myEvent", ...EventInit Options...)```.
+
+#### define the EventInit arguments (optional)
+
+when ```this.emit(eventName)``` is called and ```eventName``` is not defined a new ```Event``` will be created with the
+default options.
+
+```typescript
+import {Component} from "@miqro/web-components";
+
+customElements.define("my-element", class extends Component {
+  constructor() {
+    super();
+    this.registerEvent("myEvent", {
+      ... // EventInit Arguments as new Event("myEvent", ...)
+    });
+  }
+
+  click() {
+    this.emit("myEvent");
+  }
+
+  render() {
+    return "<p><b data-on-click={click}>{props.text}</b></p>"
+  }
+})
+```
 
 ## disable attr watching
 
 all attribute watching is **independent** of the standard way of watching attribute changes in WebComponents using ```attributeChangedCallback(...)```.
 
-by default all attr changes to the HTMLElement are observed with a ```MutationObserver``` to disable call disconnect on ```constructor``` and ```willMount```. 
+by default all attr changes to the HTMLElement are observed with a ```MutationObserver``` to disable call disconnect on ```constructor``` and ```willMount```.
 
 ```typescript
 import {Component} from "@miqro/web-components";
@@ -126,80 +221,7 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-# Events
-
-## listen to standard and custom events
-
-use ```data-on-...``` attribute to automatically call ```addEventListener(...)``` on the element.
-
-````html
-
-<html>
-<body>
-<app></app>
-<script type="module">
-  import {Component} from "@miqro/web-components";
-
-  customElements.define("app", class extends Component {
-    userClick() {
-      console.log("app got custom event");
-    }
-
-    render() {
-      return `<my-component data-on-user-click-me={userClick}></my-component>`;
-    }
-  });
-
-  customElements.define("my-component", class extends Component {
-    click() {
-      this.setState({
-        clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
-      });
-      this.emit("user-click-me");
-    }
-
-    render() {
-      return `<div><a href="#" data-on-click="{click}">click me</a><p>{state.clickCount}</p></div>`
-    }
-  });
-</script>
-</body>
-</html>
-````
-
-## emit events
-
-when ```this.emit(eventName)``` is called it will invoke internally ```this.dispatchEvent(event)``` where ```event``` by
-default be a cached instance of ```new Event("myEvent", {composed: true, bubbles: false, cancelable: false })```. to
-change this behavior call ```this.registerEvent("myEvent", ...EventInit Options...)```.
-
-### define the EventInit arguments (optional)
-
-when ```this.emit(eventName)``` is called and ```eventName``` is not defined a new ```Event``` will be created with the
-default options.
-
-```typescript
-import {Component} from "@miqro/web-components";
-
-customElements.define("my-element", class extends Component {
-  constructor() {
-    super();
-    this.registerEvent("myEvent", {
-      ... // EventInit Arguments as new Event("myEvent", ...)
-    });
-  }
-
-  click() {
-    this.emit("myEvent");
-  }
-
-  render() {
-    return "<p><b data-on-click={click}>{props.text}</b></p>"
-  }
-})
-```
-
-# Router
+# Router class
 
 the ```Router``` class extends from ```Component``` and watches changes on the ```popstate``` event on window. If the change matches a ```Route``` child element it will render that element. 
 

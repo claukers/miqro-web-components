@@ -13,11 +13,7 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
     this._emitter = new EventEmitter();
     this._observer = new MutationObserver((arg) => {
       //if (this.isConnected) {
-      const oldProps = this.props;
-      this.props = renderElementProps(this) as P;
-      if (this.didUpdate(oldProps, this.state)) {
-        return this._renderOnElement();
-      }
+      this.setProps(renderElementProps(this) as P, true);
       //}
     });
     this._observer.observe(this, {
@@ -28,7 +24,6 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
   }
 
   public connectedCallback() {
-    this.props = renderElementProps(this) as P;
     this._observer.observe(this, {
       attributes: true
     });
@@ -81,6 +76,17 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
       ...args
     };
     if (this.didUpdate(this.props, oldState)) {
+      return this._renderOnElement();
+    }
+  }
+
+  public setProps(args: Partial<P>, override = false) {
+    const oldProps = this.props;
+    this.props = override ? args as P : {
+      ...this.props,
+      ...args
+    };
+    if (this.didUpdate(oldProps, this.state)) {
       return this._renderOnElement();
     }
   }

@@ -1,7 +1,7 @@
 {
   "name": "@miqro/web-components",
   "version": "0.0.1",
-  "description": "",
+  "description": "helpers for creating dynamic HTMLElements with a basic template system",
   "type": "commonjs",
   "exports": {
     "node": {
@@ -15,7 +15,7 @@
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -Rf dist/;",
-    "build": "tsc -p tsconfig-cjs.json && tsc -p tsconfig-esm.json",
+    "build": "tsc && tsc -p tsconfig-esm.json",
     "pretest:file": "npm run build",
     "test": "npm run pretest:file && LOG_LEVEL=debug NODE_ENV=test miqro-test test/*.test.js -n ",
     "test:file": "LOG_LEVEL=debug NODE_ENV=test miqro-test"

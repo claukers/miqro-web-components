@@ -1,61 +1,46 @@
 const {strictEqual} = require("assert");
-const {fake} = require("@miqro/test");
+const {fake, requireMock} = require("@miqro/test");
+const {initDOMGlobals} = require("./common");
+const fakes = initDOMGlobals();
+const {Component} = requireMock("../", {});
 
-const fakeElement = {
-  dispatchEvent: undefined,
-  getAttributeNames: undefined,
-  getAttribute: undefined,
-  querySelectorAll: undefined
-}
-const fakeObserver = {
-  new: undefined,
-  observe: undefined,
-  disconnect: undefined
-}
+const testOptions = {
+  category: "component",
+  before: async () => {
 
-const fakeEvent = {
-  new: undefined
-}
+    fakes.Event.new = fake(() => {
 
-Event = class Event {
-  constructor() {
-    fakeEvent.new(this, ...arguments);
+    });
+
+    fakes.Element.dispatchEvent = fake(() => {
+
+    });
+
+    fakes.Element.getAttributeNames = fake(() => {
+      return ["attr1"];
+    });
+
+    fakes.Element.getAttribute = fake(() => {
+      return "attr1Value"
+    });
+
+    fakes.Element.querySelectorAll = fake(() => {
+      return [];
+    });
+
+    fakes.MutationObserver.new = fake((observer, listener) => {
+
+    });
+
+    fakes.MutationObserver.observe = fake(() => {
+
+    });
+
+    fakes.MutationObserver.disconnect = fake(() => {
+
+    });
   }
-}
-
-HTMLElement = class HTMLElement {
-  dispatchEvent() {
-    return fakeElement.dispatchEvent(...arguments);
-  }
-
-  getAttributeNames() {
-    return fakeElement.getAttributeNames(...arguments);
-  }
-
-  getAttribute() {
-    return fakeElement.getAttribute(...arguments);
-  }
-
-  querySelectorAll() {
-    return fakeElement.querySelectorAll(...arguments);
-  }
-}
-
-MutationObserver = class MutationObserver {
-  constructor() {
-    fakeObserver.new(this, ...arguments);
-  }
-
-  observe() {
-    return fakeObserver.observe(...arguments);
-  }
-
-  disconnect() {
-    return fakeObserver.disconnect(...arguments);
-  }
-}
-
-const {Component} = require("../");
+};
 
 it("happy path lifecycle with custom handler and template as simple value", async () => {
 
@@ -72,7 +57,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
 
   });
 
-  fakeElement.querySelectorAll = fake(() => {
+  fakes.Element.querySelectorAll = fake(() => {
     return [fakeChild];
   });
 
@@ -143,7 +128,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
     }
   }
 
-  strictEqual(fakeEvent.new.callCount, 0);
+  strictEqual(fakes.Event.new.callCount, 0);
   strictEqual(fakeDidUpdate.callCount, 0);
   const instance = new C();
 
@@ -151,14 +136,14 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(typeof instance.props, "object");
   strictEqual(Object.keys(instance.props).length, 1);
   strictEqual(instance.props.attr1, "attr1Value");
-  strictEqual(fakeObserver.new.callCount, 1);
-  strictEqual(fakeElement.querySelectorAll.callCount, 0);
-  strictEqual(typeof fakeObserver.new.callArgs[0][1], "function");
-  strictEqual(fakeObserver.observe.callCount, 1);
-  strictEqual(fakeObserver.disconnect.callCount, 0);
-  strictEqual(fakeObserver.observe.callArgs[0][0], instance);
-  strictEqual(typeof fakeObserver.observe.callArgs[0][1], "object");
-  strictEqual(fakeObserver.observe.callArgs[0][1].attributes, true);
+  strictEqual(fakes.MutationObserver.new.callCount, 1);
+  strictEqual(fakes.Element.querySelectorAll.callCount, 0);
+  strictEqual(typeof fakes.MutationObserver.new.callArgs[0][1], "function");
+  strictEqual(fakes.MutationObserver.observe.callCount, 1);
+  strictEqual(fakes.MutationObserver.disconnect.callCount, 0);
+  strictEqual(fakes.MutationObserver.observe.callArgs[0][0], instance);
+  strictEqual(typeof fakes.MutationObserver.observe.callArgs[0][1], "object");
+  strictEqual(fakes.MutationObserver.observe.callArgs[0][1].attributes, true);
   strictEqual(instance.innerHTML, undefined);
   strictEqual(fakeWillMount.callCount, 0);
   strictEqual(fakeDidMount.callCount, 0);
@@ -169,27 +154,27 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   await instance.connectedCallback();
   strictEqual(fakeDidUpdate.callCount, 0);
 
-  strictEqual(fakeEvent.new.callCount, 0);
-  strictEqual(fakeElement.dispatchEvent.callCount, 0);
+  strictEqual(fakes.Event.new.callCount, 0);
+  strictEqual(fakes.Element.dispatchEvent.callCount, 0);
 
   instance.emit("custom-event");
 
-  strictEqual(fakeElement.dispatchEvent.callCount, 1);
-  strictEqual(fakeElement.dispatchEvent.callArgs[0][0], fakeEvent.new.callArgs[0][0]);
-  strictEqual(fakeEvent.new.callCount, 1);
+  strictEqual(fakes.Element.dispatchEvent.callCount, 1);
+  strictEqual(fakes.Element.dispatchEvent.callArgs[0][0], fakes.Event.new.callArgs[0][0]);
+  strictEqual(fakes.Event.new.callCount, 1);
 
-  strictEqual(fakeElement.querySelectorAll.callCount, 1);
-  strictEqual(fakeElement.querySelectorAll.callArgs[0][0], "*");
+  strictEqual(fakes.Element.querySelectorAll.callCount, 1);
+  strictEqual(fakes.Element.querySelectorAll.callArgs[0][0], "*");
   strictEqual(fakeChild.addEventListener.callCount, 1);
   strictEqual(fakeWillMount.callCount, 1);
   strictEqual(fakeDidMount.callCount, 1);
   strictEqual(fakeDidUnMount.callCount, 0);
   strictEqual(fakeRender.callCount, 1);
-  strictEqual(fakeObserver.observe.callCount, 2);
-  strictEqual(fakeObserver.disconnect.callCount, 0);
-  strictEqual(fakeObserver.observe.callArgs[1][0], instance);
-  strictEqual(typeof fakeObserver.observe.callArgs[1][1], "object");
-  strictEqual(fakeObserver.observe.callArgs[1][1].attributes, true);
+  strictEqual(fakes.MutationObserver.observe.callCount, 2);
+  strictEqual(fakes.MutationObserver.disconnect.callCount, 0);
+  strictEqual(fakes.MutationObserver.observe.callArgs[1][0], instance);
+  strictEqual(typeof fakes.MutationObserver.observe.callArgs[1][1], "object");
+  strictEqual(fakes.MutationObserver.observe.callArgs[1][1].attributes, true);
   strictEqual(instance.innerHTML, "fakeVal");
   strictEqual(typeof instance.props, "object");
 
@@ -200,63 +185,108 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
 
   strictEqual(instance.innerHTML, "fakeVal1");
   strictEqual(fakeRender.callCount, 2);
-  strictEqual(fakeElement.querySelectorAll.callCount, 2);
+  strictEqual(fakes.Element.querySelectorAll.callCount, 2);
 
 
   await instance.disconnectedCallback();
   strictEqual(fakeDidUpdate.callCount, 1);
-  strictEqual(fakeEvent.new.callCount, 1);
-  strictEqual(fakeElement.dispatchEvent.callCount, 1);
+  strictEqual(fakes.Event.new.callCount, 1);
+  strictEqual(fakes.Element.dispatchEvent.callCount, 1);
 
   strictEqual(fakeCustomHandler.callCount, 1);
   strictEqual(fakeWillMount.callCount, 1);
   strictEqual(fakeDidMount.callCount, 1);
   strictEqual(fakeDidUnMount.callCount, 1);
-  strictEqual(fakeElement.querySelectorAll.callCount, 2);
+  strictEqual(fakes.Element.querySelectorAll.callCount, 2);
   strictEqual(fakeRender.callCount, 2);
-  strictEqual(fakeObserver.observe.callCount, 2);
-  strictEqual(fakeObserver.disconnect.callCount, 1);
-  strictEqual(fakeObserver.observe.callArgs[1][0], instance);
-  strictEqual(typeof fakeObserver.observe.callArgs[1][1], "object");
-  strictEqual(fakeObserver.observe.callArgs[1][1].attributes, true);
+  strictEqual(fakes.MutationObserver.observe.callCount, 2);
+  strictEqual(fakes.MutationObserver.disconnect.callCount, 1);
+  strictEqual(fakes.MutationObserver.observe.callArgs[1][0], instance);
+  strictEqual(typeof fakes.MutationObserver.observe.callArgs[1][1], "object");
+  strictEqual(fakes.MutationObserver.observe.callArgs[1][1].attributes, true);
   strictEqual(instance.innerHTML, "fakeVal1");
   strictEqual(typeof instance.props, "object");
 
 
-}, {
-  category: "component",
-  before: async () => {
+}, testOptions);
 
-    fakeEvent.new = fake(() => {
+it("happy path lifecycle props as object", async () => {
+  class C extends Component {
+    constructor() {
+      super();
+      this.state = {
+        internalObject: {
+          attr1: 1,
+          attr2: "value2",
+          attrCB: fake(() => {
 
-    });
+          })
+        }
+      }
+    }
 
-    fakeElement.dispatchEvent = fake(() => {
-
-    });
-
-    fakeElement.getAttributeNames = fake(() => {
-      return ["attr1"];
-    });
-
-    fakeElement.getAttribute = fake(() => {
-      return "attr1Value"
-    });
-
-    fakeElement.querySelectorAll = fake(() => {
-      return [];
-    });
-
-    fakeObserver.new = fake((observer, listener) => {
-
-    });
-
-    fakeObserver.observe = fake(() => {
-
-    });
-
-    fakeObserver.disconnect = fake(() => {
-
-    });
+    render() {
+      return "";
+    }
   }
-})
+
+  const instance = new C();
+
+  const fakeSetProps = fake((p) => {
+    strictEqual(p["data-custom-object"].attr1, 1);
+    strictEqual(p["data-custom-object"].attr2, "value2");
+    strictEqual(typeof p["data-custom-object"].attrCB, "function");
+  });
+
+  const fakeRender = fake((p) => {
+    strictEqual(p["data-custom-object"].attr1, 1);
+    strictEqual(p["data-custom-object"].attr2, "value2");
+    strictEqual(typeof p["data-custom-object"].attrCB, "function");
+    return "";
+  });
+
+  const fakeChild = new class extends Component {
+    setProps(p) {
+      fakeSetProps(p);
+      const oldProps = this.props;
+      this.props = {
+        ...this.props,
+        ...p
+      };
+      if (this.didUpdate(oldProps, this.state)) {
+        return this._renderOnElement();
+      }
+    }
+
+    render() {
+      return fakeRender(this.props);
+    }
+  }
+
+  fakeChild.querySelectorAll = fake(() => {
+    return [];
+  });
+
+  fakeChild.getAttributeNames = fake(() => {
+    return ["data-custom-object"];
+  });
+
+  fakeChild.getAttribute = fake(() => {
+    return "{state.internalObject}"
+  });
+
+  fakes.Element.querySelectorAll = fake(() => {
+    return [fakeChild]
+  });
+
+  strictEqual(instance.innerHTML, undefined);
+  strictEqual(fakeSetProps.callCount, 0);
+  strictEqual(fakeRender.callCount, 0);
+
+  instance.connectedCallback();
+
+  strictEqual(instance.innerHTML, "");
+  strictEqual(fakeSetProps.callCount, 1);
+  strictEqual(fakeRender.callCount, 1);
+
+}, testOptions);
