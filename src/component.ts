@@ -11,11 +11,16 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
   constructor() {
     super();
     this._emitter = new EventEmitter();
-    this._observer = new MutationObserver((arg) => {
-      this.setProps(renderElementProps(this) as P, true);
-    });
-    this._observer.observe(this, {
-      attributes: true
+    this._observer = new MutationObserver((mutations: MutationRecord[]) => {
+      const newProps: any = {};
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes') {
+          const propName = mutation.attributeName as string;
+          const propValue = this.getAttribute(propName);
+          newProps[propName] = propValue;
+        }
+      }
+      this.setProps(newProps);
     });
     this.props = renderElementProps(this) as P;
     this.state = {} as S; // start empty
@@ -25,6 +30,7 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
     this._observer.observe(this, {
       attributes: true
     });
+    this.setProps(renderElementProps(this) as P, false, false);
     this.willMount();
     this._renderOnElement();
     this.didMount();
@@ -73,24 +79,24 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
     return this._emitter.registerEvent(event, eventOptions);
   }
 
-  public setState(args: Partial<S>) {
+  public setState(args: Partial<S>, override = false, refresh = true) {
     const oldState = this.state;
-    this.state = {
+    this.state = override ? args as S : {
       ...this.state,
       ...args
     };
-    if (this.isConnected && this.didUpdate(this.props, oldState)) {
+    if (refresh && this.isConnected && this.didUpdate(this.props, oldState)) {
       return this._renderOnElement();
     }
   }
 
-  public setProps(args: Partial<P>, override = false) {
+  public setProps(args: Partial<P>, override = false, refresh = true) {
     const oldProps = this.props;
     this.props = override ? args as P : {
       ...this.props,
       ...args
     };
-    if (this.isConnected && this.didUpdate(oldProps, this.state)) {
+    if (refresh && this.isConnected && this.didUpdate(oldProps, this.state)) {
       return this._renderOnElement();
     }
   }

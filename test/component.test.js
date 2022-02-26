@@ -137,11 +137,8 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakes.MutationObserver.new.callCount, 1);
   strictEqual(fakes.Element.querySelectorAll.callCount, 0);
   strictEqual(typeof fakes.MutationObserver.new.callArgs[0][1], "function");
-  strictEqual(fakes.MutationObserver.observe.callCount, 1);
+  strictEqual(fakes.MutationObserver.observe.callCount, 0);
   strictEqual(fakes.MutationObserver.disconnect.callCount, 0);
-  strictEqual(fakes.MutationObserver.observe.callArgs[0][0], instance);
-  strictEqual(typeof fakes.MutationObserver.observe.callArgs[0][1], "object");
-  strictEqual(fakes.MutationObserver.observe.callArgs[0][1].attributes, true);
   strictEqual(instance.innerHTML, undefined);
   strictEqual(fakeWillMount.callCount, 0);
   strictEqual(fakeDidMount.callCount, 0);
@@ -152,6 +149,10 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   instance.isConnected = true;
   await instance.connectedCallback();
   strictEqual(fakeDidUpdate.callCount, 0);
+  strictEqual(fakes.MutationObserver.observe.callCount, 1);
+  strictEqual(fakes.MutationObserver.observe.callArgs[0][0], instance);
+  strictEqual(typeof fakes.MutationObserver.observe.callArgs[0][1], "object");
+  strictEqual(fakes.MutationObserver.observe.callArgs[0][1].attributes, true);
 
   strictEqual(fakes.Event.new.callCount, 0);
   strictEqual(fakes.Element.dispatchEvent.callCount, 0);
@@ -169,11 +170,11 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakeDidMount.callCount, 1);
   strictEqual(fakeDidUnMount.callCount, 0);
   strictEqual(fakeRender.callCount, 1);
-  strictEqual(fakes.MutationObserver.observe.callCount, 2);
+  strictEqual(fakes.MutationObserver.observe.callCount, 1);
   strictEqual(fakes.MutationObserver.disconnect.callCount, 0);
-  strictEqual(fakes.MutationObserver.observe.callArgs[1][0], instance);
-  strictEqual(typeof fakes.MutationObserver.observe.callArgs[1][1], "object");
-  strictEqual(fakes.MutationObserver.observe.callArgs[1][1].attributes, true);
+  strictEqual(fakes.MutationObserver.observe.callArgs[0][0], instance);
+  strictEqual(typeof fakes.MutationObserver.observe.callArgs[0][1], "object");
+  strictEqual(fakes.MutationObserver.observe.callArgs[0][1].attributes, true);
   strictEqual(instance.innerHTML, "fakeVal");
   strictEqual(typeof instance.props, "object");
 
@@ -198,11 +199,8 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakeDidUnMount.callCount, 1);
   strictEqual(fakes.Element.querySelectorAll.callCount, 2);
   strictEqual(fakeRender.callCount, 2);
-  strictEqual(fakes.MutationObserver.observe.callCount, 2);
+  strictEqual(fakes.MutationObserver.observe.callCount, 1);
   strictEqual(fakes.MutationObserver.disconnect.callCount, 1);
-  strictEqual(fakes.MutationObserver.observe.callArgs[1][0], instance);
-  strictEqual(typeof fakes.MutationObserver.observe.callArgs[1][1], "object");
-  strictEqual(fakes.MutationObserver.observe.callArgs[1][1].attributes, true);
   strictEqual(instance.innerHTML, "fakeVal1");
   strictEqual(typeof instance.props, "object");
 

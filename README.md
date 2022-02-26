@@ -76,8 +76,6 @@ to maintain the ```Component's``` normal lifecycle.
 example
 
 ```typescript
-import {Component} from "@miqro/web-components";
-
 class MyComponent extends Component {
   connectedCallback() {
     // do my stuff before render and this.props population
@@ -97,43 +95,33 @@ system.
 
 use ```data-on-...``` attribute to automatically call ```addEventListener(...)``` on the element.
 
-````html
+````typescript
+customElements.define("my-app", class extends Component {
+  // event handler
+  userClick() {
+    console.log("app got custom event");
+  }
 
-<html>
-<body>
-<app></app>
-<script type="module">
-  import {Component} from "@miqro/web-components";
+  render() {
+    // attach event handler using data-on-user-click-me={userClick}
+    return `<my-component data-on-user-click-me={userClick}></my-component>`;
+  }
+});
 
-  customElements.define("app", class extends Component {
-    // event handler
-    userClick() {
-      console.log("app got custom event");
-    }
+customElements.define("my-component", class extends Component {
+  // event handler
+  click() {
+    this.setState({
+      clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
+    });
+    this.emit("user-click-me");
+  }
 
-    render() {
-      // attach event handler using data-on-user-click-me={userClick}
-      return `<my-component data-on-user-click-me={userClick}></my-component>`;
-    }
-  });
-
-  customElements.define("my-component", class extends Component {
-    // event handler
-    click() {
-      this.setState({
-        clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
-      });
-      this.emit("user-click-me");
-    }
-
-    render() {
-      // using using data-on-click={click} to call attach to "click" event
-      return `<div><a href="#" data-on-click="{click}">click me</a><p>{state.clickCount}</p></div>`
-    }
-  });
-</script>
-</body>
-</html>
+  render() {
+    // using using data-on-click={click} to call attach to "click" event
+    return `<div><a href="#" data-on-click="{click}">click me</a><p>{state.clickCount}</p></div>`
+  }
+});
 ````
 
 ### emit events
@@ -148,8 +136,6 @@ when ```this.emit(eventName)``` is called and ```eventName``` is not defined a n
 default options.
 
 ```typescript
-import {Component} from "@miqro/web-components";
-
 customElements.define("my-element", class extends Component {
   constructor() {
     super();
@@ -173,37 +159,32 @@ customElements.define("my-element", class extends Component {
 the ```Router``` class extends from ```Component``` and watches changes on the ```popstate``` event on window. If the
 change matches a ```Route``` child element it will render that element.
 
-```html
-
-<html>
-<body>
-<path-router data-default-element="my-404">
-  <path-route data-path="/" data-element="my-home"></path-route>
-  <path-route data-path="/about" data-element="my-about"></path-route>
-</path-router>
-<script type="module">
-  import {Router, Route, Component} from "@miqro/web-components";
-
-  customElements.define("my-404", class extends Component {
-    render() {
-      return "not found";
-    }
-  });
-  customElements.define("my-home", class extends Component {
-    render() {
-      return "home";
-    }
-  });
-  customElements.define("my-about", class extends Component {
-    render() {
-      return "about";
-    }
-  });
-  customElements.define("path-router", Router);
-  customElements.define("path-route", Route);
-</script>
-</body>
-</html>
+```typescript
+customElements.define("my-app", class extends Component {
+  render() {
+    return `<path-router data-default-element="my-404">` +
+      `<path-route data-path="/" data-element="my-home"></path-route>` +
+      `<path-route data-path="/about" data-element="my-about"></path-route>` +
+      `</path-router>`;
+  }
+});
+customElements.define("my-404", class extends Component {
+  render() {
+    return "not found";
+  }
+});
+customElements.define("my-home", class extends Component {
+  render() {
+    return "home";
+  }
+});
+customElements.define("my-about", class extends Component {
+  render() {
+    return "about";
+  }
+});
+customElements.define("path-router", Router);
+customElements.define("path-route", Route);
 ```
 
 ### history.pushState
@@ -222,8 +203,6 @@ window.history.pushState(null, null as any, "/about");
 or use the helper
 
 ```typescript
-import {historyPushPath} from "@miqro/web-components";
-
 historyPushPath("/about");
 ```
 
@@ -311,44 +290,33 @@ customElements.define("my-element", class extends Component {
 the ```Component``` class is just a standard WebComponent element, it extends ```HTMLElement``` so integrating it into
 standard WebComponent projects is straight forward.
 
-```html
+```typescript
+// Standard WebComponent
+customElements.define("my-app", class extends HTMLElement {
+  constructor() {
+    super();
+    const myHome = new document.createElement("my-home");
+    myHome.setAttribute("name", "no-name");
+    setTimeout(() => {
+      myHome.setAttribute("name", "some-name");
+    }, 1000);
+    // listen to custom event from standard HTMLElement
+    myHome.addEventListener("myEvent", () => {
 
-<html>
-<body>
-<my-app></my-app>
-<script type="module">
+    });
+    this.appendChild(myHome);
+  }
+});
 
-  import {Component} from "@miqro/web-components";
+// Custom "Component"
+customElements.define("my-home", class extends Component {
 
-  // Standard WebComponent
-  customElements.define("my-app", class extends HTMLElement {
-    constructor() {
-      super();
-      const myHome = new document.createElement("my-home");
-      myHome.setAttribute("name", "no-name");
-      setTimeout(() => {
-        myHome.setAttribute("name", "some-name");
-      }, 1000);
-      // listen to custom event from standard HTMLElement
-      myHome.addEventListener("myEvent", () => {
+  click() {
+    this.emit("myEvent");
+  }
 
-      });
-      this.appendChild(myHome);
-    }
-  });
-
-  // Custom "Component"
-  customElements.define("my-home", class extends Component {
-
-    click() {
-      this.emit("myEvent");
-    }
-
-    render() {
-      return `<p data-on-click="{click}">{props.name}</p>`;
-    }
-  });
-</script>
-</body>
-</html>
+  render() {
+    return `<p data-on-click="{click}">{props.name}</p>`;
+  }
+});
 ```

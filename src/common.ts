@@ -90,7 +90,7 @@ export function renderOnElement(component: IComponent, element: Element | Shadow
           const asIComponent = (child as unknown as IComponent);
           const objectFunctionCount = Object.keys(props).map(p => props[p]).filter(p => typeof p === "object" || typeof p === "function").length;
           if (asIComponent.setProps && objectFunctionCount) {
-            asIComponent.setProps(props);
+            asIComponent.setProps(props, true);
           }
           hookElementEvents(child, props);
         }
@@ -109,7 +109,7 @@ export interface IComponent<P extends ComponentProps = ComponentProps, S extends
 
   render(): string | void;
 
-  setProps?(props: Partial<P>): void;
+  setProps?(props: Partial<P>, override?: boolean): void;
 
   afterRender?(): void;
 
