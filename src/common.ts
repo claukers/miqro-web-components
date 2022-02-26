@@ -88,9 +88,13 @@ export function renderOnElement(component: IComponent, element: Element | Shadow
           const props = renderElementProps(child, component);
           // only call setProps when object or function is set
           const asIComponent = (child as unknown as IComponent);
-          const objectFunctionCount = Object.keys(props).map(p => props[p]).filter(p => typeof p === "object" || typeof p === "function").length;
-          if (asIComponent.setProps && objectFunctionCount) {
-            asIComponent.setProps(props, true);
+          const objectList = Object.keys(props).filter(p => props[p] && typeof props[p] === "object");
+          if (asIComponent.setProps && objectList.length > 0) {
+            const newProps: Partial<ComponentProps> = {};
+            for (const propName of objectList) {
+              newProps[propName] = props[propName];
+            }
+            asIComponent.setProps(newProps);
           }
           hookElementEvents(child, props);
         }
