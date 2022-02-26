@@ -223,9 +223,9 @@ if ```this.didUpdate``` is not implemented.
 this second call to ```this.setProps``` exists to extend the current ```element.getAttribute(name): string``` to allow
 object passing as attributes and only is used if a function or an object is pass to the element.
 
-### ***Important Notice with passing objects and functions to this.props ( not recommended )***
+### ***Important Notice with passing objects to this.props ( not recommended )***
 
-**Passing objects and functions is supported, but it is not recommend.**
+**Passing objects is supported, but it is not recommend.**
 
 if you intend to pass objects in the templates as element attributes consider implementing ```didUpdate()``` and check
 if the prop pass as object is object or string, because in the first ```render()``` or ```didUpdate``` the prop you try

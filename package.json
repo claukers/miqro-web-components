@@ -12,6 +12,7 @@
   },
   "types": "./dist/cjs/index.d.ts",
   "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -Rf dist/;",
