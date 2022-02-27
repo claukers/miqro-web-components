@@ -56,6 +56,22 @@ function hookElementEvents(element: Element | ShadowRoot, p: { [attr: string]: s
   }
 }
 
+function decodeHTML(str: string) {
+  return str.replace(/&#(\d+);/g, function (match, dec) {
+    return String.fromCharCode(dec);
+  });
+}
+
+function encodeHTML(str: string): string {
+  const buf = [];
+
+  for (let i = str.length - 1; i >= 0; i--) {
+    buf.unshift(['&#', str[i].charCodeAt(0), ';'].join(''));
+  }
+
+  return buf.join('');
+}
+
 function renderTemplate(str: string, values: any): string {
   const re = /{[^}]*}/g;
   return str.replace(re, (match) => {
@@ -64,7 +80,8 @@ function renderTemplate(str: string, values: any): string {
     if (typeof value === "function") {
       return match; // leave as {name} because renderTemplate doesn't allow functions
     } else if (typeof value == "string" || typeof value === "boolean" || typeof value === "number") {
-      return String(value);
+      return encodeHTML(String(value));
+      //return String(value);
     } else if (value == undefined) {
       return "";
     } else {

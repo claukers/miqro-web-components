@@ -1,6 +1,6 @@
 # @miqro/web-components
 
-helpers for creating dynamic HTMLElements with a basic template system influenced by React.
+helpers for creating dynamic ```HTMLElements``` with a **basic template** system influenced by ***React***.
 
 ## Component class
 
@@ -22,10 +22,29 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
+### ***Important Notice***
+
+when rendering a template the string, number, boolean values are encoded to ***sanitize*** user input.
+
+for example the inner p in ```this.text``` in the code bellow will not render as html, instead it will be html **encoded**.
+
+```typescript
+import {Component} from "./component";
+
+customElements.define("my-custom", class extends Component {
+    render() {
+        this.text = "<p>this p will not be rendered as html beacuse it is encoded.</p>";
+        return `<p>{text}</p>`
+        // this will render the inner p as HTML without enconding
+        // return "<p>" + this.text + "</p>";
+    }
+})
+```
+
 ## Component lifecycle
 
 the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()```
-and ```disconnectedCallback()```, it also creates a ```MutationObserver``` to watch all attribute changes. It uses this
+and ```disconnectedCallback()```, it also creates a ```MutationObserver``` to watch for all attribute changes. It uses these
 callbacks to populate ```this.props``` and ```this.state``` and call ```this.render``` to render the template when
 necessary, the standard ```attributeChangedCallback``` it is not used to watch attributes.
 
@@ -39,14 +58,14 @@ this callback is called when the standard **connectedCallback** is called and **
 
 ### this.didUnMount()
 
-this callback is called when the standard **disconnectedCallback** is called and ***after*** the local observer is
-diconnected.
+this callback is called when the standard **disconnectedCallback** is called and ***after*** the local **MutationObserver** is
+disconnected.
 
 ### this.didUpdate(prevProps, prevState)
 
-this callback is called when the ```props``` or ```state``` of the component changes.
+this callback is called when the ```this.props``` or ```this.state``` of the component changes.
 
-can be overridden to stop the component render by returing false. by default it returns true for all changes.
+can be overridden to stop the component render by returning false. by default, it returns true for all changes.
 
 Consider implementing ```this.didUpdate(prevProps, prevState)``` to avoid unnecessary re-renders.
 
@@ -66,7 +85,8 @@ re-render of all child elements.
 
 ### this.afterRender()
 
-this callback will be called if the ```this.innerHtml``` is replaced with the template rendered from ```this.render()```.
+this callback will be called if the ```this.innerHtml``` is replaced with the template rendered from ```this.render()```
+.
 
 ### ***Important Notice***
 
@@ -154,61 +174,10 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-## Router class
-
-the ```Router``` class extends from ```Component``` and watches changes on the ```popstate``` event on window. If the
-change matches a ```Route``` child element it will render that element.
-
-```typescript
-customElements.define("my-app", class extends Component {
-  render() {
-    return `<path-router data-default-element="my-404">` +
-      `<path-route data-path="/" data-element="my-home"></path-route>` +
-      `<path-route data-path="/about" data-element="my-about"></path-route>` +
-      `</path-router>`;
-  }
-});
-customElements.define("my-404", class extends Component {
-  render() {
-    return "not found";
-  }
-});
-customElements.define("my-home", class extends Component {
-  render() {
-    return "home";
-  }
-});
-customElements.define("my-about", class extends Component {
-  render() {
-    return "about";
-  }
-});
-customElements.define("path-router", Router);
-customElements.define("path-route", Route);
-```
-
-### history.pushState
-
-the ```Router``` class attaches a listener on ```popstate``` event to listen to url changes.
-
-to change the path without reloading the page use the standard ```window.history.pushState(null, null as any, path);```
-or the helper ```historyPushPath(path)``` to trigger programmatically.
-
-```typescript
-window.history.pushState(null, null as any, "/about");
-// if you do it programmatically emit the popstate event
-// window.dispatchEvent(new PopStateEvent("popstate"));
-```
-
-or use the helper
-
-```typescript
-historyPushPath("/about");
-```
-
 ## Component props and state
 
-a ```Component``` instance has ```this.props``` and ```this.state``` attributes that you can use to render a template.
+an instance of a ```Component``` class has ```this.props``` and ```this.state``` attributes that you can use to render a
+template and attach ```events```.
 
 ### this.props
 
@@ -229,15 +198,16 @@ object passing as attributes and only is used if a function or an object is pass
 
 if you intend to pass objects in the templates as element attributes consider implementing ```didUpdate()``` and check
 if the prop pass as object is object or string, because in the first ```render()``` or ```didUpdate``` the prop you try
-to pass as an object will be the string key value as for example ```{state.parentObject}```.
+to pass as an object will be the string key value as for example ```{state.parentAttribute}```.
 
-That means that if you pass an object or function as the element attributes, when the element mounts the value
-in ```this.props``` will be initially populated with the key not the object or function itself. After the element is
-mounted and rendered ```this.setProps(...)``` will be called with the correct value in ```this.props```.
+That means that if you pass an object as the element attributes, when the element mounts the value in ```this.props```
+will be initially populated with the path indicated in the template not the object itself. After the element is mounted
+and rendered ```this.setProps(...)``` will be called with the correct value in ```this.props```.
 
 ### this.state
 
-will alter ```this.state``` with ``arg`` and will call ```didUpdate(prevProps, prevState)``` and ``this.render()``
+```this.setState(arg: Partial<S>)``` will alter ```this.state``` with ``arg`` and will
+call ```didUpdate(prevProps, prevState)``` and ``this.render()``
 if ```didUpdate(prevProps, prevState)``` returned true.
 
 ### disable attr watching
@@ -285,6 +255,105 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
+## Router class
+
+the ```Router``` class extends from ```Component``` and watches changes on the ```popstate``` event on window. If the
+change matches a ```Route``` child element it will render that element.
+
+```typescript
+customElements.define("my-app", class extends Component {
+  render() {
+    return `<path-router data-default-element="my-404">` +
+      `<path-route data-path="/" data-element="my-home"></path-route>` +
+      `<path-route data-path="/about" data-element="my-about"></path-route>` +
+      `</path-router>`;
+  }
+});
+customElements.define("my-404", class extends Component {
+  render() {
+    return "not found";
+  }
+});
+customElements.define("my-home", class extends Component {
+  render() {
+    return "home";
+  }
+});
+customElements.define("my-about", class extends Component {
+  render() {
+    return "about";
+  }
+});
+
+customElements.define("path-route", Route);
+customElements.define("path-router", Router);
+customElements.define("route-link", RouterLink);
+```
+
+### history.pushState
+
+the ```Router``` class attaches a listener on ```popstate``` event to listen to url changes.
+
+to change the path without reloading the page use the standard ```window.history.pushState(null, null as any, path);```
+or the helper ```historyPushPath(path)``` to trigger programmatically.
+
+```typescript
+window.history.pushState(null, null as any, "/about");
+// if you do it programmatically emit the popstate event
+// window.dispatchEvent(new PopStateEvent("popstate"));
+```
+
+or use the helper
+
+```typescript
+historyPushPath("/about");
+```
+
+### base path
+
+setting the attribute ```data-router-base-path``` to the HTML element to allow the router to be nested.
+
+```html
+<html data-router-base-path="/public/front">
+....
+<!-- will match for /public/front/ -->
+<path-route path="/" element="my-home"></path-route>
+....
+</html>
+```
+
+this will affect ```RouterLink``` elements also.
+
+## Use Component Class without the template system
+
+to build more performant Elements you can skip the use of the template system by returning void on ```this.render()``` method.
+
+example
+
+```typescript
+customElements.define("my-component", class extends Component {
+
+  click(ev) {
+    ev.preventDefault();
+    alert("clicked");
+  }
+
+  // render will still be call when an attribute changes and when this.setState is invoked
+  render() {
+    if (!this.p) {
+      this.p = this.p ? this.p : document.createElement("p");
+      p.addEventListener("click", (ev) => {
+        this.click(ev);
+      });
+      this.appendChild(p);
+    }
+    this.p.textContent = this.props["data-custom-attr"];
+    // all the code bellow is the same as
+    // return `<p data-on-click="{click}">{props.data-custom-attr}</p>`
+  }
+})
+```
+
 ## Integrating with standard WebComponents API
 
 the ```Component``` class is just a standard WebComponent element, it extends ```HTMLElement``` so integrating it into
@@ -296,8 +365,10 @@ customElements.define("my-app", class extends HTMLElement {
   constructor() {
     super();
     const myHome = new document.createElement("my-home");
+    // myHome this.props will be re-populated and the component re-render
     myHome.setAttribute("name", "no-name");
     setTimeout(() => {
+      // myHome this.props will be re-populated and the component re-render  
       myHome.setAttribute("name", "some-name");
     }, 1000);
     // listen to custom event from standard HTMLElement

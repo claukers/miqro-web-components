@@ -1,7 +1,7 @@
 import {ComponentProps, ComponentState, renderOnElement} from "./common.js";
 import {Component} from "./component.js";
 
-const ShadowRootMap: WeakMap<Component, ComponentState> = new WeakMap<Component, ComponentState>()
+const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
 
 export class ShadowRootComponent<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState> extends Component<P, S> {
   constructor() {
