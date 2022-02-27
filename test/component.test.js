@@ -1,9 +1,8 @@
 const {strictEqual} = require("assert");
 const {fake, requireMock} = require("@miqro/test");
-const {parse} = require("@miqro/parser");
 const {initDOMGlobals} = require("./common");
 const fakes = initDOMGlobals();
-const {Component} = requireMock("../", {});
+const {parse, Component} = requireMock("../", {});
 
 const decodeHTML = (str) => parse(str, "decodeHtml");
 
