@@ -8,6 +8,7 @@
     "lib": ["dom", "es2021"],
     "module": "es2022",
     //"moduleResolution": "es2021",
+    "moduleResolution": "Node",
     "target": "es2021",
     "outDir": "./dist/esm",
     "removeComments": false,

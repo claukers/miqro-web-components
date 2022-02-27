@@ -1,23 +1,4 @@
-/* eslint-disable  @typescript-eslint/explicit-module-boundary-types */
-
-function get(obj: any, attrPath: string | any, defaultValue?: any): any | undefined {
-  if (!obj || typeof obj !== "object") {
-    return defaultValue !== undefined ? defaultValue : undefined
-  }
-  if (typeof attrPath !== "string") {
-    throw new Error(`attrPath must be typeof string`);
-  }
-  const path = attrPath.split(".").reverse();
-  let value = obj;
-  while (path.length > 0) {
-    const p = path.pop() as string;
-    if (value[p] === undefined) {
-      return defaultValue !== undefined ? defaultValue : undefined;
-    }
-    value = value[p];
-  }
-  return value;
-}
+import {get, parse} from "@miqro/parser";
 
 export function renderElementProps(element: Element, values?: any): ComponentProps {
   const propNames = element.getAttributeNames();
@@ -56,22 +37,6 @@ function hookElementEvents(element: Element | ShadowRoot, p: { [attr: string]: s
   }
 }
 
-export function decodeHTML(str: string) {
-  return str.replace(/&#(\d+);/g, function (match, dec) {
-    return String.fromCharCode(dec);
-  });
-}
-
-export function encodeHTML(str: string): string {
-  const buf = [];
-
-  for (let i = str.length - 1; i >= 0; i--) {
-    buf.unshift(['&#', str[i].charCodeAt(0), ';'].join(''));
-  }
-
-  return buf.join('');
-}
-
 function renderTemplate(str: string, values: any): string {
   const re = /{[^}]*}/g;
   return str.replace(re, (match) => {
@@ -80,7 +45,7 @@ function renderTemplate(str: string, values: any): string {
     if (typeof value === "function") {
       return match; // leave as {name} because renderTemplate doesn't allow functions
     } else if (typeof value == "string" || typeof value === "boolean" || typeof value === "number") {
-      return encodeHTML(String(value));
+      return parse(String(value), "encodeHtml");
       //return String(value);
     } else if (value == undefined) {
       return "";

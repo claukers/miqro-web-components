@@ -1,4 +1,4 @@
-export {encodeHTML, decodeHTML, IComponent, ComponentState, ComponentProps, renderOnElement} from "./common.js";
+export {IComponent, ComponentState, ComponentProps, renderOnElement} from "./common.js";
 export * from "./component.js";
 export * from "./shadow.js";
 export * from "./router.js";

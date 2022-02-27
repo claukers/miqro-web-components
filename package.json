@@ -3,16 +3,8 @@
   "version": "0.0.1",
   "description": "helpers for creating dynamic HTMLElements with a basic template system",
   "type": "commonjs",
-  "exports": {
-    "node": {
-      "import": "dist/esm/index.js",
-      "require": "dist/cjs/index.js"
-    },
-    "default": "dist/cjs/index.js"
-  },
   "types": "dist/cjs/index.d.ts",
   "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -Rf dist/;",
@@ -26,13 +18,15 @@
   "author": "claukers",
   "license": "ISC",
   "devDependencies": {
-    "@miqro/core": "^1.5.9",
-    "@miqro/request": "../request",
-    "@miqro/parser": "../parser",
-    "@miqro/test": "^0.0.10",
-    "miqro": "../miqro",
+    "@miqro/core": "^1.5.11",
+    "@miqro/request": "^0.0.5",
+    "@miqro/test": "^0.0.11",
+    "miqro": "^1.7.11",
     "typescript": "^4.5.4",
     "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "@miqro/parser": "^0.0.5"
   },
   "engines": {
     "node": ">=16.0.0",
