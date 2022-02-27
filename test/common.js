@@ -1,6 +1,14 @@
+const {fake} = require("@miqro/test");
 module.exports = {
   initDOMGlobals: () => {
     const fakes = {
+      document: {
+        documentElement: {
+          getAttribute: fake(() => {
+            return null;
+          })
+        }
+      },
       Element: {
         dispatchEvent: undefined,
         getAttributeNames: undefined,
@@ -21,6 +29,8 @@ module.exports = {
         fakes.Event.new(this, ...arguments);
       }
     }
+
+    document = fakes.document;
 
     HTMLElement = class HTMLElement {
       dispatchEvent() {

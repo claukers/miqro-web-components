@@ -1,4 +1,5 @@
 const {Component, Router, Route, RouteLink, historyPushPath} = require("../../../../../dist/cjs/index.js");
+const {request} = require("@miqro/request");
 
 window.onload = () => {
 
@@ -9,8 +10,24 @@ window.onload = () => {
   });
 
   customElements.define("my-home", class Home extends Component {
+    async click() {
+      try {
+        const response = await request({
+          url: "/api/v1/feeds?other=otherValue1",
+          query: {
+            some: 1,
+            another: ["1", "2"],
+            other: "otherValue"
+          }
+        });
+        console.dir(response.data);
+      } catch(e) {
+        console.error("error on request call");
+        console.error(e);
+      }
+    }
     render() {
-      return `home`;
+      return `home <p data-on-click="{click}">click me</p>`;
     }
   });
 
