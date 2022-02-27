@@ -430,7 +430,9 @@ this method will add the global ```WebComponents``` that will house the module, 
   const {Component} = WebComponents;
   
   customElements.define("my-element", class extends Component {
-      
+      render() {
+          return `<p>{props.text}</p>`
+      }
   });
 </script>
 </body>
