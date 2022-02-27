@@ -115,7 +115,7 @@ system.
 
 use ```data-on-...``` attribute to automatically call ```addEventListener(...)``` on the element.
 
-````typescript
+```typescript
 customElements.define("my-app", class extends Component {
   // event handler
   userClick() {
@@ -142,7 +142,7 @@ customElements.define("my-component", class extends Component {
     return `<div><a href="#" data-on-click="{click}">click me</a><p>{state.clickCount}</p></div>`
   }
 });
-````
+```
 
 ### emit events
 
