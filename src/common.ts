@@ -56,13 +56,13 @@ function hookElementEvents(element: Element | ShadowRoot, p: { [attr: string]: s
   }
 }
 
-function decodeHTML(str: string) {
+export function decodeHTML(str: string) {
   return str.replace(/&#(\d+);/g, function (match, dec) {
     return String.fromCharCode(dec);
   });
 }
 
-function encodeHTML(str: string): string {
+export function encodeHTML(str: string): string {
   const buf = [];
 
   for (let i = str.length - 1; i >= 0; i--) {

@@ -25,8 +25,6 @@ export class Router extends Component<RouterProps, RouterState> {
       defaultRoute.setAttribute("data-default", "");
       this.appendChild(defaultRoute);
     }
-    console.log("Router ctor");
-    console.dir(this.props);
   }
 
   willMount(): void {
@@ -47,14 +45,11 @@ export class Router extends Component<RouterProps, RouterState> {
     const children = this.querySelectorAll("*");
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
-      console.log(child.tagName);
       if ((child as Route).isActive && (child as Route).setState && child instanceof Route) {
         routes.push(child as Route);
       }
     }
 
-    console.dir(routes);
-    console.dir(this.props);
     if (setState) {
       this.setState({
         routes
@@ -107,8 +102,6 @@ export class Route extends Component<RouteProps, RouteState> {
 
   constructor() {
     super();
-    console.log("route ctor ");
-    console.dir(this.props);
   }
 
   isActive(activeRoute: Route | undefined, useDefault: boolean = true) {
@@ -123,7 +116,7 @@ export class Route extends Component<RouteProps, RouteState> {
     if (activeRoute && this !== activeRoute && active && activeRoute.isActive(activeRoute, false)) {
       active = false;
     }
-    console.log("%s %s on %s isActive %s", this.props["data-path"], this.props["data-element"], pathname, active);
+    // console.log("%s %s on %s isActive %s", this.props["data-path"], this.props["data-element"], pathname, active);
     return active;
   }
 
