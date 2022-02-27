@@ -181,8 +181,8 @@ template and attach ```events```.
 
 ### this.props
 
-```this.props``` is extension to the standard element attributes that allows object and function passing with templates
-without eval.
+```this.props``` is an extension to the standard element attributes. It allows object passing
+**avoiding** using eval or JSON.parse/JSON.stringify.
 
 ```this.props``` will be populate on the ```Component``` by watching changes to the element's attributes with a
 MutationObserver, and by calling ```this.setProps(props: Partial<P>)```. ```this.setProps``` will be called when the
@@ -390,4 +390,49 @@ customElements.define("my-home", class extends Component {
     return `<p data-on-click="{click}">{props.name}</p>`;
   }
 });
+```
+
+## Importing
+
+this module is exported as a ```CommonJS``` and ```ESM``` module also, a minified ```bundle``` is provided.
+
+when using a packer like webpack just import the module and the packer will take care of the rest like.
+
+```typescript
+import {Component} from "@miqro/web-components";
+```
+
+or
+
+```typescript
+const {Component} = require("@miqro/web-components");
+```
+
+### using the ESM module
+
+the esm version of the module is located in ```dist/esm```.
+
+### using bundle directly with script tag
+
+you can also add the bundle located in ```dist/webcomponents.bundle.min.js``` in the html.
+
+this method will add the global ```WebComponents``` that will house the module, so accessing for example the ```Component``` class you will have to use ```WebComponents.Component```.
+
+```html
+<html>
+<head>
+  <!-- this will add the WebComponents global with the module -->
+  <script src="webcomponents.bundle.min.js"></script>
+</head>
+<body>
+<script>
+  // the WebComponents global contains the @miqro/webcomponents module.
+  const {Component} = WebComponents;
+  
+  customElements.define("my-element", class extends Component {
+      
+  });
+</script>
+</body>
+</html>
 ```

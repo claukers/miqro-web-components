@@ -1,8 +1,11 @@
 <html>
+<head>
+  <script src="./lib.js"></script>
+</head>
 <body>
 <my-root></my-root>
-<script type="module">
-  import {ShadowRootComponent} from "./lib";
+<script>
+  const {ShadowRootComponent} = WebComponents;
 
   class Root extends HTMLElement {
     constructor() {
@@ -55,7 +58,7 @@
         clicked: true,
         clickedCount: this.state.clickedCount ? this.state.clickedCount + 1 : 1
       });
-      if(this.state.clickedCount === 5) {
+      if (this.state.clickedCount === 5) {
         this.emit("custom");
       }
     }
@@ -70,7 +73,7 @@
   customElements.define("my-bla", Bla);
   customElements.define("my-root", Root);
 
-  setTimeout(()=>{
+  setTimeout(() => {
     debugger;
   }, 5000);
 </script>

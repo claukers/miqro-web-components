@@ -2,4 +2,3 @@ export {IComponent, ComponentState, ComponentProps, renderOnElement} from "./com
 export * from "./component.js";
 export * from "./shadow.js";
 export * from "./router.js";
-

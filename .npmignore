@@ -11,6 +11,7 @@ test/
 tsconfig.json
 .editorconfig
 .nycrc
+src/
 .github/
 .vscode/
 test/
