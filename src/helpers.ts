@@ -100,6 +100,9 @@ export function renderElementProps(element: Element, values?: any): { [p: string
   return props;
 }
 
+/*
+hooks data-ref and data-on-... for Components
+ */
 function hookElementEvents(element: Element | ShadowRoot, p: { [attr: string]: string | Function; }): void {
   const props = Object.keys(p);
   for (const prop of props) {
@@ -117,7 +120,9 @@ function hookElementEvents(element: Element | ShadowRoot, p: { [attr: string]: s
   }
 }
 
-
+/*
+replace "{...}" from string with only string values from values. the value from values is html encoded before being replaced.
+ */
 function renderTemplate(str: string, values: any): string {
   const re = /{[^}]*}/g;
   return str.replace(re, (match) => {
