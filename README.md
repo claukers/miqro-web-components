@@ -425,6 +425,7 @@ this method will add the global ```WebComponents``` that will house the module, 
   <script src="webcomponents.bundle.min.js"></script>
 </head>
 <body>
+<my-element></my-element>
 <script>
   // the WebComponents global contains the @miqro/webcomponents module.
   const {Component} = WebComponents;
