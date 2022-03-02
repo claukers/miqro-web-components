@@ -1,5 +1,6 @@
-import {ComponentProps, ComponentState, renderOnElement} from "./common.js";
+import {ComponentProps, ComponentState} from "./common.js";
 import {Component} from "./component.js";
+import {renderOnElement} from "./render";
 
 const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
 

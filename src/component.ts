@@ -1,5 +1,6 @@
-import {ComponentProps, ComponentState, IComponent, renderElementProps, renderOnElement} from "./common.js";
+import {ComponentProps, ComponentState, IComponent} from "./common.js";
 import {EventEmitter, IEventEmitter} from "./events.js";
+import {renderElementProps, renderOnElement} from "./render";
 
 export class Component<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState> extends HTMLElement implements IComponent<P, S>, IEventEmitter {
 
@@ -15,9 +16,10 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
       const newProps: any = {};
       for (const mutation of mutations) {
         if (mutation.type === 'attributes') {
-          const propName = mutation.attributeName as string;
-          const propValue = this.getAttribute(propName);
-          newProps[propName] = propValue;
+          const propName = mutation.attributeName;
+          if (propName) {
+            newProps[propName] = this.getAttribute(propName);
+          }
         }
       }
       this.setProps(newProps);

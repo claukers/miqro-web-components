@@ -35,7 +35,7 @@
     }
 
     render() {
-      return !this.state.reach5 ? `<hello-world data-on-custom="{reach5}" data="{props.name}" data-obj="{state.obj}"></hello-world><p class="bla">{props.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
+      return !this.state.reach5 ? `<hello-world attr1="{state.obj.attr1}" data-on-custom="{reach5}" data="{props.name}" data-obj="{state.obj}"></hello-world><p class="bla">{props.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
     }
   }
 
