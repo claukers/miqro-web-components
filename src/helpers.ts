@@ -29,11 +29,11 @@ export class EventCacheEmitter {
 
 
 /*
-implements the render lifecycle
+implements the render lifecycle for render -> setProps ( only if objects are passed ) -> afterRender
  */
 export function renderOnElement(component: {
 
-  render(): string | void;
+  render?(): string | void;
 
   setProps?(props: any): void;
 
