@@ -1,6 +1,6 @@
 import {ComponentProps, ComponentState} from "./common.js";
 import {Component} from "./component.js";
-import {renderOnElement} from "./render";
+import {renderElementProps, renderOnElement} from "./render";
 
 const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
 
@@ -13,9 +13,35 @@ export class ShadowRootComponent<P extends ComponentProps = ComponentProps, S ex
     ShadowRootMap.set(this, root);
   }
 
-  protected _renderOnElement(): void {
+  public connectedCallback() {
     const shadowRoot = ShadowRootMap.get(this);
-    return renderOnElement(this, shadowRoot as ShadowRoot);
+    this._observer.observe(this, {
+      attributes: true
+    });
+    this.setProps(renderElementProps(this) as P, false, false);
+    this.willMount();
+    renderOnElement(this, shadowRoot as ShadowRoot);
+    this.didMount();
+  }
+
+  setState(args: Partial<S>, override: boolean = false, refresh: boolean = true): void {
+    const oldState = this.state;
+    super.setState(args, override, false);
+    const shadowRoot = ShadowRootMap.get(this);
+    console.log("shadow setState %s", shadowRoot);
+    if (shadowRoot && refresh && this.isConnected && this.didUpdate(this.props, oldState)) {
+      return renderOnElement(this, shadowRoot);
+    }
+  }
+
+  setProps(args: Partial<P>, override: boolean = false, refresh: boolean = true): void {
+    const oldProps = this.props;
+    super.setProps(args, override, false);
+    const shadowRoot = ShadowRootMap.get(this);
+    console.log("shadow setProps %s", shadowRoot);
+    if (shadowRoot && refresh && this.isConnected && this.didUpdate(oldProps, this.state)) {
+      return renderOnElement(this, shadowRoot);
+    }
   }
 }
 

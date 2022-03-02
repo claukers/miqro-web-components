@@ -1,5 +1,5 @@
 import {ComponentProps, ComponentState, IComponent} from "./common.js";
-import {EventEmitter, IEventEmitter} from "./events.js";
+import {EventCacheEmitter, IEventEmitter} from "./events.js";
 import {renderElementProps, renderOnElement} from "./render";
 
 export class Component<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState> extends HTMLElement implements IComponent<P, S>, IEventEmitter {
@@ -7,11 +7,11 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
   public props: P;
   public state: S;
   protected readonly _observer: MutationObserver;
-  private readonly _emitter: EventEmitter;
+  private readonly _emitter: EventCacheEmitter;
 
   constructor() {
     super();
-    this._emitter = new EventEmitter();
+    this._emitter = new EventCacheEmitter();
     this._observer = new MutationObserver((mutations: MutationRecord[]) => {
       const newProps: any = {};
       for (const mutation of mutations) {
@@ -34,11 +34,11 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
     });
     this.setProps(renderElementProps(this) as P, false, false);
     this.willMount();
-    this._renderOnElement();
+    renderOnElement(this, this);
     this.didMount();
   }
 
-  disconnectedCallback() {
+  public disconnectedCallback() {
     this._observer.disconnect();
     this.didUnMount();
   }
@@ -88,7 +88,7 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
       ...args
     };
     if (refresh && this.isConnected && this.didUpdate(this.props, oldState)) {
-      return this._renderOnElement();
+      return renderOnElement(this, this);
     }
   }
 
@@ -99,15 +99,11 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
       ...args
     };
     if (refresh && this.isConnected && this.didUpdate(oldProps, this.state)) {
-      return this._renderOnElement();
+      return renderOnElement(this, this);
     }
   }
 
   protected didUpdate(oldProps: P, oldState: S): boolean {
     return true;
-  }
-
-  protected _renderOnElement(): void {
-    return renderOnElement(this, this);
   }
 }

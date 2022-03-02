@@ -1,6 +1,50 @@
 import {get, parse} from "@miqro/parser";
 import {ComponentProps, IComponent} from "./common";
 
+/*
+calls IComponent.render, replaces element.innerHtml
+ */
+export function renderOnElement(component: IComponent, element: Element | ShadowRoot): void {
+  // console.log("renderOnElement [%s] props [%o] state [%o]", element.nodeName, component.props, component.state);
+  if (component.render) {
+    const renderOutput = component.render();
+    if (typeof renderOutput === "string") {
+      const rendered = renderTemplate(renderOutput, component);
+      if (rendered !== undefined) {
+        element.innerHTML = rendered;
+        // because innerHTML is replaced we must re-hook events
+        const childElements = element.querySelectorAll("*");
+        for (let i = 0; i < childElements.length; i++) {
+          const child = childElements[i];
+          const props = renderElementProps(child, component);
+          // only call setProps when object or function is set
+          const asIComponent = (child as unknown as IComponent);
+          if (asIComponent.setProps) {
+            const objectList = Object.keys(props).filter(p => props[p] && typeof props[p] === "object");
+            if (objectList.length > 0) {
+              console.warn("%s passing objects to children on props is not recommended", element.nodeName);
+              const newProps: Partial<ComponentProps> = {};
+              for (const propName of objectList) {
+                newProps[propName] = props[propName];
+              }
+              asIComponent.setProps(newProps);
+            }
+          }
+          hookElementEvents(child, props);
+        }
+        if (component.afterRender) {
+          component.afterRender();
+        }
+      }
+    }
+  } else {
+    console.error("component.render not defined render will do nothing.");
+  }
+}
+
+/*
+renders this.props for element. if values is passed it will try to render "{...}" with values as a template.
+ */
 export function renderElementProps(element: Element, values?: any): ComponentProps {
   const propNames = element.getAttributeNames();
   const props: ComponentProps = {};
@@ -38,6 +82,7 @@ function hookElementEvents(element: Element | ShadowRoot, p: { [attr: string]: s
   }
 }
 
+
 function renderTemplate(str: string, values: any): string {
   const re = /{[^}]*}/g;
   return str.replace(re, (match) => {
@@ -54,41 +99,4 @@ function renderTemplate(str: string, values: any): string {
       return match;
     }
   });
-}
-
-export function renderOnElement(component: IComponent, element: Element | ShadowRoot): void {
-  // console.log("renderOnElement [%s] props [%o] state [%o]", element.nodeName, component.props, component.state);
-  if (component.render) {
-    const renderOutput = component.render();
-    if (typeof renderOutput === "string") {
-      const rendered = renderTemplate(renderOutput, component);
-      if (rendered !== undefined) {
-        element.innerHTML = rendered;
-        // because innerHTML is replaced we must re-hook events
-        const childElements = element.querySelectorAll("*");
-        for (let i = 0; i < childElements.length; i++) {
-          const child = childElements[i];
-          const props = renderElementProps(child, component);
-          // only call setProps when object or function is set
-          const asIComponent = (child as unknown as IComponent);
-          if (asIComponent.setProps) {
-            const objectList = Object.keys(props).filter(p => props[p] && typeof props[p] === "object");
-            if (objectList.length > 0) {
-              const newProps: Partial<ComponentProps> = {};
-              for (const propName of objectList) {
-                newProps[propName] = props[propName];
-              }
-              asIComponent.setProps(newProps);
-            }
-          }
-          hookElementEvents(child, props);
-        }
-        if (component.afterRender) {
-          component.afterRender();
-        }
-      }
-    }
-  } else {
-    console.warn("component.render not defined render will do nothing.");
-  }
 }

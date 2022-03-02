@@ -4,7 +4,7 @@ export interface IEventEmitter {
   registerEvent(event: string, eventOptions?: EventInit): void;
 }
 
-export class EventEmitter {
+export class EventCacheEmitter {
 
   private _events: Map<string, Event> = new Map<string, Event>();
 

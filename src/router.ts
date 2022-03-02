@@ -2,16 +2,16 @@ import {Component} from "./component.js";
 
 const BASE_PATH = document.documentElement.getAttribute("data-router-base-path") ? document.documentElement.getAttribute("data-router-base-path") : "";
 
-interface RouterState {
+export interface RouterState {
   active?: Route;
   routes: Route[];
 }
 
-interface RouterProps {
+export interface RouterProps {
   ["data-default-element"]: string;
 }
 
-export class Router extends Component<RouterProps, RouterState> {
+export class Router<P extends RouterProps = RouterProps, S extends RouterState = RouterState> extends Component<P, S> {
   private readonly popStateListener: () => void;
 
   constructor() {
@@ -53,7 +53,7 @@ export class Router extends Component<RouterProps, RouterState> {
     if (setState) {
       this.setState({
         routes
-      });
+      } as Partial<S>);
     }
     return routes;
   }
@@ -80,31 +80,31 @@ export class Router extends Component<RouterProps, RouterState> {
       if (setOwnState) {
         this.setState({
           active: activeRoute
-        });
+        } as Partial<S>);
       }
     }
     return activeRoute;
   }
 }
 
-interface RouteState {
+export interface RouteState {
   active?: boolean;
   basePath?: string;
 }
 
-interface RouteProps {
+export interface RouteProps {
   ["data-path"]: string;
   ["data-default"]?: string;
   ["data-element"]: string;
 }
 
-export class Route extends Component<RouteProps, RouteState> {
+export class Route<P extends RouteProps = RouteProps, S extends RouteState = RouteState> extends Component<P, S> {
 
   constructor() {
     super();
   }
 
-  isActive(activeRoute: Route | undefined, useDefault: boolean = true) {
+  public isActive(activeRoute: Route | undefined, useDefault: boolean = true) {
     const path = BASE_PATH + this.props["data-path"];
     let pathname = location.pathname;
     if (pathname.length > 1 && pathname.charAt(pathname.length - 1) !== "/") {
@@ -120,21 +120,21 @@ export class Route extends Component<RouteProps, RouteState> {
     return active;
   }
 
-  render(): string | void {
+  public render(): string | void {
     return this.state.active ? `<${this.props["data-element"]}></${this.props["data-element"]}>` : "";
 
   }
 }
 
-interface RouteLinkProps {
+export interface RouteLinkProps {
   ["data-path"]: string;
 }
 
-interface RouteLinkState {
+export interface RouteLinkState {
 
 }
 
-export class RouteLink extends Component<RouteLinkProps, RouteLinkState> {
+export class RouteLink<P extends RouteLinkProps = RouteLinkProps, S extends RouteLinkState = RouteLinkState> extends Component<P, S> {
   private readonly clickListener: (ev: Event) => void;
 
   constructor() {
@@ -145,11 +145,11 @@ export class RouteLink extends Component<RouteLinkProps, RouteLinkState> {
     };
   }
 
-  willMount() {
+  public willMount() {
     this.addEventListener("click", this.clickListener);
   }
 
-  didUnMount() {
+  public didUnMount() {
     this.removeEventListener("click", this.clickListener);
   }
 }

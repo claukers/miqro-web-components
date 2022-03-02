@@ -245,20 +245,10 @@ it("happy path lifecycle props as object", async () => {
   });
 
   const fakeChild = new (class extends Component {
-    setProps(p) {
+    setProps(p, o, r) {
       fakeSetProps(p);
-      const oldProps = this.props;
-      this.props = {
-        ...this.props,
-        ...p
-      };
-      if (this.didUpdate(oldProps, this.state)) {
-        return this._renderOnElement();
-      }
-    }
-
-    render() {
-      return fakeRender(this.props);
+      super.setProps(p, o, r);
+      fakeRender(this.props);
     }
   })()
 
