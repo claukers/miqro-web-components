@@ -1,5 +1,4 @@
-import {EventCacheEmitter} from "./events.js";
-import {renderElementProps, renderOnElement} from "./render.js";
+import {EventCacheEmitter, renderElementProps, renderOnElement} from "./helpers.js";
 
 export type ComponentState = { [p: string]: any };
 

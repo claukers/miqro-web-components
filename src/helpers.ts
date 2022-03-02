@@ -1,5 +1,33 @@
 import {get, parse} from "@miqro/parser";
 
+export function decodeHtml(str: string) {
+  return parse(str, "decodeHtml");
+}
+
+export function encodeHtml(str: string) {
+  return parse(str, "encodeHtml");
+}
+
+export class EventCacheEmitter {
+
+  private _events: Map<string, Event> = new Map<string, Event>();
+
+  constructor(public defaultOptions?: EventInit) {
+  }
+
+  public emit(event: string, element: Element | ShadowRoot): void {
+    if (!this._events.has(event)) {
+      this.registerEvent(event);
+    }
+    element.dispatchEvent(this._events.get(event) as Event);
+  }
+
+  public registerEvent(event: string, eventOptions?: EventInit): void {
+    this._events.set(event, new Event(event, eventOptions ? eventOptions : this.defaultOptions));
+  }
+}
+
+
 /*
 implements the render lifecycle
  */
@@ -98,7 +126,7 @@ function renderTemplate(str: string, values: any): string {
     if (typeof value === "function") {
       return match; // leave as {name} because renderTemplate doesn't allow functions
     } else if (typeof value == "string" || typeof value === "boolean" || typeof value === "number") {
-      return parse(String(value), "encodeHtml");
+      return encodeHtml(String(value));
       //return String(value);
     } else if (value == undefined) {
       return "";

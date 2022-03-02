@@ -2,9 +2,7 @@ const {strictEqual} = require("assert");
 const {fake, requireMock} = require("@miqro/test");
 const {initDOMGlobals} = require("./common");
 const fakes = initDOMGlobals();
-const {parse, Component} = requireMock("../", {});
-
-const decodeHTML = (str) => parse(str, "decodeHtml");
+const {decodeHtml, Component} = requireMock("../", {});
 
 const testOptions = {
   category: "component",
@@ -177,7 +175,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakes.MutationObserver.observe.callArgs[0][0], instance);
   strictEqual(typeof fakes.MutationObserver.observe.callArgs[0][1], "object");
   strictEqual(fakes.MutationObserver.observe.callArgs[0][1].attributes, true);
-  strictEqual(decodeHTML(instance.innerHTML), "fakeVal");
+  strictEqual(decodeHtml(instance.innerHTML), "fakeVal");
   strictEqual(typeof instance.props, "object");
 
   await instance.setState({
@@ -185,7 +183,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   });
   strictEqual(fakeDidUpdate.callCount, 1);
 
-  strictEqual(decodeHTML(instance.innerHTML), "fakeVal1");
+  strictEqual(decodeHtml(instance.innerHTML), "fakeVal1");
   strictEqual(fakeRender.callCount, 2);
   strictEqual(fakes.Element.querySelectorAll.callCount, 2);
 
@@ -203,7 +201,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakeRender.callCount, 2);
   strictEqual(fakes.MutationObserver.observe.callCount, 1);
   strictEqual(fakes.MutationObserver.disconnect.callCount, 1);
-  strictEqual(decodeHTML(instance.innerHTML), "fakeVal1");
+  strictEqual(decodeHtml(instance.innerHTML), "fakeVal1");
   strictEqual(typeof instance.props, "object");
 
 

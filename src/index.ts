@@ -1,4 +1,4 @@
 export * from "./component.js";
-export * from "./shadow.js";
+export {encodeHtml, decodeHtml} from "./helpers.js";
 export * from "./router.js";
-export * from "@miqro/parser";
+export * from "./shadow.js";
