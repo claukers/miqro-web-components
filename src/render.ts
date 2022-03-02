@@ -1,10 +1,17 @@
 import {get, parse} from "@miqro/parser";
-import {ComponentProps, IComponent} from "./common";
 
 /*
-calls IComponent.render, replaces element.innerHtml
+implements the render lifecycle
  */
-export function renderOnElement(component: IComponent, element: Element | ShadowRoot): void {
+export function renderOnElement(component: {
+
+  render(): string | void;
+
+  setProps?(props: any): void;
+
+  afterRender?(): void;
+
+}, element: Element | ShadowRoot): void {
   // console.log("renderOnElement [%s] props [%o] state [%o]", element.nodeName, component.props, component.state);
   if (component.render) {
     const renderOutput = component.render();
@@ -18,12 +25,12 @@ export function renderOnElement(component: IComponent, element: Element | Shadow
           const child = childElements[i];
           const props = renderElementProps(child, component);
           // only call setProps when object or function is set
-          const asIComponent = (child as unknown as IComponent);
+          const asIComponent = (child as unknown as any);
           if (asIComponent.setProps) {
             const objectList = Object.keys(props).filter(p => props[p] && typeof props[p] === "object");
             if (objectList.length > 0) {
               console.warn("%s passing objects to children on props is not recommended", element.nodeName);
-              const newProps: Partial<ComponentProps> = {};
+              const newProps: Partial<{ [p: string]: any }> = {};
               for (const propName of objectList) {
                 newProps[propName] = props[propName];
               }
@@ -45,9 +52,9 @@ export function renderOnElement(component: IComponent, element: Element | Shadow
 /*
 renders this.props for element. if values is passed it will try to render "{...}" with values as a template.
  */
-export function renderElementProps(element: Element, values?: any): ComponentProps {
+export function renderElementProps(element: Element, values?: any): { [p: string]: any } {
   const propNames = element.getAttributeNames();
-  const props: ComponentProps = {};
+  const props: { [p: string]: any } = {};
   for (const propName of propNames) {
     const value = element.getAttribute(propName);
     if (values && value && value.charAt(0) === "{" && value.charAt(value.length - 1) === "}") {

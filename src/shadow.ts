@@ -1,6 +1,5 @@
-import {ComponentProps, ComponentState} from "./common.js";
-import {Component} from "./component.js";
-import {renderElementProps, renderOnElement} from "./render";
+import {Component, ComponentProps, ComponentState} from "./component.js";
+import {renderElementProps, renderOnElement} from "./render.js";
 
 const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
 
@@ -28,7 +27,6 @@ export class ShadowRootComponent<P extends ComponentProps = ComponentProps, S ex
     const oldState = this.state;
     super.setState(args, override, false);
     const shadowRoot = ShadowRootMap.get(this);
-    console.log("shadow setState %s", shadowRoot);
     if (shadowRoot && refresh && this.isConnected && this.didUpdate(this.props, oldState)) {
       return renderOnElement(this, shadowRoot);
     }
@@ -38,7 +36,6 @@ export class ShadowRootComponent<P extends ComponentProps = ComponentProps, S ex
     const oldProps = this.props;
     super.setProps(args, override, false);
     const shadowRoot = ShadowRootMap.get(this);
-    console.log("shadow setProps %s", shadowRoot);
     if (shadowRoot && refresh && this.isConnected && this.didUpdate(oldProps, this.state)) {
       return renderOnElement(this, shadowRoot);
     }

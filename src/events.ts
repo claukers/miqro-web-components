@@ -1,9 +1,3 @@
-export interface IEventEmitter {
-  emit(event: string): void;
-
-  registerEvent(event: string, eventOptions?: EventInit): void;
-}
-
 export class EventCacheEmitter {
 
   private _events: Map<string, Event> = new Map<string, Event>();

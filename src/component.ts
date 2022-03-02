@@ -1,8 +1,11 @@
-import {ComponentProps, ComponentState, IComponent} from "./common.js";
-import {EventCacheEmitter, IEventEmitter} from "./events.js";
-import {renderElementProps, renderOnElement} from "./render";
+import {EventCacheEmitter} from "./events.js";
+import {renderElementProps, renderOnElement} from "./render.js";
 
-export class Component<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState> extends HTMLElement implements IComponent<P, S>, IEventEmitter {
+export type ComponentState = { [p: string]: any };
+
+export type ComponentProps = { [p: string]: any };
+
+export class Component<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState> extends HTMLElement {
 
   public props: P;
   public state: S;
