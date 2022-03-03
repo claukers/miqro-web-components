@@ -1,6 +1,6 @@
 # @miqro/web-components
 
-helpers for creating dynamic ```HTMLElements``` with a **basic template** system influenced by ***React***.
+helpers for creating dynamic ```HTMLElements``` with a **basic template** language influenced by ***React***.
 
 ## Component class
 
@@ -29,8 +29,6 @@ when rendering a template the string, number, boolean values are encoded to ***s
 for example the inner p in ```this.text``` in the code bellow will not render as html, instead it will be html **encoded**.
 
 ```typescript
-import {Component} from "./component";
-
 customElements.define("my-custom", class extends Component {
     render() {
         this.text = "<p>this p will not be rendered as html beacuse it is encoded.</p>";
@@ -219,8 +217,6 @@ by default all attr changes to the HTMLElement are observed with a ```MutationOb
 on ```constructor``` and ```willMount```.
 
 ```typescript
-import {Component} from "@miqro/web-components";
-
 customElements.define("my-element", class extends Component {
   constructor() {
     super();
@@ -324,9 +320,9 @@ setting the attribute ```data-router-base-path``` to the HTML element to allow t
 
 this will affect ```RouterLink``` elements also.
 
-## Use Component Class without the template system
+## Use Component Class without the template language
 
-to build more performant Elements you can skip the use of the template system by returning void on ```this.render()``` method.
+to build more performant HTMLElement you can skip the use of the template language by returning void on ```this.render()``` method.
 
 example
 
@@ -342,12 +338,12 @@ customElements.define("my-component", class extends Component {
   render() {
     if (!this.p) {
       this.p = this.p ? this.p : document.createElement("p");
+      this.p.textContent = this.props["data-custom-attr"];
       p.addEventListener("click", (ev) => {
         this.click(ev);
       });
       this.appendChild(p);
     }
-    this.p.textContent = this.props["data-custom-attr"];
     // all the code bellow is the same as
     // return `<p data-on-click="{click}">{props.data-custom-attr}</p>`
   }

@@ -75,6 +75,13 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
   public afterRender() {
   }
 
+  /*
+  will be called before a render if returns true this.render will be called.
+   */
+  protected didUpdate(oldProps: P, oldState: S): boolean {
+    return true;
+  }
+
   public emit(event: string): void {
     return this._emitter.emit(event, this);
   }
@@ -94,6 +101,9 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
     }
   }
 
+  /*
+  will be called after the MutationObserver detects a change in the element attributes.
+   */
   public setProps(args: Partial<P>, override = false, refresh = true) {
     const oldProps = this.props;
     this.props = override ? args as P : {
@@ -103,9 +113,5 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
     if (refresh && this.isConnected && this.didUpdate(oldProps, this.state)) {
       return renderOnElement(this, this);
     }
-  }
-
-  protected didUpdate(oldProps: P, oldState: S): boolean {
-    return true;
   }
 }
