@@ -13,20 +13,22 @@ export class ShadowRootComponent<S extends ComponentState = ComponentState> exte
   }
 
   refresh(): void {
-    console.log("shadow reload");
-    const shadow = ShadowRootMap.get(this) as ShadowRoot;
+    const shadow = ShadowRootMap.get(this);
     if (shadow) {
       return renderOnElement(this, shadow);
     }
   }
 }
 
-export class OpenShadowRootComponent extends ShadowRootComponent {
+export class OpenShadowRootComponent<S extends ComponentState = ComponentState> extends Component<S> {
   constructor() {
     super();
-    const root = this.attachShadow({
+    this.attachShadow({
       mode: "open"
     });
-    ShadowRootMap.set(this, root);
+  }
+
+  refresh(): void {
+    return renderOnElement(this, this.shadowRoot as ShadowRoot);
   }
 }
