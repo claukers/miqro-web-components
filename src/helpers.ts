@@ -41,22 +41,12 @@ export class EventCacheEmitter {
 implements the render lifecycle for render -> setProps ( only if objects are passed ) -> afterRender
  */
 export function renderOnElement(component: {
-
-  state: any;
-
   render?(): string | void;
-
-  afterRender?(): void;
-
-  beforeRender?(): void;
 
 }, element: HTMLElement | ShadowRoot): void {
   // const {tagName, dataset} = element instanceof HTMLElement ? element : element.host as HTMLElement;
   // console.log("renderOnElement [%s] dataset [%o] state [%o]", tagName, dataset, component.state);
   if (component.render) {
-    if (component.beforeRender) {
-      component.beforeRender();
-    }
     const renderOutput = component.render();
     if (typeof renderOutput === "string") {
       const rendered = renderTemplate(renderOutput, component);
@@ -67,9 +57,6 @@ export function renderOnElement(component: {
         for (let i = 0; i < childElements.length; i++) {
           const child = childElements[i];
           hookElementEvents(child, renderElementProps(child, component));
-        }
-        if (component.afterRender) {
-          component.afterRender();
         }
       }
     }

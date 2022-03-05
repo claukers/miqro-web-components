@@ -24,18 +24,6 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   /*
-  will be called on before render is called
-   */
-  public beforeRender() {
-  }
-
-  /*
-  will be called on after render is called
-   */
-  public afterRender() {
-  }
-
-  /*
   will be called before a render if returns true this.render will be called.
    */
   protected didUpdate(oldState: S): boolean {
@@ -50,9 +38,9 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     return this._emitter.registerEvent(event, eventOptions);
   }
 
-  public setState(args: Partial<S>, override = false, refresh = true) {
+  public setState(args: Partial<S>, refresh = true) {
     const oldState = this.state;
-    this.state = override ? args as S : {
+    this.state = {
       ...this.state,
       ...args
     };

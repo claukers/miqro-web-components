@@ -1,6 +1,6 @@
 # @miqro/web-components
 
-helpers for creating dynamic ```HTMLElements``` with a **basic template** language influenced by ***React***.
+very basic ```HTMLElements``` for creating dynamic components with a **basic template** language influenced by ***React***.
 
 ## Component class
 
