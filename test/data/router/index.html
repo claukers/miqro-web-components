@@ -1,49 +1,46 @@
-<html>
+<html data-router-base-path="/miqro/test/data/router">
 <head>
   <script src="./lib.js"></script>
 </head>
 <body>
-<path-router data-default-element="my-404">
-  <path-route data-path="/" data-element="my-home"></path-route>
-  <path-route data-path="/about" data-element="my-about"></path-route>
-</path-router>
+<my-app></my-app>
 <script>
-  //import {Component, Route, Router, historyPushPath} from "./lib";
-  debugger;
-  const {Component, Route, Router, historyPushPath} = WebComponents;
+  const {Component, Router, RouteLink} = WebComponents;
+
+  customElements.define("route-link", RouteLink);
+
   customElements.define("my-home", class extends Component {
     render() {
-      return `<p>home</p><route-link path="/naoisfjadsk"><a href="#">not found link</a></route-link><route-link path="/about"><a href="#">about link</a></route-link>`;
+      return `<p>home</p><route-link data-path="/naoisfjadsk"><a href="#">not found link</a></route-link><route-link data-path="/about"><a href="#">about link</a></route-link><route-link data-path="/extra"><a href="#">extra link</a></route-link>`;
+    }
+  });
+  customElements.define("my-extra", class extends Component {
+    render() {
+      return `<p>extra</p><route-link data-path="/naoisfjadsk"><a href="#">not found link</a></route-link><route-link data-path="/about"><a href="#">about link</a></route-link>`;
     }
   });
   customElements.define("my-404", class extends Component {
     render() {
-      return `<p>not found</p><route-link path="/"><a href="#">home link</a></route-link>`;
+      return `<p>not found</p><route-link data-path="/"><a href="#">home link</a></route-link>`;
     }
   });
   customElements.define("my-about", class extends Component {
     render() {
-      return `<p>about</p><route-link path="/#fromabout?query1=1"><a href="#">home link</a></route-link>`;
+      return `<p>about</p><route-link data-path="/#fromabout?query1=1"><a href="#">home link</a></route-link>`;
     }
   });
 
-  customElements.define("path-route", Route);
-  customElements.define("path-router", Router);
-  customElements.define("route-link", class extends Component {
+  customElements.define("my-app", class extends Router {
     constructor() {
       super();
-      this.clickListener = (ev) => {
-        ev.preventDefault();
-        historyPushPath(this.props.path);
+      this.state = {
+        routes: [
+          {path: "/", element: "my-home"},
+          {path: "/about", element: "my-about"},
+          {path: "/extra", element: "my-extra"}
+        ],
+        defaultElement: "my-404"
       };
-    }
-
-    willMount() {
-      this.addEventListener("click", this.clickListener);
-    }
-
-    didUnMount() {
-      this.removeEventListener("click", this.clickListener);
     }
   });
 </script>

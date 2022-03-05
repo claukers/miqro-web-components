@@ -24,7 +24,7 @@ customElements.define("my-element", class extends Component {
 
 ### ***Important Notice***
 
-when rendering a template the string, number, boolean values are encoded to ***sanitize*** user input.
+when rendering a template the string, number, boolean values are html encoded to ***sanitize*** user input.
 
 for example the inner p in ```this.text``` in the code bellow will not render as html, instead it will be html **encoded**.
 
@@ -37,71 +37,6 @@ customElements.define("my-custom", class extends Component {
         // return "<p>" + this.text + "</p>";
     }
 })
-```
-
-## Component lifecycle
-
-the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()```
-and ```disconnectedCallback()```, it also creates a ```MutationObserver``` to watch for all attribute changes. It uses these
-callbacks to populate ```this.props``` and ```this.state``` and call ```this.render``` to render the template when
-necessary, the standard ```attributeChangedCallback``` it is not used to watch attributes.
-
-### this.willMount()
-
-this callback is called when the standard **connectedCallback** is called and ***before*** the render lifecycle.
-
-### this.didMount()
-
-this callback is called when the standard **connectedCallback** is called and ***after*** the render lifecycle.
-
-### this.didUnMount()
-
-this callback is called when the standard **disconnectedCallback** is called and ***after*** the local **MutationObserver** is
-disconnected.
-
-### this.didUpdate(prevProps, prevState)
-
-this callback is called when the ```this.props``` or ```this.state``` of the component changes.
-
-can be overridden to stop the component render by returning false. by default, it returns true for all changes.
-
-Consider implementing ```this.didUpdate(prevProps, prevState)``` to avoid unnecessary re-renders.
-
-### this.render()
-
-the result of ```this.render()``` is used to replace ```this.innerHtml```. this will call for complete **re-render** of
-the element by the browser.
-
-by default ```this.render()``` will be called if one of the component's attributes changes and when it's connected to
-the dom, also ```this.render()``` will be called when ```this.setState({..})``` is invoked.
-
-to change this behavior simply override the method ```this.didUpdate(prevProps, prevState)``` and return ```false```
-when needed.
-
-Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
-re-render of all child elements.
-
-### this.afterRender()
-
-this callback will be called if the ```this.innerHtml``` is replaced with the template rendered from ```this.render()```
-.
-
-### ***Important Notice***
-
-when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.callback()```
-to maintain the ```Component's``` normal lifecycle.
-
-example
-
-```typescript
-class MyComponent extends Component {
-  connectedCallback() {
-    // do my stuff before render and this.props population
-    // remember to call super to not alter the Component's lifecyle
-    super.connectedCallback();
-    // do my stuff after render and this.props population
-  }
-}
 ```
 
 ## Component Events
@@ -172,84 +107,50 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-## Component props and state
+## Component lifecycle
 
-an instance of a ```Component``` class has ```this.props``` and ```this.state``` attributes that you can use to render a
-template and attach ```events```.
+the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()```. It uses this
+callback to render the template.
 
-### this.props
+### ***Important Notice***
 
-```this.props``` is an extension to the standard element attributes. It allows object passing
-**avoiding** using eval or JSON.parse/JSON.stringify.
+when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.connectedCallback()```
+to maintain the ```Component's``` normal lifecycle.
 
-```this.props``` will be populate on the ```Component``` by watching changes to the element's attributes with a
-MutationObserver, and by calling ```this.setProps(props: Partial<P>)```. ```this.setProps``` will be called when the
-current ```Component``` is being rendered by another component. This will effectively call render again
-if ```this.didUpdate``` is not implemented.
-
-this second call to ```this.setProps``` exists to extend the current ```element.getAttribute(name): string``` to allow
-object passing as attributes and only is used if a function or an object is pass to the element.
-
-### ***Important Notice with passing objects to this.props ( not recommended )***
-
-**Passing objects is supported, but it is not recommend.**
-
-if you intend to pass objects in the templates as element attributes consider implementing ```didUpdate()``` and check
-if the prop pass as object is object or string, because in the first ```render()``` or ```didUpdate``` the prop you try
-to pass as an object will be the string key value as for example ```{state.parentAttribute}```.
-
-That means that if you pass an object as the element attributes, when the element mounts the value in ```this.props```
-will be initially populated with the path indicated in the template not the object itself. After the element is mounted
-and rendered ```this.setProps(...)``` will be called with the correct value in ```this.props```.
-
-### this.state
-
-```this.setState(arg: Partial<S>)``` will alter ```this.state``` with ``arg`` and will
-call ```didUpdate(prevProps, prevState)``` and ``this.render()``
-if ```didUpdate(prevProps, prevState)``` returned true.
-
-### disable attr watching
-
-all attribute watching is **independent** of the standard way of watching attribute changes in WebComponents
-using ```attributeChangedCallback(...)```.
-
-by default all attr changes to the HTMLElement are observed with a ```MutationObserver``` to disable call disconnect
-on ```constructor``` and ```willMount```.
+example
 
 ```typescript
-customElements.define("my-element", class extends Component {
-  constructor() {
-    super();
-    this._observer.disconnect();
-    /*
-    // reconect the ones to want
-    // render will be called by this observer
-    // see MutationObserver on mdm for more information
-    this._observer.observe(this, {
-      attributes: ...,
-      ...
-    });
-     */
+class MyComponent extends Component {
+  connectedCallback() {
+    // do my stuff before render and this.props population
+    // remember to call super to not alter the Component's lifecyle
+    super.connectedCallback();
+    // do my stuff after render and this.props population
   }
-
-  willMount() {
-    this._observer.disconnect();
-    /*
-    // reconect the ones to want
-    // render will be called by this observer
-    // see MutationObserver on mdm for more information
-    this._observer.observe(this, {
-      attributes: ...,
-      ...
-    });
-     */
-  }
-
-  render() {
-    return "<p>{props.text}</p>"
-  }
-})
+}
 ```
+
+### this.render()
+
+the result of ```this.render()``` is used to replace ```this.innerHtml```. this will call for complete **re-render** of
+the element by the browser.
+
+by default ```this.render()``` will be called when it's connected to
+the dom and also when ```this.setState({..})``` is invoked.
+
+to change this behavior simply override the method ```this.didUpdate(prevState)``` and return ```false```
+when needed.
+
+Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
+re-render of all child elements.
+
+### this.didUpdate(prevState)
+
+this callback is called when ```this.state``` of the component changes.
+
+can be overridden to stop the component render by returning false. by default, it returns true for all changes.
+
+Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.
 
 ## Router class
 
@@ -257,14 +158,6 @@ the ```Router``` class extends from ```Component``` and watches changes on the `
 change matches a ```Route``` child element it will render that element.
 
 ```typescript
-customElements.define("my-app", class extends Component {
-  render() {
-    return `<path-router data-default-element="my-404">` +
-      `<path-route data-path="/" data-element="my-home"></path-route>` +
-      `<path-route data-path="/about" data-element="my-about"></path-route>` +
-      `</path-router>`;
-  }
-});
 customElements.define("my-404", class extends Component {
   render() {
     return "not found";
@@ -280,10 +173,18 @@ customElements.define("my-about", class extends Component {
     return "about";
   }
 });
-
-customElements.define("path-route", Route);
-customElements.define("path-router", Router);
-customElements.define("route-link", RouterLink);
+customElements.define("my-app", class extends Router {
+  constructor() {
+    super();
+    this.state = {
+      routes: [
+        {path: "/", element: "my-home"},
+        {path: "/about", element: "my-about"},
+      ],
+      defaultElement: "my-404"
+    }
+  }
+});
 ```
 
 ### history.pushState
@@ -312,9 +213,6 @@ setting the attribute ```data-router-base-path``` to the HTML element to allow t
 ```html
 <html data-router-base-path="/public/front">
 ....
-<!-- will match for /public/front/ -->
-<path-route path="/" element="my-home"></path-route>
-....
 </html>
 ```
 
@@ -329,23 +227,19 @@ example
 ```typescript
 customElements.define("my-component", class extends Component {
 
+  constructor() {
+    super();
+    this.p = document.createElement("p");
+    this.p.textContent = this.props["data-custom-attr"];
+    p.addEventListener("click", (ev) => {
+      this.click(ev);
+    });
+    this.appendChild(p);
+  }
+
   click(ev) {
     ev.preventDefault();
     alert("clicked");
-  }
-
-  // render will still be call when an attribute changes and when this.setState is invoked
-  render() {
-    if (!this.p) {
-      this.p = this.p ? this.p : document.createElement("p");
-      this.p.textContent = this.props["data-custom-attr"];
-      p.addEventListener("click", (ev) => {
-        this.click(ev);
-      });
-      this.appendChild(p);
-    }
-    // all the code bellow is the same as
-    // return `<p data-on-click="{click}">{props.data-custom-attr}</p>`
   }
 })
 ```

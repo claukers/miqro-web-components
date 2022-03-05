@@ -1,9 +1,9 @@
-import {Component, ComponentProps, ComponentState} from "./component.js";
-import {renderElementProps, renderOnElement} from "./helpers.js";
+import {Component, ComponentState} from "./component.js";
+import {renderOnElement} from "./helpers.js";
 
 const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
 
-export class ShadowRootComponent<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState> extends Component<P, S> {
+export class ShadowRootComponent<S extends ComponentState = ComponentState> extends Component<S> {
   constructor() {
     super();
     const root = this.attachShadow({
@@ -12,32 +12,11 @@ export class ShadowRootComponent<P extends ComponentProps = ComponentProps, S ex
     ShadowRootMap.set(this, root);
   }
 
-  public connectedCallback() {
-    const shadowRoot = ShadowRootMap.get(this);
-    this._observer.observe(this, {
-      attributes: true
-    });
-    this.setProps(renderElementProps(this) as P, false, false);
-    this.willMount();
-    renderOnElement(this, shadowRoot as ShadowRoot);
-    this.didMount();
-  }
-
-  setState(args: Partial<S>, override: boolean = false, refresh: boolean = true): void {
-    const oldState = this.state;
-    super.setState(args, override, false);
-    const shadowRoot = ShadowRootMap.get(this);
-    if (shadowRoot && refresh && this.isConnected && this.didUpdate(this.props, oldState)) {
-      return renderOnElement(this, shadowRoot);
-    }
-  }
-
-  setProps(args: Partial<P>, override: boolean = false, refresh: boolean = true): void {
-    const oldProps = this.props;
-    super.setProps(args, override, false);
-    const shadowRoot = ShadowRootMap.get(this);
-    if (shadowRoot && refresh && this.isConnected && this.didUpdate(oldProps, this.state)) {
-      return renderOnElement(this, shadowRoot);
+  refresh(): void {
+    console.log("shadow reload");
+    const shadow = ShadowRootMap.get(this) as ShadowRoot;
+    if (shadow) {
+      return renderOnElement(this, shadow);
     }
   }
 }

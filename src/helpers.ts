@@ -1,5 +1,14 @@
 import {get, parse} from "@miqro/parser";
 
+export const normalizePath = (path: string) => {
+  if (path.length > 1 && path.charAt(path.length - 1) === "/") {
+    path = path.substring(0, path.length - 1);
+  }
+  return path;
+}
+
+export const renderTag = (tagName: string) => `<${tagName}></${tagName}>`;
+
 export function decodeHtml(str: string) {
   return parse(str, "decodeHtml");
 }
@@ -33,15 +42,21 @@ implements the render lifecycle for render -> setProps ( only if objects are pas
  */
 export function renderOnElement(component: {
 
-  render?(): string | void;
+  state: any;
 
-  setProps?(props: any): void;
+  render?(): string | void;
 
   afterRender?(): void;
 
-}, element: Element | ShadowRoot): void {
-  // console.log("renderOnElement [%s] props [%o] state [%o]", element.nodeName, component.props, component.state);
+  beforeRender?(): void;
+
+}, element: HTMLElement | ShadowRoot): void {
+  // const {tagName, dataset} = element instanceof HTMLElement ? element : element.host as HTMLElement;
+  // console.log("renderOnElement [%s] dataset [%o] state [%o]", tagName, dataset, component.state);
   if (component.render) {
+    if (component.beforeRender) {
+      component.beforeRender();
+    }
     const renderOutput = component.render();
     if (typeof renderOutput === "string") {
       const rendered = renderTemplate(renderOutput, component);
@@ -51,21 +66,7 @@ export function renderOnElement(component: {
         const childElements = element.querySelectorAll("*");
         for (let i = 0; i < childElements.length; i++) {
           const child = childElements[i];
-          const props = renderElementProps(child, component);
-          // only call setProps when object or function is set
-          const asIComponent = (child as unknown as any);
-          if (asIComponent.setProps) {
-            const objectList = Object.keys(props).filter(p => props[p] && typeof props[p] === "object");
-            if (objectList.length > 0) {
-              console.warn("%s passing objects to children on props is not recommended", element.nodeName);
-              const newProps: Partial<{ [p: string]: any }> = {};
-              for (const propName of objectList) {
-                newProps[propName] = props[propName];
-              }
-              asIComponent.setProps(newProps);
-            }
-          }
-          hookElementEvents(child, props);
+          hookElementEvents(child, renderElementProps(child, component));
         }
         if (component.afterRender) {
           component.afterRender();
@@ -80,7 +81,7 @@ export function renderOnElement(component: {
 /*
 renders this.props for element. if values is passed it will try to render "{...}" with values as a template.
  */
-export function renderElementProps(element: Element, values?: any): { [p: string]: any } {
+function renderElementProps(element: Element, values?: any): { [p: string]: any } {
   const propNames = element.getAttributeNames();
   const props: { [p: string]: any } = {};
   for (const propName of propNames) {
@@ -130,13 +131,13 @@ function renderTemplate(str: string, values: any): string {
     const value = get(values, path);
     if (typeof value === "function") {
       return match; // leave as {name} because renderTemplate doesn't allow functions
-    } else if (typeof value == "string" || typeof value === "boolean" || typeof value === "number") {
+    } /*else if (typeof value == "string" || typeof value === "boolean" || typeof value === "number") {
       return encodeHtml(String(value));
       //return String(value);
-    } else if (value == undefined) {
+    }  else if (value == undefined) {
       return "";
-    } else {
-      return match;
+    } */else {
+      return encodeHtml(String(value));
     }
   });
 }

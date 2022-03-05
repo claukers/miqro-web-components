@@ -5,15 +5,19 @@
 <body>
 <my-root></my-root>
 <script>
-  const {ShadowRootComponent} = WebComponents;
+  const {Component, ShadowRootComponent} = WebComponents;
 
   class Root extends HTMLElement {
     constructor() {
       super();
       const app = document.createElement("my-app");
       app.setAttribute("id", "MyApp");
-      app.setAttribute("name", "nonameasd");
+      app.setAttribute("data-name", "nonameasd");
       this.appendChild(app);
+      setTimeout(()=>{
+        console.log("set attribute");
+        app.setAttribute("data-name", "nonameasd2");
+      }, 2000)
     }
   }
 
@@ -35,7 +39,9 @@
     }
 
     render() {
-      return !this.state.reach5 ? `<hello-world attr1="{state.obj.attr1}" data-on-custom="{reach5}" data="{props.name}" data-obj="{state.obj}"></hello-world><p class="bla">{props.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
+      console.log("app render");
+      return !this.state.reach5 ? `<hello-world attr1="{state.obj.attr1}" data-on-custom="{reach5}" data="{dataset.name}" data-obj="{state.obj}"></hello-world><p class="bla">{dataset.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
+      // return "<p>{dataset.name}</p>"
     }
   }
 
@@ -64,7 +70,7 @@
     }
 
     render() {
-      return `<style> p { color: blue; } </style><p data-ref="{pref}" data-on-click="{click12}">blabla {props.data} {state.clicked} {state.clickedCount} attr 1 {props.data-obj.attr1} </p>`;
+      return `<style> p { color: blue; } </style><p data-ref="{pref}" data-on-click="{click12}">blabla {props.data} {state.clicked} {state.clickedCount} "{props.data-obj}.attr1=" "{props.data-obj.attr1}"</p>`;
     }
   }
 
@@ -73,9 +79,9 @@
   customElements.define("my-bla", Bla);
   customElements.define("my-root", Root);
 
-  setTimeout(() => {
+  /*setTimeout(() => {
     debugger;
-  }, 5000);
+  }, 5000);*/
 </script>
 </body>
 </html>

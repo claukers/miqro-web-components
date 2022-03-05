@@ -1,48 +1,20 @@
-import {EventCacheEmitter, renderElementProps, renderOnElement} from "./helpers.js";
+import {EventCacheEmitter, renderOnElement} from "./helpers.js";
 
 export type ComponentState = { [p: string]: any };
 
-export type ComponentProps = { [p: string]: any };
+export class Component<S extends ComponentState = ComponentState> extends HTMLElement {
 
-export class Component<P extends ComponentProps = ComponentProps, S extends ComponentState = ComponentState> extends HTMLElement {
-
-  public props: P;
   public state: S;
-  protected readonly _observer: MutationObserver;
   private readonly _emitter: EventCacheEmitter;
 
   constructor() {
     super();
     this._emitter = new EventCacheEmitter();
-    this._observer = new MutationObserver((mutations: MutationRecord[]) => {
-      const newProps: any = {};
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes') {
-          const propName = mutation.attributeName;
-          if (propName) {
-            newProps[propName] = this.getAttribute(propName);
-          }
-        }
-      }
-      this.setProps(newProps);
-    });
-    this.props = renderElementProps(this) as P;
     this.state = {} as S; // start empty
   }
 
   public connectedCallback() {
-    this._observer.observe(this, {
-      attributes: true
-    });
-    this.setProps(renderElementProps(this) as P, false, false);
-    this.willMount();
-    renderOnElement(this, this);
-    this.didMount();
-  }
-
-  public disconnectedCallback() {
-    this._observer.disconnect();
-    this.didUnMount();
+    this.refresh();
   }
 
   /*
@@ -52,21 +24,9 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
   }
 
   /*
-  will be called on connectedCallback before render is called
+  will be called on before render is called
    */
-  public willMount() {
-  }
-
-  /*
-  will be called on connectedCallback after render is called
-   */
-  public didMount() {
-  }
-
-  /*
-  will be called on disconnectedCallback after this._observer.disconnect() is called
-   */
-  public didUnMount() {
+  public beforeRender() {
   }
 
   /*
@@ -78,7 +38,7 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
   /*
   will be called before a render if returns true this.render will be called.
    */
-  protected didUpdate(oldProps: P, oldState: S): boolean {
+  protected didUpdate(oldState: S): boolean {
     return true;
   }
 
@@ -96,22 +56,12 @@ export class Component<P extends ComponentProps = ComponentProps, S extends Comp
       ...this.state,
       ...args
     };
-    if (refresh && this.isConnected && this.didUpdate(this.props, oldState)) {
-      return renderOnElement(this, this);
+    if (refresh && this.isConnected && this.didUpdate(oldState)) {
+      return this.refresh();
     }
   }
 
-  /*
-  will be called after the MutationObserver detects a change in the element attributes.
-   */
-  public setProps(args: Partial<P>, override = false, refresh = true) {
-    const oldProps = this.props;
-    this.props = override ? args as P : {
-      ...this.props,
-      ...args
-    };
-    if (refresh && this.isConnected && this.didUpdate(oldProps, this.state)) {
-      return renderOnElement(this, this);
-    }
+  public refresh() {
+    return renderOnElement(this, this);
   }
 }

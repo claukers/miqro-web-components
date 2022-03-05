@@ -1,4 +1,4 @@
-export * from "./component.js";
+export {Component, ComponentState} from "./component.js";
 export {encodeHtml, decodeHtml} from "./helpers.js";
-export * from "./router.js";
-export * from "./shadow.js";
+export {Router, RouterState, RouteLink, historyPushPath} from "./router.js";
+export {ShadowRootComponent, OpenShadowRootComponent} from "./shadow.js";

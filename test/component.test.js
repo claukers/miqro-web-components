@@ -131,14 +131,7 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   })();
 
   strictEqual(fakeChild.addEventListener.callCount, 0);
-  strictEqual(typeof instance.props, "object");
-  strictEqual(Object.keys(instance.props).length, 1);
-  strictEqual(instance.props.attr1, "attr1Value");
-  strictEqual(fakes.MutationObserver.new.callCount, 1);
   strictEqual(fakes.Element.querySelectorAll.callCount, 0);
-  strictEqual(typeof fakes.MutationObserver.new.callArgs[0][1], "function");
-  strictEqual(fakes.MutationObserver.observe.callCount, 0);
-  strictEqual(fakes.MutationObserver.disconnect.callCount, 0);
   strictEqual(instance.innerHTML, undefined);
   strictEqual(fakeWillMount.callCount, 0);
   strictEqual(fakeDidMount.callCount, 0);
@@ -149,10 +142,6 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   instance.isConnected = true;
   await instance.connectedCallback();
   strictEqual(fakeDidUpdate.callCount, 0);
-  strictEqual(fakes.MutationObserver.observe.callCount, 1);
-  strictEqual(fakes.MutationObserver.observe.callArgs[0][0], instance);
-  strictEqual(typeof fakes.MutationObserver.observe.callArgs[0][1], "object");
-  strictEqual(fakes.MutationObserver.observe.callArgs[0][1].attributes, true);
 
   strictEqual(fakes.Event.new.callCount, 0);
   strictEqual(fakes.Element.dispatchEvent.callCount, 0);
@@ -170,11 +159,6 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakeDidMount.callCount, 1);
   strictEqual(fakeDidUnMount.callCount, 0);
   strictEqual(fakeRender.callCount, 1);
-  strictEqual(fakes.MutationObserver.observe.callCount, 1);
-  strictEqual(fakes.MutationObserver.disconnect.callCount, 0);
-  strictEqual(fakes.MutationObserver.observe.callArgs[0][0], instance);
-  strictEqual(typeof fakes.MutationObserver.observe.callArgs[0][1], "object");
-  strictEqual(fakes.MutationObserver.observe.callArgs[0][1].attributes, true);
   strictEqual(decodeHtml(instance.innerHTML), "fakeVal");
   strictEqual(typeof instance.props, "object");
 
@@ -199,82 +183,8 @@ it("happy path lifecycle with custom handler and template as simple value", asyn
   strictEqual(fakeDidUnMount.callCount, 1);
   strictEqual(fakes.Element.querySelectorAll.callCount, 2);
   strictEqual(fakeRender.callCount, 2);
-  strictEqual(fakes.MutationObserver.observe.callCount, 1);
-  strictEqual(fakes.MutationObserver.disconnect.callCount, 1);
   strictEqual(decodeHtml(instance.innerHTML), "fakeVal1");
   strictEqual(typeof instance.props, "object");
 
-
-}, testOptions);
-
-it("happy path lifecycle props as object", async () => {
-
-
-  const instance = new (class extends Component {
-    constructor() {
-      super();
-      this.state = {
-        internalObject: {
-          attr1: 1,
-          attr2: "value2",
-          attrCB: fake(() => {
-
-          })
-        }
-      }
-    }
-
-    render() {
-      return "";
-    }
-  })();
-
-  const fakeSetProps = fake((p) => {
-    strictEqual(p["data-custom-object"].attr1, 1);
-    strictEqual(p["data-custom-object"].attr2, "value2");
-    strictEqual(typeof p["data-custom-object"].attrCB, "function");
-  });
-
-  const fakeRender = fake((p) => {
-    strictEqual(p["data-custom-object"].attr1, 1);
-    strictEqual(p["data-custom-object"].attr2, "value2");
-    strictEqual(typeof p["data-custom-object"].attrCB, "function");
-    return "";
-  });
-
-  const fakeChild = new (class extends Component {
-    setProps(p, o, r) {
-      fakeSetProps(p);
-      super.setProps(p, o, r);
-      fakeRender(this.props);
-    }
-  })()
-
-  fakeChild.querySelectorAll = fake(() => {
-    return [];
-  });
-
-  fakeChild.getAttributeNames = fake(() => {
-    return ["data-custom-object"];
-  });
-
-  fakeChild.getAttribute = fake(() => {
-    return "{state.internalObject}"
-  });
-
-  fakes.Element.querySelectorAll = fake(() => {
-    return [fakeChild]
-  });
-
-  strictEqual(instance.innerHTML, undefined);
-  strictEqual(fakeSetProps.callCount, 0);
-  strictEqual(fakeRender.callCount, 0);
-
-  instance.isConnected = true;
-  instance.connectedCallback();
-
-  strictEqual(instance.innerHTML, "");
-  strictEqual(fakeSetProps.callCount, 1);
-  strictEqual(fakeRender.callCount, 1);
 
 }, testOptions);
