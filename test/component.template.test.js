@@ -9,11 +9,9 @@ const testOptions = {
   before: async () => {
 
     fakes.Event.new = fake(() => {
-
     });
 
     fakes.Element.dispatchEvent = fake(() => {
-
     });
 
     fakes.Element.getAttributeNames = fake(() => {
@@ -29,7 +27,6 @@ const testOptions = {
     });
 
     fakes.Element.addEventListener = fake(() => {
-
     });
   }
 };
