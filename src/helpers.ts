@@ -66,7 +66,7 @@ export function renderOnElement(component: {
 }
 
 /*
-renders this.props for element. if values is passed it will try to render "{...}" with values as a template.
+hook data-on and ref and check's for other attrs with functions to warn the user that this is not allowed.
  */
 function hookElementEvents(element: Element, values: any): void {
   const attributes = element.getAttributeNames();
