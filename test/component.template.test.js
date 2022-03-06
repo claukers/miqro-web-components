@@ -34,7 +34,7 @@ const testOptions = {
   }
 };
 
-it("happy path template avoid functions", async () => {
+it("happy path template avoid functions but not objects", async () => {
   const instance = new (class extends Component {
     constructor() {
       super();
@@ -42,11 +42,14 @@ it("happy path template avoid functions", async () => {
         cb: () => {
 
         },
+        obj: {
+          toString: () => "obj.tostring"
+        },
         text: "hello",
         textClass: "custom-class"
       }
       this.render = fake(() => {
-        return `<p class="{state.textClass}" data-on-click="{state.cb}">{state.text}{state.cb}</p>`
+        return `<p class="{state.textClass}" data-on-click="{state.cb}">{state.text}{state.cb}{state.obj}</p>`
       });
     }
   })();
@@ -54,5 +57,5 @@ it("happy path template avoid functions", async () => {
   strictEqual(instance.innerHTML, undefined);
   instance.connectedCallback();
   strictEqual(instance.render.callCount, 1);
-  strictEqual(decodeHTML(instance.innerHTML), `<p class="custom-class" data-on-click="{state.cb}">hello{state.cb}</p>`);
+  strictEqual(decodeHTML(instance.innerHTML), `<p class="custom-class" data-on-click="{state.cb}">hello{state.cb}obj.tostring</p>`);
 }, testOptions);
