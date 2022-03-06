@@ -56,7 +56,7 @@ export function renderOnElement(component: {
         const childElements = element.querySelectorAll("*");
         for (let i = 0; i < childElements.length; i++) {
           const child = childElements[i];
-          hookElementEvents(child, renderElementProps(child, component));
+          hookElementEvents(child, component);
         }
       }
     }
@@ -68,41 +68,22 @@ export function renderOnElement(component: {
 /*
 renders this.props for element. if values is passed it will try to render "{...}" with values as a template.
  */
-function renderElementProps(element: Element, values?: any): { [p: string]: any } {
-  const propNames = element.getAttributeNames();
-  const props: { [p: string]: any } = {};
-  for (const propName of propNames) {
-    const value = element.getAttribute(propName);
-    if (values && value && value.charAt(0) === "{" && value.charAt(value.length - 1) === "}") {
+function hookElementEvents(element: Element, values: any): void {
+  const attributes = element.getAttributeNames();
+  for (const attributeName of attributes) {
+    const value = element.getAttribute(attributeName);
+    if (value && value.charAt(0) === "{" && value.charAt(value.length - 1) === "}") {
       const parentAttr = get((values as any), value.substring(1, value.length - 1));
       if (typeof parentAttr === "function") {
-        const fn = parentAttr as Function;
-        props[propName] = fn.bind(values) as Function;
-      } else if (parentAttr !== undefined) {
-        props[propName] = parentAttr;
-      }
-    } else if (value !== undefined && value !== null) {
-      props[propName] = value;
-    }
-  }
-  return props;
-}
-
-/*
-hooks data-ref and data-on-... for Components
- */
-function hookElementEvents(element: Element | ShadowRoot, p: { [attr: string]: string | Function; }): void {
-  const props = Object.keys(p);
-  for (const prop of props) {
-    const propValue = p[prop];
-    if (typeof propValue === "function") {
-      if (prop === "data-ref") {
-        (propValue as (...args: any[]) => void)(element);
-      } else if (prop.indexOf("data-on-") === 0) {
-        const eventName = prop.substring("data-on-".length);
-        element.addEventListener(eventName, (propValue as (...args: any[]) => void));
-      } else {
-        console.error("Cannot use attribute [%s] with function as value. Only data-on-... and data-ref are allowed. Use custom events for using data-on... with custom events or use the helpers .emit and .registerEvent to use custom events.", prop);
+        const callback = (parentAttr as Function).bind(values);
+        if (attributeName === "data-ref") {
+          (callback as (...args: any[]) => void)(element);
+        } else if (attributeName.indexOf("data-on-") === 0) {
+          const eventName = attributeName.substring("data-on-".length);
+          element.addEventListener(eventName, (callback as (...args: any[]) => void));
+        } else {
+          console.error("Cannot use attribute [%s] with function as value. Only data-on-... and data-ref are allowed. Use custom events for using data-on... with custom events or use the helpers .emit and .registerEvent to use custom events.", attributeName);
+        }
       }
     }
   }
@@ -123,7 +104,7 @@ function renderTemplate(str: string, values: any): string {
       //return String(value);
     }  else if (value == undefined) {
       return "";
-    } */else {
+    } */ else {
       return encodeHTML(String(value));
     }
   });
