@@ -9,13 +9,9 @@ export const normalizePath = (path: string) => {
 
 export const renderTag = (tagName: string) => `<${tagName}></${tagName}>`;
 
-export function decodeHTML(str: string) {
-  return parse(str, "decodeHTML");
-}
+export const decodeHTML = (str: string) => parse(str, "decodeHTML");
 
-export function encodeHTML(str: string) {
-  return parse(str, "encodeHTML");
-}
+export const encodeHTML = (str: string) => parse(str, "encodeHTML");
 
 export class EventCacheEmitter {
 
@@ -36,39 +32,13 @@ export class EventCacheEmitter {
   }
 }
 
-
-/*
-implements the render lifecycle for render -> setProps ( only if objects are passed ) -> afterRender
- */
-export function renderOnElement(component: {
-  render?(): string | void;
-
-}, element: HTMLElement | ShadowRoot): void {
-  // const {tagName, dataset} = element instanceof HTMLElement ? element : element.host as HTMLElement;
-  // console.log("renderOnElement [%s] dataset [%o] state [%o]", tagName, dataset, component.state);
-  if (component.render) {
-    const renderOutput = component.render();
-    if (typeof renderOutput === "string") {
-      const rendered = renderTemplate(renderOutput, component);
-      if (rendered !== undefined) {
-        element.innerHTML = rendered;
-        // because innerHTML is replaced we must re-hook events
-        const childElements = element.querySelectorAll("*");
-        for (let i = 0; i < childElements.length; i++) {
-          const child = childElements[i];
-          hookElementEvents(child, component);
-        }
-      }
-    }
-  } else {
-    console.error("component.render not defined render will do nothing.");
-  }
-}
-
 /*
 hook data-on and ref and check's for other attrs with functions to warn the user that this is not allowed.
  */
-function hookElementEvents(element: Element, values: any): void {
+export function hookElementEvents(element: Element, values: any): void {
+  if (!values || !element) {
+    throw new Error("element and value must be defined!");
+  }
   const attributes = element.getAttributeNames();
   for (const attributeName of attributes) {
     const value = element.getAttribute(attributeName);
@@ -92,19 +62,14 @@ function hookElementEvents(element: Element, values: any): void {
 /*
 replace "{...}" from string with only string values from values. the value from values is html encoded before being replaced.
  */
-function renderTemplate(str: string, values: any): string {
+export function renderTemplate(str: string, values: any): string {
   const re = /{[^}]*}/g;
   return str.replace(re, (match) => {
     const path = match.substring(1, match.length - 1);
     const value = get(values, path);
     if (typeof value === "function") {
       return match; // leave as {name} because renderTemplate doesn't allow functions
-    } /*else if (typeof value == "string" || typeof value === "boolean" || typeof value === "number") {
-      return encodeHtml(String(value));
-      //return String(value);
-    }  else if (value == undefined) {
-      return "";
-    } */ else {
+    } else {
       return encodeHTML(String(value));
     }
   });

@@ -1,4 +1,4 @@
-import {EventCacheEmitter, renderOnElement} from "./helpers.js";
+import {EventCacheEmitter, hookElementEvents, renderTemplate} from "./helpers.js";
 
 export type ComponentState = { [p: string]: any };
 
@@ -14,7 +14,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   public connectedCallback() {
-    this.refresh();
+    this._renderOnElement();
   }
 
   /*
@@ -45,11 +45,25 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
       ...args
     };
     if (refresh && this.isConnected && this.didUpdate(oldState)) {
-      return this.refresh();
+      return this._renderOnElement();
     }
   }
 
-  public refresh() {
-    return renderOnElement(this, this);
+  protected _renderOnElement(element: HTMLElement | ShadowRoot = this) {
+    // const {tagName, dataset} = element instanceof HTMLElement ? element : element.host as HTMLElement;
+    // console.log("renderOnElement [%s] dataset [%o] state [%o]", tagName, dataset, component.state);
+    const renderOutput = this.render();
+    if (typeof renderOutput === "string") {
+      const rendered = renderTemplate(renderOutput, this);
+      if (rendered !== undefined) {
+        element.innerHTML = rendered;
+        // because innerHTML is replaced we must re-hook events
+        const childElements = element.querySelectorAll("*");
+        for (let i = 0; i < childElements.length; i++) {
+          const child = childElements[i];
+          hookElementEvents(child, this);
+        }
+      }
+    }
   }
 }

@@ -1,5 +1,4 @@
 import {Component, ComponentState} from "./component.js";
-import {renderOnElement} from "./helpers.js";
 
 const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
 
@@ -12,10 +11,10 @@ export class ShadowRootComponent<S extends ComponentState = ComponentState> exte
     ShadowRootMap.set(this, root);
   }
 
-  refresh(): void {
+  protected _renderOnElement(): void {
     const shadow = ShadowRootMap.get(this);
     if (shadow) {
-      return renderOnElement(this, shadow);
+      return super._renderOnElement(shadow);
     }
   }
 }
@@ -28,7 +27,7 @@ export class OpenShadowRootComponent<S extends ComponentState = ComponentState> 
     });
   }
 
-  refresh(): void {
-    return renderOnElement(this, this.shadowRoot as ShadowRoot);
+  protected _renderOnElement(): void {
+    return super._renderOnElement(this.shadowRoot as ShadowRoot);
   }
 }
