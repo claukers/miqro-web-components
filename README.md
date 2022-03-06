@@ -1,6 +1,6 @@
 # @miqro/web-components
 
-very basic ```HTMLElements``` for creating dynamic components with a **basic template** language influenced by ***React***.
+very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **basic template** language influenced by ***React***.
 
 ## Component class
 
@@ -39,12 +39,12 @@ customElements.define("my-custom", class extends Component {
 })
 ```
 
-## Component Events
+### Events
 
 the ```Component``` class can auto attach ```addEventListener(...)``` to a function of the instance using the template
 system.
 
-### listen to standard and custom events
+#### listen to standard and custom events
 
 use ```data-on-...``` attribute to automatically call ```addEventListener(...)``` on the element.
 
@@ -77,13 +77,13 @@ customElements.define("my-component", class extends Component {
 });
 ```
 
-### emit events
+#### emit events
 
 when ```this.emit(eventName)``` is called it will invoke internally ```this.dispatchEvent(event)``` where ```event``` by
 default be a cached instance of ```new Event("myEvent", {composed: true, bubbles: false, cancelable: false })```. to
 change this behavior call ```this.registerEvent("myEvent", ...EventInit Options...)```.
 
-#### define the EventInit arguments (optional)
+##### define the EventInit arguments (optional)
 
 when ```this.emit(eventName)``` is called and ```eventName``` is not defined a new ```Event``` will be created with the
 default options.
@@ -107,12 +107,12 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-## Component lifecycle
+### Lifecycle
 
 the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()```. It uses this
 callback to render the template.
 
-### ***Important Notice***
+#### ***Important Notice***
 
 when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.connectedCallback()```
 to maintain the ```Component's``` normal lifecycle.
@@ -130,7 +130,7 @@ class MyComponent extends Component {
 }
 ```
 
-### this.render()
+#### this.render()
 
 the result of ```this.render()``` is used to replace ```this.innerHtml```. this will call for complete **re-render** of
 the element by the browser.
@@ -144,7 +144,7 @@ when needed.
 Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
 re-render of all child elements.
 
-### this.didUpdate(prevState)
+#### this.didUpdate(prevState)
 
 this callback is called when ```this.state``` of the component changes.
 
@@ -187,12 +187,12 @@ customElements.define("my-app", class extends Router {
 });
 ```
 
-### history.pushState
+### Change path without reloading.
 
 the ```Router``` class attaches a listener on ```popstate``` event to listen to url changes.
 
 to change the path without reloading the page use the standard ```window.history.pushState(null, null as any, path);```
-or the helper ```historyPushPath(path)``` to trigger programmatically.
+or the helper ```historyPushPath(path)``` to trigger programmatically without user interaction.
 
 ```typescript
 window.history.pushState(null, null as any, "/about");
@@ -216,32 +216,66 @@ setting the attribute ```data-router-base-path``` to the HTML element to allow t
 </html>
 ```
 
-this will affect ```RouterLink``` elements also.
+this will affect ```RouteLink``` elements also.
 
-## Use Component Class without the template language
+### RouteLink
 
-to build more performant HTMLElement you can skip the use of the template language by returning void on ```this.render()``` method.
-
-example
+you can also use the helper ```RouteLink``` to provide clickable elements to change the current route without reloading. The benefit of using ```RouteLink``` is that it takes into account the **base path**.  
 
 ```typescript
-customElements.define("my-component", class extends Component {
+customElements.define("my-link", RouteLink);
+```
 
-  constructor() {
-    super();
-    this.p = document.createElement("p");
-    this.p.textContent = this.props["data-custom-attr"];
-    p.addEventListener("click", (ev) => {
-      this.click(ev);
-    });
-    this.appendChild(p);
-  }
+```html
+<my-link data-path="/about">go to about page</my-link>
+```
 
-  click(ev) {
-    ev.preventDefault();
-    alert("clicked");
-  }
-})
+## Importing
+
+this module is exported as a ```CommonJS``` and ```ESM``` module also, a minified ```bundle``` is provided.
+
+when using a packer like webpack just import the module and the packer will take care of the rest like.
+
+```typescript
+import {Component, Router, RouteLink, historyPushPath} from "@miqro/web-components";
+```
+
+or
+
+```typescript
+const {Component, Router, RouteLink, historyPushPath} = require("@miqro/web-components");
+```
+
+### using the ESM module
+
+the esm version of the module is located in ```dist/esm```.
+
+### using bundle directly with script tag
+
+you can also add the bundle located in ```dist/webcomponents.bundle.min.js``` in the html.
+
+this method will add the global ```WebComponents``` that will house the module, so accessing for example the ```Component``` class you will have to use ```WebComponents.Component```.
+
+```html
+<html>
+<head>
+  <!-- this will add the WebComponents global with the module -->
+  <script src="webcomponents.bundle.min.js"></script>
+</head>
+<body>
+<my-element></my-element>
+<script>
+  // the WebComponents global contains the @miqro/webcomponents module.
+  const {Component} = WebComponents;
+  
+  customElements.define("my-element", class extends Component {
+      render() {
+          return `<p>{props.text}</p>`
+      }
+  });
+</script>
+</body>
+</html>
 ```
 
 ## Integrating with standard WebComponents API
@@ -280,52 +314,4 @@ customElements.define("my-home", class extends Component {
     return `<p data-on-click="{click}">{props.name}</p>`;
   }
 });
-```
-
-## Importing
-
-this module is exported as a ```CommonJS``` and ```ESM``` module also, a minified ```bundle``` is provided.
-
-when using a packer like webpack just import the module and the packer will take care of the rest like.
-
-```typescript
-import {Component} from "@miqro/web-components";
-```
-
-or
-
-```typescript
-const {Component} = require("@miqro/web-components");
-```
-
-### using the ESM module
-
-the esm version of the module is located in ```dist/esm```.
-
-### using bundle directly with script tag
-
-you can also add the bundle located in ```dist/webcomponents.bundle.min.js``` in the html.
-
-this method will add the global ```WebComponents``` that will house the module, so accessing for example the ```Component``` class you will have to use ```WebComponents.Component```.
-
-```html
-<html>
-<head>
-  <!-- this will add the WebComponents global with the module -->
-  <script src="webcomponents.bundle.min.js"></script>
-</head>
-<body>
-<my-element></my-element>
-<script>
-  // the WebComponents global contains the @miqro/webcomponents module.
-  const {Component} = WebComponents;
-  
-  customElements.define("my-element", class extends Component {
-      render() {
-          return `<p>{props.text}</p>`
-      }
-  });
-</script>
-</body>
-</html>
 ```

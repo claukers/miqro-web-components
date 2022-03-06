@@ -9,11 +9,11 @@ export const normalizePath = (path: string) => {
 
 export const renderTag = (tagName: string) => `<${tagName}></${tagName}>`;
 
-export function decodeHtml(str: string) {
+export function decodeHTML(str: string) {
   return parse(str, "decodeHtml");
 }
 
-export function encodeHtml(str: string) {
+export function encodeHTML(str: string) {
   return parse(str, "encodeHtml");
 }
 
@@ -124,7 +124,7 @@ function renderTemplate(str: string, values: any): string {
     }  else if (value == undefined) {
       return "";
     } */else {
-      return encodeHtml(String(value));
+      return encodeHTML(String(value));
     }
   });
 }

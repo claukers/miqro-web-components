@@ -10,7 +10,7 @@
     "prebuild": "rm -Rf dist/;",
     "build": "tsc && tsc -p tsconfig-esm.json && webpack -c webpack.config-bundle-global.js",
     "pretest": "npm run build",
-    "test": "LOG_LEVEL=debug NODE_ENV=test miqro-test test/*.test.js -n ",
+    "test": "LOG_LEVEL=debug NODE_ENV=test miqro-test test/*.test.js -i -n ",
     "predemo:serve": "npm run build && webpack -c webpack.config-demo-bundle.js",
     "demo:serve": "LOG_LEVEL=debug NODE_ENV=test DEMO_API_PORT=9696 node test/data/app/server/server.js",
     "demo:watch": "miqro watch test/data/app/front/src/ \"npm run predemo:serve\" & npm run demo:serve"

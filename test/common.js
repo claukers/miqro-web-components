@@ -13,19 +13,16 @@ module.exports = {
         dispatchEvent: undefined,
         getAttributeNames: undefined,
         getAttribute: undefined,
-        querySelectorAll: undefined
-      },
-      MutationObserver: {
-        new: undefined,
-        observe: undefined,
-        disconnect: undefined
+        querySelectorAll: undefined,
+        addEventListener: undefined
       },
       Event: {
         new: undefined
       }
     };
     Event = class Event {
-      constructor() {
+      constructor(eventName) {
+        this.eventName = eventName;
         fakes.Event.new(this, ...arguments);
       }
     }
@@ -48,19 +45,9 @@ module.exports = {
       querySelectorAll() {
         return fakes.Element.querySelectorAll(...arguments);
       }
-    }
 
-    MutationObserver = class MutationObserver {
-      constructor() {
-        fakes.MutationObserver.new(this, ...arguments);
-      }
-
-      observe() {
-        return fakes.MutationObserver.observe(...arguments);
-      }
-
-      disconnect() {
-        return fakes.MutationObserver.disconnect(...arguments);
+      addEventListener() {
+        return fakes.Element.addEventListener(...arguments);
       }
     }
     return fakes;
