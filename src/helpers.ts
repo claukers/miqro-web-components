@@ -10,11 +10,11 @@ export const normalizePath = (path: string) => {
 export const renderTag = (tagName: string) => `<${tagName}></${tagName}>`;
 
 export function decodeHTML(str: string) {
-  return parse(str, "decodeHtml");
+  return parse(str, "decodeHTML");
 }
 
 export function encodeHTML(str: string) {
-  return parse(str, "encodeHtml");
+  return parse(str, "encodeHTML");
 }
 
 export class EventCacheEmitter {
