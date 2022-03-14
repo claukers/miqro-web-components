@@ -1,28 +1,54 @@
 const {fake} = require("@miqro/test");
+const defaultFakes = {
+  document: {
+    documentElement: {
+      getAttribute: fake(() => {
+        return null;
+      })
+    }
+  },
+  Element: {
+    dispatchEvent: fake(() => {
+      return;
+    }),
+    getAttributeNames: fake(() => {
+      return [];
+    }),
+    getAttribute: fake(() => {
+      return null;
+    }),
+    querySelectorAll: fake(() => {
+      return [];
+    }),
+    addEventListener: fake(() => {
+
+    })
+  },
+  Event: {
+    new: fake(() => {
+    })
+  }
+}
+const fakes = {
+  reset: () => {
+    fakes.document = {
+      ...defaultFakes.document
+    };
+    fakes.Element = {
+      ...defaultFakes.Element
+    };
+    fakes.Event = {
+      ...defaultFakes.Event
+    };
+  }
+};
+fakes.reset();
 module.exports = {
   initDOMGlobals: () => {
-    const fakes = {
-      document: {
-        documentElement: {
-          getAttribute: fake(() => {
-            return null;
-          })
-        }
-      },
-      Element: {
-        dispatchEvent: undefined,
-        getAttributeNames: undefined,
-        getAttribute: undefined,
-        querySelectorAll: undefined,
-        addEventListener: undefined
-      },
-      Event: {
-        new: undefined
-      }
-    };
-    Event = class Event {
-      constructor(eventName) {
+    CustomEvent = class CustomEvent {
+      constructor(eventName, options) {
         this.eventName = eventName;
+        this.detail = options ? options.detail : undefined;
         fakes.Event.new(this, ...arguments);
       }
     }

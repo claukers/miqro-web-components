@@ -1,17 +1,19 @@
 import {Component, ComponentState} from "./component.js";
-import {normalizePath, renderTag} from "./helpers";
+import {normalizePath} from "./helpers";
+
+const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}></${tagName}>`;
 
 const BASE_PATH = normalizePath(document.documentElement.getAttribute("data-router-base-path") ? document.documentElement.getAttribute("data-router-base-path") as string : "");
 
 interface Route {
   path: string;
   isDefault?: boolean;
-  element: string;
+  element: string | (() => string);
 }
 
 export interface RouterState {
   active?: Route;
-  defaultElement?: string;
+  defaultElement?: string | (() => string);
   routes: Route[];
 }
 
@@ -76,6 +78,8 @@ export class Router<S extends RouterState = RouterState> extends Component<S> {
 
 export class RouteLink<S extends ComponentState = ComponentState> extends Component<S> {
   private readonly clickListener: (ev: Event) => void;
+
+  public static tagName: string = "route-link";
 
   constructor() {
     super();

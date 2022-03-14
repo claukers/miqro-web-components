@@ -1,16 +1,16 @@
-import {EventCacheEmitter, hookElementEvents, renderTemplate} from "./helpers.js";
+import {EventEmitter, getTagName, renderComponentOnElement} from "./helpers.js";
 
 export type ComponentState = { [p: string]: any };
 
 export class Component<S extends ComponentState = ComponentState> extends HTMLElement {
 
   public state: S;
-  private readonly _emitter: EventCacheEmitter;
+  private readonly _emitter: EventEmitter;
 
-  constructor() {
+  constructor(state: S = {} as S) {
     super();
-    this._emitter = new EventCacheEmitter();
-    this.state = {} as S; // start empty
+    this._emitter = new EventEmitter();
+    this.state = state ? state : {} as S; // start empty
   }
 
   public connectedCallback() {
@@ -20,7 +20,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   /*
   return string to render a template or undefined to render your component using standard api.
    */
-  public render(): string | void {
+  public render(): string[] | string | void {
   }
 
   /*
@@ -30,12 +30,8 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     return true;
   }
 
-  public emit(event: string): void {
-    return this._emitter.emit(event, this);
-  }
-
-  public registerEvent(event: string, eventOptions?: EventInit): void {
-    return this._emitter.registerEvent(event, eventOptions);
+  public emit(event: string, args?: any, eventOptions?: EventInit): void {
+    return this._emitter.emit(event, args, this);
   }
 
   public setState(args: Partial<S>, refresh = true) {
@@ -50,20 +46,20 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   protected _renderOnElement(element: HTMLElement | ShadowRoot = this) {
-    // const {tagName, dataset} = element instanceof HTMLElement ? element : element.host as HTMLElement;
-    // console.log("renderOnElement [%s] dataset [%o] state [%o]", tagName, dataset, component.state);
-    const renderOutput = this.render();
-    if (typeof renderOutput === "string") {
-      const rendered = renderTemplate(renderOutput, this);
-      if (rendered !== undefined) {
-        element.innerHTML = rendered;
-        // because innerHTML is replaced we must re-hook events
-        const childElements = element.querySelectorAll("*");
-        for (let i = 0; i < childElements.length; i++) {
-          const child = childElements[i];
-          hookElementEvents(child, this);
-        }
-      }
+    return renderComponentOnElement(this, element);
+  }
+
+  public static define(component: {
+    new(...params: any[]): HTMLElement;
+    tagName?: string;
+  }): void {
+    const tagName = getTagName(component);
+    // console.log(`define tag [${tagName}]`);
+    try {
+      customElements.define(tagName, component);
+    } catch (e) {
+      console.error(`cannot define tag ${tagName}`)
+      throw e;
     }
   }
 }

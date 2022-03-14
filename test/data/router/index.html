@@ -5,13 +5,24 @@
 <body>
 <my-app></my-app>
 <script>
-  const {Component, Router, RouteLink} = WebComponents;
+  const {Component, Router, RouteLink, define, renderTag} = WebComponents;
 
-  customElements.define("route-link", RouteLink);
+  // customElements.define("route-link", RouteLink);
+  define(RouteLink);
 
-  customElements.define("my-home", class extends Component {
+  define(class extends Component {
+    static tagName = "my-home";
+
     render() {
-      return `<p>home</p><route-link data-path="/naoisfjadsk"><a href="#">not found link</a></route-link><route-link data-path="/about"><a href="#">about link</a></route-link><route-link data-path="/extra"><a href="#">extra link</a></route-link>`;
+      return `<p>home</p>` +
+        `<route-link data-path="/naoisfjadsk">` +
+        `<a href="#">not found link</a>` +
+        `</route-link><route-link data-path="/about">` +
+        `<a href="#">about link</a>` +
+        `</route-link>` +
+        `<route-link data-path="/extra">` +
+        `<a href="#">extra link</a>` +
+        `</route-link>`;
     }
   });
   customElements.define("my-extra", class extends Component {

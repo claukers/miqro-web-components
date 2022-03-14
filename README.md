@@ -1,6 +1,7 @@
 # @miqro/web-components
 
-very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **basic template** language influenced by ***React***.
+very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **basic template** language
+influenced by ***React***.
 
 ## Component class
 
@@ -26,16 +27,17 @@ customElements.define("my-element", class extends Component {
 
 when rendering a template the string, number, boolean values are html encoded to ***sanitize*** user input.
 
-for example the inner p in ```this.text``` in the code bellow will not render as html, instead it will be html **encoded**.
+for example the inner p in ```this.text``` in the code bellow will not render as html, instead it will be html **
+encoded**.
 
 ```typescript
 customElements.define("my-custom", class extends Component {
-    render() {
-        this.text = "<p>this p will not be rendered as html beacuse it is encoded.</p>";
-        return `<p>{text}</p>`
-        // this will render the inner p as HTML without enconding
-        // return "<p>" + this.text + "</p>";
-    }
+  render() {
+    this.text = "<p>this p will not be rendered as html beacuse it is encoded.</p>";
+    return `<p>{text}</p>`
+    // this will render the inner p as HTML without enconding
+    // return "<p>" + this.text + "</p>";
+  }
 })
 ```
 
@@ -51,8 +53,8 @@ use ```data-on-...``` attribute to automatically call ```addEventListener(...)``
 ```typescript
 customElements.define("my-app", class extends Component {
   // event handler
-  userClick() {
-    console.log("app got custom event");
+  userClick({args}) {
+    console.log("app got clicked " + args + " times");
   }
 
   render() {
@@ -64,10 +66,11 @@ customElements.define("my-app", class extends Component {
 customElements.define("my-component", class extends Component {
   // event handler
   click() {
+    const clickCount = this.state.clickCount ? this.state.clickCount + 1 : 1;
     this.setState({
-      clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
+      clickCount
     });
-    this.emit("user-click-me");
+    this.emit("user-click-me", clickCount);
   }
 
   render() {
@@ -79,42 +82,22 @@ customElements.define("my-component", class extends Component {
 
 #### emit events
 
-when ```this.emit(eventName)``` is called it will invoke internally ```this.dispatchEvent(event)``` where ```event``` by
-default be a cached instance of ```new Event("myEvent", {composed: true, bubbles: false, cancelable: false })```. to
-change this behavior call ```this.registerEvent("myEvent", ...EventInit Options...)```.
+when ```this.emit(eventName, detail)``` is called it will invoke internally ```this.dispatchEvent(event)```
+where ```event``` by default will be an instance
+of ```new CustomEvent("myEvent", {detail})```.
 
-##### define the EventInit arguments (optional)
-
-when ```this.emit(eventName)``` is called and ```eventName``` is not defined a new ```Event``` will be created with the
-default options.
-
-```typescript
-customElements.define("my-element", class extends Component {
-  constructor() {
-    super();
-    this.registerEvent("myEvent", {
-      ... // EventInit Arguments as new Event("myEvent", ...)
-    });
-  }
-
-  click() {
-    this.emit("myEvent");
-  }
-
-  render() {
-    return "<p><b data-on-click={click}>{props.text}</b></p>"
-  }
-})
-```
+to change the default EventInit options you can alter ```this._emitter.defaultOptions``` or
+call ```this.emit(eventName, args, eventInit)```.
 
 ### Lifecycle
 
-the ```Component``` class extends ```HTMLElement``` and implements the ```connectedCallback()```. It uses this
-callback to render the template.
+the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent, also
+implements the ```connectedCallback()```. It uses this callback to render the template.
 
 #### ***Important Notice***
 
-when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to call ```super.connectedCallback()```
+when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to
+call ```super.connectedCallback()```
 to maintain the ```Component's``` normal lifecycle.
 
 example
@@ -122,21 +105,21 @@ example
 ```typescript
 class MyComponent extends Component {
   connectedCallback() {
-    // do my stuff before render and this.props population
+    // do my stuff before this.render
     // remember to call super to not alter the Component's lifecyle
     super.connectedCallback();
-    // do my stuff after render and this.props population
+    // do my stuff after this.render is called
   }
 }
 ```
 
-#### this.render()
+### this.render(): string | void
 
 the result of ```this.render()``` is used to replace ```this.innerHtml```. this will call for complete **re-render** of
 the element by the browser.
 
-by default ```this.render()``` will be called when it's connected to
-the dom and also when ```this.setState({..})``` is invoked.
+by default ```this.render()``` will be called when it's connected to the dom and also when ```this.setState({..})``` is
+invoked.
 
 to change this behavior simply override the method ```this.didUpdate(prevState)``` and return ```false```
 when needed.
@@ -144,7 +127,7 @@ when needed.
 Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
 re-render of all child elements.
 
-#### this.didUpdate(prevState)
+### this.didUpdate(prevState): boolean
 
 this callback is called when ```this.state``` of the component changes.
 
@@ -211,6 +194,7 @@ historyPushPath("/about");
 setting the attribute ```data-router-base-path``` to the HTML element to allow the router to be nested.
 
 ```html
+
 <html data-router-base-path="/public/front">
 ....
 </html>
@@ -218,15 +202,18 @@ setting the attribute ```data-router-base-path``` to the HTML element to allow t
 
 this will affect ```RouteLink``` elements also.
 
-### RouteLink
+## RouteLink Class
 
-you can also use the helper ```RouteLink``` to provide clickable elements to change the current route without reloading. The benefit of using ```RouteLink``` is that it takes into account the **base path**.  
+to change the current path without reloading the page you can use the helper ```RouteLink``` to provide clickable
+elements to change the current route without reloading. The benefit of using ```RouteLink``` is that it takes into
+account the **base path**.
 
 ```typescript
 customElements.define("my-link", RouteLink);
 ```
 
 ```html
+
 <my-link data-path="/about">go to about page</my-link>
 ```
 
@@ -254,9 +241,11 @@ the esm version of the module is located in ```dist/esm```.
 
 you can also add the bundle located in ```dist/webcomponents.bundle.min.js``` in the html.
 
-this method will add the global ```WebComponents``` that will house the module, so accessing for example the ```Component``` class you will have to use ```WebComponents.Component```.
+this method will add the global ```WebComponents``` that will house the module, so accessing for example
+the ```Component``` class you will have to use ```WebComponents.Component```.
 
 ```html
+
 <html>
 <head>
   <!-- this will add the WebComponents global with the module -->
@@ -267,11 +256,11 @@ this method will add the global ```WebComponents``` that will house the module, 
 <script>
   // the WebComponents global contains the @miqro/webcomponents module.
   const {Component} = WebComponents;
-  
+
   customElements.define("my-element", class extends Component {
-      render() {
-          return `<p>{props.text}</p>`
-      }
+    render() {
+      return `<p>{props.text}</p>`
+    }
   });
 </script>
 </body>

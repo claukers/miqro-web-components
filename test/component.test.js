@@ -5,32 +5,12 @@ const fakes = initDOMGlobals();
 const {decodeHTML, Component} = requireMock("../", {});
 
 const testOptions = {
-  category: "component",
-  before: async () => {
-
-    fakes.Event.new = fake(() => {
-
-    });
-
-    fakes.Element.dispatchEvent = fake(() => {
-
-    });
-
-    fakes.Element.getAttributeNames = fake(() => {
-      return [];
-    });
-
-    fakes.Element.getAttribute = fake(() => {
-      return undefined;
-    });
-
-    fakes.Element.querySelectorAll = fake(() => {
-      return [];
-    });
-
-    fakes.Element.addEventListener = fake(() => {
-
-    });
+  category: "component.lifecycle",
+  before: () => {
+    fakes.reset();
+  },
+  after: () => {
+    fakes.reset();
   }
 };
 
@@ -43,7 +23,7 @@ it("happy path ctor and connectCallback and setState with very simple template",
         textClass: "custom-class"
       }
       this.render = fake(() => {
-        return `<p class="{state.textClass}">{state.text}</p>`
+        return `<p class="{{state.textClass}}">{{state.text}}</p>`
       });
     }
 
@@ -96,7 +76,7 @@ it("happy path custom event data-on-custom-event and emit(custom-event)", async 
         case "class":
           return "custom-class";
         case "data-on-custom-event":
-          return "{eventHandler}"; // because of function it should not have change on the template render see template.test.js
+          return "{{eventHandler}}"; // because of function it should not have change on the template render see template.test.js
         default:
           strictEqual(false, true);
       }
@@ -116,8 +96,18 @@ it("happy path custom event data-on-custom-event and emit(custom-event)", async 
         textClass: "custom-class"
       }
       this.dispatchEvent = fake((event) => {
-        strictEqual(event instanceof Event, true);
+        strictEqual(event.constructor.name, "CustomEvent");
         strictEqual(event.eventName, "custom-event");
+        switch (fakes.Event.new.callCount) {
+          case 1:
+            strictEqual(event.detail, "custom-args1");
+            break;
+          case 2:
+            strictEqual(event.detail, "custom-args2");
+            break;
+          default:
+            strictEqual(false, true);
+        }
       });
     }
 
@@ -132,7 +122,7 @@ it("happy path custom event data-on-custom-event and emit(custom-event)", async 
 
     render() {
       strictEqual(fakeChild.addEventListener.callCount, 0);
-      return `<p class="{state.textClass}" data-on-custom-event="{eventHandler}">{state.text}</p>`
+      return `<p class="{{state.textClass}}" data-on-custom-event="{{eventHandler}}">{{state.text}}</p>`
     }
   })();
 
@@ -144,14 +134,14 @@ it("happy path custom event data-on-custom-event and emit(custom-event)", async 
   strictEqual(fakeChild.addEventListener.callCount, 1);
 
   strictEqual(typeof instance.innerHTML, "string");
-  strictEqual(decodeHTML(instance.innerHTML), `<p class="custom-class" data-on-custom-event="{eventHandler}">hello</p>`);
+  strictEqual(decodeHTML(instance.innerHTML), `<p class="custom-class" data-on-custom-event="{{eventHandler}}">hello</p>`);
 
   strictEqual(instance.dispatchEvent.callCount, 0);
   strictEqual(fakes.Event.new.callCount, 0);
-  instance.emit("custom-event");
+  instance.emit("custom-event", "custom-args1");
   strictEqual(fakes.Event.new.callCount, 1);
   strictEqual(instance.dispatchEvent.callCount, 1);
-  instance.emit("custom-event");
-  strictEqual(fakes.Event.new.callCount, 1); // uses cache!
+  instance.emit("custom-event", "custom-args2");
+  strictEqual(fakes.Event.new.callCount, 2);
   strictEqual(instance.dispatchEvent.callCount, 2);
 }, testOptions);

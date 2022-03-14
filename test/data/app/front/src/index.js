@@ -29,7 +29,7 @@ customElements.define("my-home", class extends Component {
   }
 
   render() {
-    return `home <button data-on-click="{click}">click me</button> <p>{state.data}</p><p>{state.response.data}</p>`;
+    return `home <button data-on-click="{{click}}">click me</button> <p>{{state.data}}</p><p>{state.response.data}</p>`;
   }
 });
 

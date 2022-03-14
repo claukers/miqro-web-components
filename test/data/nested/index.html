@@ -1,0 +1,57 @@
+<html data-router-base-path="/miqro/test/data/router">
+<head>
+  <script src="./lib.js"></script>
+</head>
+<body>
+<a-component></a-component>
+<script>
+  const {Component} = WebComponents;
+  Component.define(class extends Component {
+    static tagName = "a-component";
+
+    userEvent2() {
+      alert("userEvent2");
+    }
+
+    render() {
+      return `<b-component data-on-user-event2="{{userEvent2}}"></b-component>`;
+    }
+  });
+  Component.define(class extends Component {
+    static tagName = "b-component";
+
+    userEvent1() {
+      this.emit("user-event2");
+    }
+
+    render() {
+      return `<c-component data-on-user-event1="{{userEvent1}}"></c-component>`;
+    }
+  });
+  Component.define(class extends Component {
+    static tagName = "c-component";
+
+    userEvent0() {
+      alert("hello");
+      this.emit("user-event1");
+    }
+
+    render() {
+      return `<d-component data-on-user-event0="{{userEvent0}}"></d-component>`;
+    }
+  });
+  Component.define(class extends Component {
+    static tagName = "d-component";
+
+    click() {
+      this.emit("user-event0");
+    }
+
+    render() {
+      return `<p data-on-click="{{click}}">d component</p>`;
+    }
+  });
+
+</script>
+</body>
+</html>

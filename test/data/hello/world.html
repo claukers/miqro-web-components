@@ -14,7 +14,7 @@
       app.setAttribute("id", "MyApp");
       app.setAttribute("data-name", "nonameasd");
       this.appendChild(app);
-      setTimeout(()=>{
+      setTimeout(() => {
         console.log("set attribute");
         app.setAttribute("data-name", "nonameasd2");
       }, 2000)
@@ -40,14 +40,15 @@
 
     render() {
       console.log("app render");
-      return !this.state.reach5 ? `<hello-world attr1="{state.obj.attr1}" data-on-custom="{reach5}" data="{dataset.name}" data-obj="{state.obj}"></hello-world><p class="bla">{dataset.name}</p><my-bla data-ref="{bla}"></my-bla>` : "good bye";
+      return !this.state.reach5 ? `<hello-world attr1="{{state.obj.attr1}}" data-on-custom="{{reach5}}" data="{{dataset.name}}" data-obj="{state.obj}"></hello-world><p class="bla">{{dataset.name}}</p><my-bla data-ref="{{bla}}"></my-bla>` : "good bye";
       // return "<p>{dataset.name}</p>"
     }
   }
 
   class Bla extends ShadowRootComponent {
     render() {
-      return `<p id="asd">private data</p>`;
+      this.p = "<p>GETP escaped</p>";
+      return `<p id="asd">private data</p><p id="asd">{{p}}</p>`;
     }
   }
 
@@ -55,7 +56,6 @@
 
     constructor() {
       super();
-      this.registerEvent("custom");
     }
 
     click12(ev) {
@@ -69,8 +69,13 @@
       }
     }
 
+    pref(ref) {
+      console.log("pref=");
+      console.log(ref.toString());
+    }
+
     render() {
-      return `<style> p { color: blue; } </style><p data-ref="{pref}" data-on-click="{click12}">blabla {props.data} {state.clicked} {state.clickedCount} "{props.data-obj}.attr1=" "{props.data-obj.attr1}"</p>`;
+      return `<style> p { color: blue; } </style><p data-ref="{{pref}}" data-on-click="{{click12}}">blabla {{props.data}} {{state.clicked}} {{state.clickedCount}}"</p>`;
     }
   }
 
