@@ -60,6 +60,41 @@ function getTemplateTagPath(str: string): string | undefined {
   return undefined;
 }
 
+const DATA_REF = "data-ref";
+const DATA_ON = "data-on-";
+
+function renderComponentAttributes(component: IComponent, childElement: Element, child: Element) {
+  const attributes = child.getAttributeNames();
+  for (const attribute of attributes) {
+    const attributeValue = child.getAttribute(attribute);
+    if (attributeValue) {
+      const isDataRef = attribute === DATA_REF;
+      const isDataOn = attribute.indexOf(DATA_ON) === 0;
+      if (isDataRef || isDataOn) {
+        const path = getTemplateTagPath(attributeValue);
+        const value = path ? get(component, path) : undefined;
+        const callback = value && typeof value == "function" ? (value as Function).bind(component) : undefined;
+        if (callback) {
+          if (isDataRef) {
+            (callback as (...args: any[]) => void)(childElement);
+          } else if (isDataOn) {
+            const eventName = attribute.substring(DATA_ON.length);
+            childElement.addEventListener(eventName, (callback as (...args: any[]) => void));
+          } else {
+            console.error("%o.\nCannot use attribute [%s] as [%s] path [%s] with value [%s].", child, attribute, attributeValue, path, value);
+          }
+        } else {
+          console.error("%o.\nCannot use attribute [%s] as [%s] path [%s] with value [%s].", child, attribute, attributeValue, path, value);
+        }
+      } else {
+        childElement.setAttribute(attribute, runTextContentTemplate(attributeValue, component));
+      }
+    } else {
+      childElement.setAttribute(attribute, "");
+    }
+  }
+}
+
 /*
 replace "{...}" from string with only string values from values. the value from values is html encoded before being replaced.
  */
@@ -119,41 +154,6 @@ export function renderComponentOnElement(component: IComponent, element: HTMLEle
         renderComponentOnElement(component, childElement, child);
         element.appendChild(childElement);
       }
-    }
-  }
-}
-
-const DATA_REF = "data-ref";
-const DATA_ON = "data-on-";
-
-function renderComponentAttributes(component: IComponent, childElement: Element, child: Element) {
-  const attributes = child.getAttributeNames();
-  for (const attribute of attributes) {
-    const attributeValue = child.getAttribute(attribute);
-    if (attributeValue) {
-      const isDataRef = attribute === DATA_REF;
-      const isDataOn = attribute.indexOf(DATA_ON) === 0;
-      if (isDataRef || isDataOn) {
-        const path = getTemplateTagPath(attributeValue);
-        const value = path ? get(component, path) : undefined;
-        const callback = value && typeof value == "function" ? (value as Function).bind(component) : undefined;
-        if (callback) {
-          if (isDataRef) {
-            (callback as (...args: any[]) => void)(childElement);
-          } else if (isDataOn) {
-            const eventName = attribute.substring(DATA_ON.length);
-            childElement.addEventListener(eventName, (callback as (...args: any[]) => void));
-          } else {
-            console.error("%o.\nCannot use attribute [%s] as [%s] path [%s] with value [%s].", child, attribute, attributeValue, path, value);
-          }
-        } else {
-          console.error("%o.\nCannot use attribute [%s] as [%s] path [%s] with value [%s].", child, attribute, attributeValue, path, value);
-        }
-      } else {
-        childElement.setAttribute(attribute, runTextContentTemplate(attributeValue, component));
-      }
-    } else {
-      childElement.setAttribute(attribute, "");
     }
   }
 }

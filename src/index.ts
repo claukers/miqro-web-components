@@ -1,4 +1,4 @@
-import {Component} from "./component";
+import {Component} from "./component.js";
 
 export {Component, ComponentState} from "./component.js";
 export {encodeHTML, decodeHTML} from "./helpers.js";

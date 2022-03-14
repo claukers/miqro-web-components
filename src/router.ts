@@ -1,5 +1,5 @@
 import {Component, ComponentState} from "./component.js";
-import {normalizePath} from "./helpers";
+import {normalizePath} from "./helpers.js";
 
 const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}></${tagName}>`;
 
