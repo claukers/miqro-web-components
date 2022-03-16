@@ -1,0 +1,38 @@
+<p>Hello {dataset.name}</p>
+<ht-22 data-on-really-bored="{stopIt}" data-click-count="{dataset.clickCount}"></ht-22>
+<script>
+  Component.define(class extends Component {
+    static tagName = "ht-22";
+
+    constructor() {
+      super();
+    }
+
+    connectedCallback() {
+      this.state.clickCount = this.dataset.clickCount ? parseInt(this.dataset.clickCount, 10) : 0;
+      return super.connectedCallback();
+    }
+
+    onClick(ev) {
+      ev.preventDefault();
+      if ((this.state.clickCount % 99 === 0)) {
+        if (this.state.clickCount) {
+          console.log("emit stop it with " + this.state.clickCount);
+          this.emit("really-bored", this.state.clickCount);
+        }
+      }
+      this.setState({
+        clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
+      });
+    }
+
+    getText() {
+      return this.state.text ? this.state.text : "lorem ipsum";
+    }
+
+    render() {
+      //return "<div>asd</div>asdsa2d<p>asdaadasd</p><p>asdaadasd</p>";
+      return this.state.clickCount > 10 ? TemplateLoader.renderTemplate(this, "./ht22-2.html") : TemplateLoader.renderTemplate(this, "./ht22.html");
+    }
+  });
+</script>

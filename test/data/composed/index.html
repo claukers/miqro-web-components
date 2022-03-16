@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="./lib.js"></script>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<my-app data-name="MyAppName" data-username="some name">loading...</my-app>
+<script>
+  const {TemplateLoader, Component, ShadowRootComponent} = WebComponents;
+
+  TemplateLoader.preLoad([
+    "./app.html",
+    "./hello.html",
+    "./ht22.html",
+    "./ht22-2.html",
+  ]).then(() => {
+    Component.define(class extends Component {
+      static tagName = "my-app";
+
+      constructor() {
+        super();
+        this.state.clickCount = 0;
+      }
+
+      custom(ev) {
+        console.log("asdsad " + ev.detail);
+        const clickCount = Math.floor(parseInt(ev.detail, 10) + Math.random() * 50);
+        this.setState({
+          warning: clickCount > 50000 ? "lol" : "lol you are persistent",
+          clickCount: clickCount > 9000 ? -Math.floor(Math.random() * 100 + 1) : clickCount
+        });
+      }
+
+      render() {
+        return TemplateLoader.renderTemplate(this, "./app.html");
+      }
+    });
+  }).catch(e => {
+    console.error(e);
+  })
+</script>
+</body>
+</html>

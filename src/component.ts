@@ -7,10 +7,10 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   public state: S;
   private readonly _emitter: EventEmitter;
 
-  constructor(state: S = {} as S) {
+  constructor() {
     super();
     this._emitter = new EventEmitter();
-    this.state = state ? state : {} as S; // start empty
+    this.state = {} as S; // start empty
   }
 
   public connectedCallback() {
@@ -52,11 +52,13 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   public static define(component: {
     new(...params: any[]): HTMLElement;
     tagName?: string;
-  }): void {
+  }, override: boolean = false): void {
     const tagName = getTagName(component);
     // console.log(`define tag [${tagName}]`);
     try {
-      customElements.define(tagName, component);
+      if (!customElements.get(tagName) || override) {
+        customElements.define(tagName, component);
+      }
     } catch (e) {
       console.error(`cannot define tag ${tagName}`)
       throw e;

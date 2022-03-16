@@ -5,27 +5,6 @@ export const getTagName = (component: {
   tagName?: string;
 }) => component.hasOwnProperty("tagName") ? String(component.tagName) : pascalCaseToDash(component.name);
 
-const pascalCaseToDash = (v: string): string => {
-  let ret = '', prevLowercase = false, prevIsNumber = false
-  for (let s of v) {
-    const isUppercase = s.toUpperCase() === s
-    const isNumber = !isNaN(parseInt(s, 10))
-    if (isNumber) {
-      if (prevLowercase) {
-        ret += '-'
-      }
-    } else {
-      if (isUppercase && (prevLowercase || prevIsNumber)) {
-        ret += '-'
-      }
-    }
-    ret += s
-    prevLowercase = !isUppercase
-    prevIsNumber = isNumber
-  }
-  return ret.replace(/-+/g, '-').toLowerCase()
-};
-
 export const normalizePath = (path: string) => {
   if (path.length > 1 && path.charAt(path.length - 1) === "/") {
     path = path.substring(0, path.length - 1);
@@ -53,17 +32,31 @@ export class EventEmitter {
   }
 }
 
-function getTemplateTagPath(str: string): string | undefined {
-  if (str && str.length > 4 && str.substring(0, 2) === "{{" && str.substring(str.length - 2) === "}}") {
-    return str.substring(2, str.length - 2).trim();
+export function renderComponentOnElement(component: {
+  state?: any;
+  render?: () => string[] | string | void;
+}, element: HTMLElement | ShadowRoot): void {
+  console.log("renderOnElement [%s] dataset [%o] state [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset, component.state);
+  if (component && component.render) {
+    let renderOutput = component.render();
+    if (renderOutput instanceof Array) {
+      renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
+    }
+    if (typeof renderOutput === "string") {
+      element.innerHTML = "";
+      const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
+      const root = xmlDocument.children[0];
+      renderNodeOnElement(component, element, root);
+    }
   }
-  return undefined;
 }
 
 const DATA_REF = "data-ref";
 const DATA_ON = "data-on-";
 
-function renderComponentAttributes(component: IComponent, childElement: Element, child: Element) {
+function renderAttributes(component: {
+  render?: () => string[] | string | void;
+}, childElement: Element, child: Element): void {
   const attributes = child.getAttributeNames();
   for (const attribute of attributes) {
     const attributeValue = child.getAttribute(attribute);
@@ -87,7 +80,7 @@ function renderComponentAttributes(component: IComponent, childElement: Element,
           console.error("%o.\nCannot use attribute [%s] as [%s] path [%s] with value [%s].", child, attribute, attributeValue, path, value);
         }
       } else {
-        childElement.setAttribute(attribute, runTextContentTemplate(attributeValue, component));
+        childElement.setAttribute(attribute, renderTextContent(attributeValue, component));
       }
     } else {
       childElement.setAttribute(attribute, "");
@@ -95,65 +88,86 @@ function renderComponentAttributes(component: IComponent, childElement: Element,
   }
 }
 
+function getTemplateTagPath(str: string): string | undefined {
+  //if (str && str.length > 4 && str.substring(0, 2) === "{{" && str.substring(str.length - 2) === "}}") {
+  if (str && typeof str === "string" && str.length > 3 && str.charAt(0) === "{" && str.charAt(str.length - 1) === "}") {
+    //return str.substring(2, str.length - 2).trim();
+    const path = str.substring(1, str.length - 1);
+    if (path.indexOf(" ") !== -1 && !path) {
+      return undefined;
+    } else {
+      return path;
+    }
+  }
+  return undefined;
+}
+
 /*
 replace "{...}" from string with only string values from values. the value from values is html encoded before being replaced.
  */
-function runTextContentTemplate(textContent: string, values: any): string {
-  const re = /{{[^}]*}}/g;
+function renderTextContent(textContent: string, values: any): string {
+  const re = /{[^{^}^\s]+}/g;
   return textContent.replace(re, (match) => {
     const path = getTemplateTagPath(match);
     if (path) {
       const value = get(values, path);
       if (typeof value === "function") {
         //return encodeHTML(String(value()));
-        return String(value());
+        const callback = value.bind(values);
+        return String(callback());
       } else {
         //return encodeHTML(String(value));
         return String(value);
       }
     } else {
-      return "";
+      return match;
     }
   });
 }
 
-export interface IComponent {
+function renderNodeOnElement(component: {
   render?: () => string[] | string | void;
-}
-
-export function renderComponentOnElement(component: IComponent, element: HTMLElement | ShadowRoot, node?: Node) {
-  if (node === undefined) {
-    // const {tagName, dataset} = element instanceof HTMLElement ? element : element.host as HTMLElement;
-    // console.log("renderOnElement [%s] dataset [%o] state [%o]", tagName, dataset, component.state);
-    if (component.render) {
-      let renderOutput = component.render();
-      if (renderOutput instanceof Array) {
-        renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
-      }
-      if (typeof renderOutput === "string") {
-        element.innerHTML = "";
-        const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
-        const root = xmlDocument.children[0];
-        renderComponentOnElement(component, element, root);
-      }
+}, element: HTMLElement | ShadowRoot, node: Node): void {
+  const nodes = node.childNodes;
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (!node) {
+      continue;
     }
-  } else {
-    const nodes = node.childNodes;
-    for (let i = 0; i < nodes.length; i++) {
-      const node = nodes[i];
-      if (!node) {
-        continue;
-      }
-      if (node.nodeType === Node.TEXT_NODE && node.textContent) {
-        const childNode = document.createTextNode(runTextContentTemplate(node.textContent, component));
-        element.appendChild(childNode);
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const child = node as Element;
-        const childElement = document.createElement(child.tagName);
-        renderComponentAttributes(component, childElement, child);
-        renderComponentOnElement(component, childElement, child);
-        element.appendChild(childElement);
-      }
+    if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+      // avoid rendering templates on script and style tags.
+      /*if (element instanceof HTMLElement && (element.tagName === "SCRIPT" || element.tagName === "STYLE")) {
+        element.appendChild(node.cloneNode(true));
+      } else {*/
+      const childNode = document.createTextNode(renderTextContent(node.textContent, component));
+      element.appendChild(childNode);
+      //}
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const childElement = document.createElement((node as Element).tagName);
+      renderAttributes(component, childElement, node as Element);
+      renderNodeOnElement(component, childElement, node);
+      element.appendChild(childElement);
     }
   }
 }
+
+const pascalCaseToDash = (v: string): string => {
+  let ret = '', prevLowercase = false, prevIsNumber = false
+  for (let s of v) {
+    const isUppercase = s.toUpperCase() === s
+    const isNumber = !isNaN(parseInt(s, 10))
+    if (isNumber) {
+      if (prevLowercase) {
+        ret += '-'
+      }
+    } else {
+      if (isUppercase && (prevLowercase || prevIsNumber)) {
+        ret += '-'
+      }
+    }
+    ret += s
+    prevLowercase = !isUppercase
+    prevIsNumber = isNumber
+  }
+  return ret.replace(/-+/g, '-').toLowerCase()
+};

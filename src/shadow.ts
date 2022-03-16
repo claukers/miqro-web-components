@@ -1,6 +1,10 @@
 import {Component, ComponentState} from "./component.js";
 
-const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
+/*
+MULTIPLE ISSUES DO NOT USE
+ */
+
+/*const ShadowRootMap: WeakMap<ShadowRootComponent, ShadowRoot> = new WeakMap<ShadowRootComponent, ShadowRoot>()
 
 export class ShadowRootComponent<S extends ComponentState = ComponentState> extends Component<S> {
   constructor() {
@@ -31,3 +35,4 @@ export class OpenShadowRootComponent<S extends ComponentState = ComponentState> 
     return super._renderOnElement(this.shadowRoot as ShadowRoot);
   }
 }
+*/

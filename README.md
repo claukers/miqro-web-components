@@ -23,13 +23,6 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-### ***Important Notice***
-
-when rendering a template the string, number, boolean values are html encoded to ***sanitize*** user input.
-
-for example the inner p in ```this.text``` in the code bellow will not render as html, instead it will be html **
-encoded**.
-
 ```typescript
 customElements.define("my-custom", class extends Component {
   render() {
@@ -129,11 +122,11 @@ re-render of all child elements.
 
 ### this.didUpdate(prevState): boolean
 
-this callback is called when ```this.state``` of the component changes.
+this callback is called when ```this.setState(...)``` function is invoked.
 
-can be overridden to stop the component render by returning false. by default, it returns true for all changes.
+can be overridden to stop the call to ```this.render()``` by returning false. by default, it returns true for all changes.
 
-Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.
+**Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.**
 
 ## Router class
 
