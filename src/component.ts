@@ -1,5 +1,6 @@
-import {EventEmitter, getTagName, renderComponentOnElement} from "./helpers.js";
-import {TemplateLoader} from "./template";
+import {EventEmitter, getTagName} from "./helpers.js";
+import {TemplateLoader} from "./template.js";
+import {renderComponentOnElement} from "./render.js";
 
 export type ComponentState = { [p: string]: any };
 
