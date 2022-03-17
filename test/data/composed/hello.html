@@ -1,5 +1,5 @@
-<p>Hello {dataset.name}</p>
-<ht-22 data-on-really-bored="{stopIt}" data-click-count="{dataset.clickCount}"></ht-22>
+<p>Hello {this.dataset.name}</p>
+<ht-22 data-on-really-bored="{this.stopIt}" data-click-count="{this.dataset.clickCount}"></ht-22>
 <script>
   Component.define(class extends Component {
     static tagName = "ht-22";
@@ -32,6 +32,27 @@
 
     render() {
       //return "<div>asd</div>asdsa2d<p>asdaadasd</p><p>asdaadasd</p>";
+      this.list = [{
+        itemId: 1,
+        flag: false,
+        categories: [
+          {name: "bla"}
+        ]
+      }, {
+        itemId: 2,
+        flag: true,
+        categories: [
+          {name: "ads"},
+          {name: "dsa"}
+        ]
+      },
+      {
+        itemId: 3,
+        flag: true,
+        categories: [
+          {name: "dsa"}
+        ]
+      }];
       return this.state.clickCount > 10 ? TemplateLoader.renderTemplate(this, "./ht22-2.html") : TemplateLoader.renderTemplate(this, "./ht22.html");
     }
   });

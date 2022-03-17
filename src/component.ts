@@ -1,4 +1,5 @@
 import {EventEmitter, getTagName, renderComponentOnElement} from "./helpers.js";
+import {TemplateLoader} from "./template";
 
 export type ComponentState = { [p: string]: any };
 
@@ -50,14 +51,28 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   public static define(component: {
-    new(...params: any[]): HTMLElement;
+    new(...params: any[]): Component;
     tagName?: string;
-  }, override: boolean = false): void {
+    template?: string;
+  }, template?: string, override: boolean = false): void {
     const tagName = getTagName(component);
     // console.log(`define tag [${tagName}]`);
     try {
       if (!customElements.get(tagName) || override) {
-        customElements.define(tagName, component);
+        template = template ? template : component.hasOwnProperty("template") ? component.template : undefined;
+        if (typeof template === "string") {
+          const t = template;
+          customElements.define(tagName, class extends component {
+            constructor() {
+              super();
+              this.render = () => {
+                return TemplateLoader.renderTemplate(this, t);
+              };
+            }
+          });
+        } else {
+          customElements.define(tagName, component);
+        }
       }
     } catch (e) {
       console.error(`cannot define tag ${tagName}`)

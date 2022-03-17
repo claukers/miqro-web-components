@@ -3,7 +3,9 @@ import {normalizePath} from "./helpers.js";
 
 const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}></${tagName}>`;
 
-const BASE_PATH = normalizePath(document.documentElement.getAttribute("data-router-base-path") ? document.documentElement.getAttribute("data-router-base-path") as string : "");
+let basePath: string | null = null;
+
+const BASE_PATH = () => basePath === null ? normalizePath(document.documentElement.getAttribute("data-router-base-path") ? document.documentElement.getAttribute("data-router-base-path") as string : "") : basePath;
 
 interface Route {
   path: string;
@@ -76,7 +78,11 @@ export class Router<S extends RouterState = RouterState> extends Component<S> {
   }
 }
 
-export class RouteLink<S extends ComponentState = ComponentState> extends Component<S> {
+export interface RouteLinkState extends ComponentState {
+  active?: boolean;
+}
+
+export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Component<S> {
   private readonly clickListener: (ev: Event) => void;
 
   public static tagName: string = "route-link";
@@ -85,23 +91,41 @@ export class RouteLink<S extends ComponentState = ComponentState> extends Compon
     super();
     this.clickListener = (ev) => {
       ev.preventDefault();
+      if (!this.state.active) {
+        this.setState({
+          active: true
+        } as Partial<S>);
+      }
       historyPushPath(this.dataset.path as string);
     };
   }
 
   public connectedCallback() {
     this.addEventListener("click", this.clickListener);
+    const isActive = isPathLocation(this.dataset.path);
+    if (this.state.active !== isActive) {
+      this.state.active = isActive;
+    }
     return super.connectedCallback();
   }
 
   public disconnectedCallback() {
     this.removeEventListener("click", this.clickListener);
   }
+
+  public render(): string[] | string | void {
+    if (this.classList.contains("active") && !this.state.active) {
+      this.classList.remove("active");
+    } else if (!this.classList.contains("active") && this.state.active) {
+      this.classList.add("active");
+    }
+    return super.render();
+  }
 }
 
 export function historyPushPath(path: string): void {
   // console.log("historyPushPath(%s)", path);
-  window.history.pushState(null, null as any, BASE_PATH + path);
+  window.history.pushState(null, null as any, BASE_PATH() + path);
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
@@ -132,11 +156,17 @@ function getActiveRoute(routes: Route[], currentActive?: Route): Route | undefin
   return activeRoute;
 }
 
-function isRouteActive(route: Route, activeRoute: Route | undefined, useDefault: boolean = true): boolean | undefined {
-  const path = normalizePath(BASE_PATH + route.path);
+function isPathLocation(p?: string) {
+  if (p === undefined) {
+    return false;
+  }
+  const path = normalizePath(BASE_PATH() + p);
   const pathname = normalizePath(location.pathname);
+  return pathname.toLowerCase() === path.toLowerCase();
+}
 
-  let active = useDefault ? pathname.toLowerCase() === path.toLowerCase() || route.isDefault : pathname.toLowerCase() === path.toLowerCase();
+function isRouteActive(route: Route, activeRoute: Route | undefined, useDefault: boolean = true): boolean | undefined {
+  let active = useDefault ? route.isDefault || isPathLocation(route.path) : isPathLocation(route.path);
 
   if (activeRoute && route.element !== activeRoute.element && active && isRouteActive(activeRoute, activeRoute, false)) {
     active = false;

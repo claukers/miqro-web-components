@@ -34,6 +34,16 @@ customElements.define("my-custom", class extends Component {
 })
 ```
 
+### Template
+
+#### text replace
+
+#### data-if
+
+#### data-for-each
+
+#### data-ref
+
 ### Events
 
 the ```Component``` class can auto attach ```addEventListener(...)``` to a function of the instance using the template

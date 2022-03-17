@@ -1,9 +1,11 @@
 <div>
-  <h1>{dataset.name}</h1>
-  <hello-world data-click-count="{state.clickCount}" data-on-custom-event="{custom}" data-name="{dataset.username}"></hello-world>
-  <p>{state.warning}</p>
+  <h1>{this.dataset.name}</h1>
+  <hello-world data-click-count="{this.state.clickCount}" data-on-custom-event="{this.custom}"
+               data-name="{this.dataset.username}"></hello-world>
+  <p>{this.state.warning}</p>
 </div>
 <script>
+
   Component.define(class extends Component {
     static tagName = "hello-world";
 
@@ -11,9 +13,5 @@
       console.log("stop it with " + ev.detail);
       this.emit("custom-event", ev.detail);
     }
-
-    render() {
-      return TemplateLoader.renderTemplate(this, "./hello.html");
-    }
-  });
+  }, "./hello.html");
 </script>

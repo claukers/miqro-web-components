@@ -8,7 +8,7 @@
 <body>
 <my-app data-name="MyAppName" data-username="some name">loading...</my-app>
 <script>
-  const {TemplateLoader, Component, ShadowRootComponent} = WebComponents;
+  const {TemplateLoader, Component} = WebComponents;
 
   TemplateLoader.preLoad([
     "./app.html",
@@ -28,15 +28,11 @@
         console.log("asdsad " + ev.detail);
         const clickCount = Math.floor(parseInt(ev.detail, 10) + Math.random() * 50);
         this.setState({
-          warning: clickCount > 50000 ? "lol" : "lol you are persistent",
+          warning: clickCount > 50000 ? "lol" : "lol you are persistent. i am going to mess up the count++.",
           clickCount: clickCount > 9000 ? -Math.floor(Math.random() * 100 + 1) : clickCount
         });
       }
-
-      render() {
-        return TemplateLoader.renderTemplate(this, "./app.html");
-      }
-    });
+    }, "./app.html");
   }).catch(e => {
     console.error(e);
   })
