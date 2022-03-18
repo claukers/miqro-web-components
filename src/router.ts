@@ -19,7 +19,9 @@ export interface RouterState {
   routes: Route[];
 }
 
-export class Router<S extends RouterState = RouterState> extends Component<S> {
+export class PathRouter<S extends RouterState = RouterState> extends Component<S> {
+  public static tagName: string = "path-router";
+
   private readonly popStateListener: () => void;
 
   constructor() {
@@ -129,7 +131,7 @@ export function historyPushPath(path: string): void {
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
-function updateRouter(router: Router, setState = true): boolean {
+function updateRouter(router: PathRouter, setState = true): boolean {
   const active = getActiveRoute(router.state.routes, router.state.active);
   if (active !== router.state.active) {
     if (setState) {

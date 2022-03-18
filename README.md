@@ -36,61 +36,68 @@ customElements.define("my-custom", class extends Component {
 
 ### Template
 
-#### text replace
+```html
+<div>
+  hello {this.state.name}
+</div>
+```
 
 #### data-if
 
-#### data-for-each
+to avoid rendering elements use ```data-if```.
 
-#### data-ref
+***the value must be a boolean.***
 
-### Events
-
-the ```Component``` class can auto attach ```addEventListener(...)``` to a function of the instance using the template
-system.
-
-#### listen to standard and custom events
-
-use ```data-on-...``` attribute to automatically call ```addEventListener(...)``` on the element.
-
-```typescript
-customElements.define("my-app", class extends Component {
-  // event handler
-  userClick({args}) {
-    console.log("app got clicked " + args + " times");
-  }
-
-  render() {
-    // attach event handler using data-on-user-click-me={userClick}
-    return `<my-component data-on-user-click-me={userClick}></my-component>`;
-  }
-});
-
-customElements.define("my-component", class extends Component {
-  // event handler
-  click() {
-    const clickCount = this.state.clickCount ? this.state.clickCount + 1 : 1;
-    this.setState({
-      clickCount
-    });
-    this.emit("user-click-me", clickCount);
-  }
-
-  render() {
-    // using using data-on-click={click} to call attach to "click" event
-    return `<div><a href="#" data-on-click="{click}">click me</a><p>{state.clickCount}</p></div>`
-  }
-});
+```html
+<div data-if="{this.state.showDiv}"></div>
 ```
 
-#### emit events
+#### data-for-each
 
-when ```this.emit(eventName, detail)``` is called it will invoke internally ```this.dispatchEvent(event)```
-where ```event``` by default will be an instance
-of ```new CustomEvent("myEvent", {detail})```.
+to loop list. the value for ```data-for-each``` must be an Array or a function that returns an Array.
 
-to change the default EventInit options you can alter ```this._emitter.defaultOptions``` or
-call ```this.emit(eventName, args, eventInit)```.
+***the value must be an Array.***
+
+```html
+<ul>
+  <li data-for-each="{this.state.list}">
+    {item.name}
+  </li>
+</ul>
+```
+
+to change ```item``` for another string set the ```data-for-each-item``` attribute.
+
+#### data-state
+
+set the initial state of a custom component and to transfer objects though attributes without serialization.
+
+***the value must be an object.***
+
+for example this will call ```this.setState(...)``` on ```custom-element``` before it is connected to the dom.
+
+```html
+<custom-element data-data="{this.state.divData}"></custom-element>
+```
+#### data-ref
+
+get the actual ```HTMLElement``` reference of an element rendered.
+
+for example this will call ```this.setDivRef``` with the div's ```HTMLElement``` reference.
+
+```html
+<div data-ref="{this.setDivRef}"></div>
+```
+
+#### data-on
+
+to listen to the element's events.
+
+for example this will call ```addEventListener``` on ```click``` event.
+
+```html
+<div data-on-click="{this.divClicked}"></div>
+```
 
 ### Lifecycle
 
@@ -116,6 +123,14 @@ class MyComponent extends Component {
 }
 ```
 
+### this.didUpdate(prevState): boolean
+
+this callback is called when ```this.setState(...)``` function is invoked.
+
+can be overridden to stop the call to ```this.render()``` by returning false. by default, it returns true for all changes.
+
+**Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.**
+
 ### this.render(): string | void
 
 the result of ```this.render()``` is used to replace ```this.innerHtml```. this will call for complete **re-render** of
@@ -129,14 +144,6 @@ when needed.
 
 Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
 re-render of all child elements.
-
-### this.didUpdate(prevState): boolean
-
-this callback is called when ```this.setState(...)``` function is invoked.
-
-can be overridden to stop the call to ```this.render()``` by returning false. by default, it returns true for all changes.
-
-**Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.**
 
 ## Router class
 

@@ -1,5 +1,5 @@
 import {EventEmitter, getTagName} from "./helpers.js";
-import {TemplateLoader} from "./template.js";
+import {TemplateLoader} from "./template-loader.js";
 import {renderComponentOnElement} from "./render.js";
 
 export type ComponentState = { [p: string]: any };

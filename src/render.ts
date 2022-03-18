@@ -1,9 +1,13 @@
 import {get} from "@miqro/parser";
+import {evaluateTextTemplate, getTemplateTagPath} from "./template.js";
 
-export function renderComponentOnElement(component: {
+export interface IComponent {
   state?: any;
   render?: () => string[] | string | void;
-}, element: HTMLElement | ShadowRoot): void {
+  setState?: (args: object, refresh?: boolean) => void;
+}
+
+export function renderComponentOnElement(component: IComponent, element: HTMLElement | ShadowRoot): void {
   // console.log("renderOnElement [%s] dataset [%o] state [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset, component.state);
   if (component && component.render) {
     let renderOutput = component.render();
@@ -11,10 +15,10 @@ export function renderComponentOnElement(component: {
       renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
     }
     if (typeof renderOutput === "string") {
-      element.innerHTML = "";
       const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
+      element.innerHTML = "";
       const root = xmlDocument.children[0];
-      renderNodeOnElement({this: component}, element, root);
+      renderNodeChildrenOnElement(root.childNodes, {this: component}, element);
     }
   }
 }
@@ -24,8 +28,137 @@ const DATA_ON = "data-on-";
 const DATA_FOR_EACH = "data-for-each";
 const DATA_FOR_EACH_ITEM = "data-for-each-item";
 const DATA_IF = "data-if";
+const DATA_STATE = "data-state";
 
-function dataIf(node: Element, values: any) {
+const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
+
+function renderNodeChildrenOnElement(nodes: NodeListOf<ChildNode>, values: any, element: HTMLElement | ShadowRoot): void {
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (!node) {
+      continue;
+    }
+    if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+      element.appendChild(document.createTextNode(evaluateTextTemplate(node.textContent, values)));
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      const childElements = renderElementNode(node, values);
+      for (const c of childElements) {
+        element.appendChild(c);
+      }
+    }
+  }
+}
+
+function renderElementNode(node: Node, v: any): HTMLElement[] {
+  return dataForEach(node, v, (node: Node, values: any) => {
+    if (dataIf(node as Element, values)) {
+      const childElement = document.createElement((node as Element).tagName);
+      dataState(node, values, childElement);
+      dataRef(node, values, childElement);
+      dataOnAndOtherAttributes(node, values, childElement);
+
+      renderNodeChildrenOnElement(node.childNodes, values, childElement);
+      return childElement;
+    }
+  });
+}
+
+function dataOnAndOtherAttributes(node: Node, values: any, childElement: HTMLElement): void {
+  const attributes = (node as Element).getAttributeNames();
+  for (const attribute of attributes) {
+    if (IGNORE_ATTRIBUTES.indexOf(attribute) === -1) {
+      const attributeValue = (node as Element).getAttribute(attribute);
+      if (attributeValue) {
+        if (attribute.indexOf(DATA_ON) === 0) {
+          const eventName = attributeValue ? attribute.substring(DATA_ON.length) : undefined;
+          const dataOnPath = attributeValue ? getTemplateTagPath(attributeValue) : undefined;
+          const value = dataOnPath ? get(values, dataOnPath) : undefined;
+          const callback = value && typeof value == "function" ? (value as Function).bind(values.this) as () => void : undefined;
+          if (callback && eventName) {
+            (node as Element).removeAttribute(attribute);
+            childElement.addEventListener(eventName, callback);
+          } else {
+            console.error("invalid value for %s [%s]=[%o] for [%o]", attribute, attributeValue, value, values.this);
+            throw new Error(`invalid value for ${attribute}`);
+          }
+        } else {
+          childElement.setAttribute(attribute, evaluateTextTemplate(attributeValue, values));
+        }
+      } else {
+        childElement.setAttribute(attribute, "");
+      }
+    }
+  }
+}
+
+function dataRef(node: Node, values: any, childElement: HTMLElement): void {
+  const dataRefValue = (node as Element).getAttribute(DATA_REF);
+  if (dataRefValue !== null) {
+    const dataRefPath = getTemplateTagPath(dataRefValue);
+    const value = dataRefPath ? get(values, dataRefPath) : undefined;
+    const callback = value && typeof value == "function" ? (value as Function).bind(values.this) : undefined;
+    if (callback) {
+      callback(childElement);
+    } else {
+      console.error("invalid value for %s [%s]=[%o] for [%o]", DATA_REF, dataRefValue, value, values.this);
+      throw new Error(`invalid value for ${DATA_REF}`);
+    }
+  }
+}
+
+function dataForEach(node: Node, values: any, cb: (node: Node, values: any) => HTMLElement | undefined): HTMLElement[] {
+  const forEachValue = (node as Element).getAttribute(DATA_FOR_EACH);
+  const forEachItemValue = (node as Element).getAttribute(DATA_FOR_EACH_ITEM);
+  if (forEachValue !== null) {
+    const ret = [];
+    const forEachPath = getTemplateTagPath(forEachValue);
+    let value = forEachPath && get(values, forEachPath);
+    value = typeof value === "function" ? (value.bind(values.this))() : value;
+    if (forEachPath && value && value instanceof Array) {
+      const vValues: any = {
+        ...values
+      };
+      for (let index = 0; index < value.length; index++) {
+        vValues[forEachItemValue !== null ? forEachItemValue : "item"] = value[index];
+        vValues.index = index;
+        const r = cb(node, vValues);
+        if (r) {
+          ret.push(r);
+        }
+      }
+      return ret;
+    } else {
+      console.error("invalid value for data-for-each [%s]=[%o] for [%o]", forEachValue, value, values.this);
+      throw new Error(`invalid value for ${DATA_FOR_EACH}`);
+    }
+  } else {
+    const ret = cb(node, values);
+    return ret ? [ret] : [];
+  }
+}
+
+function dataState(node: Node, values: any, childElement: HTMLElement): void {
+  const dataStateValue = (node as Element).getAttribute(DATA_STATE);
+  if (dataStateValue !== null) {
+    const dataStatePath = getTemplateTagPath(dataStateValue);
+    let value = dataStatePath && get(values, dataStatePath);
+    value = typeof value === "function" ? (value.bind(values.this))() : value;
+    if (dataStatePath && value && typeof value === "object") {
+      const asComponent = (childElement as IComponent);
+      if (asComponent && asComponent.state && typeof asComponent.setState === "function") {
+        asComponent.setState(value, false);
+      } else {
+        console.error("invalid value for data-state [%o] for [%o]", value, values.this);
+        throw new Error(`invalid value for ${DATA_STATE}`);
+      }
+    } else {
+      console.error("invalid value for data-state [%s]=[%o] for [%o]", dataStateValue, value, values.this);
+      throw new Error(`invalid value for ${DATA_STATE}`);
+    }
+  }
+}
+
+function dataIf(node: Element, values: any): boolean {
   const ifValue = (node as Element).getAttribute(DATA_IF);
   if (ifValue !== null) {
     const ifPath = getTemplateTagPath(ifValue);
@@ -38,136 +171,5 @@ function dataIf(node: Element, values: any) {
     return !!value;
   } else {
     return true;
-  }
-}
-
-
-function renderAttributes(values: {
-  this: {
-    render?: () => string[] | string | void;
-  }
-}, childElement: Element, child: Element): void {
-  const attributes = child.getAttributeNames();
-  for (const attribute of attributes) {
-    const attributeValue = child.getAttribute(attribute);
-    if (attributeValue) {
-      const isDataRef = attribute === DATA_REF;
-      const isDataOn = attribute.indexOf(DATA_ON) === 0;
-      if (isDataRef || isDataOn) {
-        const path = getTemplateTagPath(attributeValue);
-        const value = path ? get(values, path) : undefined;
-        const callback = value && typeof value == "function" ? (value as Function).bind(values.this) : undefined;
-        if (callback) {
-          if (isDataRef) {
-            (callback as (...args: any[]) => void)(childElement);
-          } else if (isDataOn) {
-            const eventName = attribute.substring(DATA_ON.length);
-            childElement.addEventListener(eventName, (callback as (...args: any[]) => void));
-          } else {
-            console.error("%o.\nCannot use attribute [%s] as [%s] path [%s] with value [%s].", child, attribute, attributeValue, path, value);
-          }
-        } else {
-          console.error("%o.\nCannot use attribute [%s] as [%s] path [%s] with value [%s].", child, attribute, attributeValue, path, value);
-        }
-      } else {
-        childElement.setAttribute(attribute, renderTextContent(attributeValue, values));
-      }
-    } else {
-      childElement.setAttribute(attribute, "");
-    }
-  }
-}
-
-function getTemplateTagPath(str: string): string | undefined {
-  //if (str && str.length > 4 && str.substring(0, 2) === "{{" && str.substring(str.length - 2) === "}}") {
-  if (str && typeof str === "string" && str.length > 3 && str.charAt(0) === "{" && str.charAt(str.length - 1) === "}") {
-    //return str.substring(2, str.length - 2).trim();
-    const path = str.substring(1, str.length - 1);
-    if (path.indexOf(" ") !== -1 && !path) {
-      return undefined;
-    } else {
-      return path;
-    }
-  }
-  return undefined;
-}
-
-/*
-replace "{...}" from string with only string values from values. the value from values is html encoded before being replaced.
- */
-function renderTextContent(textContent: string, values: any): string {
-  const re = /{[^{^}^\s]+}/g;
-  return textContent.replace(re, (match) => {
-    const path = getTemplateTagPath(match);
-    if (path) {
-      const value = get(values, path);
-      if (typeof value === "function") {
-        //return encodeHTML(String(value()));
-        const callback = value.bind(values.this);
-        return String(callback());
-      } else {
-        //return encodeHTML(String(value));
-        return String(value);
-      }
-    } else {
-      return match;
-    }
-  });
-}
-
-function renderNodeOnElement(values: {
-  this: {
-    render?: () => string[] | string | void;
-  }
-}, element: HTMLElement | ShadowRoot, node: Node): void {
-  const nodes = node.childNodes;
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    if (!node) {
-      continue;
-    }
-    if (node.nodeType === Node.TEXT_NODE && node.textContent) {
-      // avoid rendering templates on script and style tags.
-      /*if (element instanceof HTMLElement && (element.tagName === "SCRIPT" || element.tagName === "STYLE")) {
-        element.appendChild(node.cloneNode(true));
-      } else {*/
-      const childNode = document.createTextNode(renderTextContent(node.textContent, values));
-      element.appendChild(childNode);
-      //}
-    } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const forEachValue = (node as Element).getAttribute(DATA_FOR_EACH);
-      const forEachItemValue = (node as Element).getAttribute(DATA_FOR_EACH_ITEM);
-      if (forEachValue !== null) {
-        const forEachPath = getTemplateTagPath(forEachValue);
-        let value = forEachPath && get(values, forEachPath);
-        value = typeof value === "function" ? (value.bind(values.this))() : value;
-        if (forEachPath && value && value instanceof Array) {
-          const vValues: any = {
-            ...values
-          };
-          for (let index = 0; index < value.length; index++) {
-            vValues[forEachItemValue !== null ? forEachItemValue : "item"] = value[index];
-            vValues.index = index;
-
-            if (dataIf(node as Element, vValues)) {
-              const childElement = document.createElement((node as Element).tagName);
-              renderAttributes(vValues, childElement, node as Element);
-              renderNodeOnElement(vValues, childElement, node);
-              element.appendChild(childElement);
-            }
-          }
-        } else {
-          console.error("invalid value for data-for-each [%s]=[%o] for [%o]", forEachValue, value, values.this);
-          throw new Error("invalid value for data-for-each");
-        }
-      } else {
-        if (dataIf(node as Element, values)) {
-          const childElement = document.createElement((node as Element).tagName);
-          renderAttributes(values, childElement, node as Element);
-          renderNodeOnElement(values, childElement, node);
-          element.appendChild(childElement);
-        }
-      }
-    }
   }
 }
