@@ -13,13 +13,13 @@ interface Route {
   element: string | (() => string);
 }
 
-export interface RouterState {
+export interface PathRouterState {
   active?: Route;
   defaultElement?: string | (() => string);
   routes: Route[];
 }
 
-export class PathRouter<S extends RouterState = RouterState> extends Component<S> {
+export class PathRouter<S extends PathRouterState = PathRouterState> extends Component<S> {
   public static tagName: string = "path-router";
 
   private readonly popStateListener: () => void;

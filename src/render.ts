@@ -28,6 +28,7 @@ const DATA_ON = "data-on-";
 const DATA_FOR_EACH = "data-for-each";
 const DATA_FOR_EACH_ITEM = "data-for-each-item";
 const DATA_IF = "data-if";
+const DATA_IFN = "data-ifn";
 const DATA_STATE = "data-state";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
@@ -51,7 +52,7 @@ function renderNodeChildrenOnElement(nodes: NodeListOf<ChildNode>, values: any, 
 
 function renderElementNode(node: Node, v: any): HTMLElement[] {
   return dataForEach(node, v, (node: Node, values: any) => {
-    if (dataIf(node as Element, values)) {
+    if (dataIf(node as Element, values) && dataIfn(node as Element, values)) {
       const childElement = document.createElement((node as Element).tagName);
       dataState(node, values, childElement);
       dataRef(node, values, childElement);
@@ -75,7 +76,6 @@ function dataOnAndOtherAttributes(node: Node, values: any, childElement: HTMLEle
           const value = dataOnPath ? get(values, dataOnPath) : undefined;
           const callback = value && typeof value == "function" ? (value as Function).bind(values.this) as () => void : undefined;
           if (callback && eventName) {
-            (node as Element).removeAttribute(attribute);
             childElement.addEventListener(eventName, callback);
           } else {
             console.error("invalid value for %s [%s]=[%o] for [%o]", attribute, attributeValue, value, values.this);
@@ -155,6 +155,22 @@ function dataState(node: Node, values: any, childElement: HTMLElement): void {
       console.error("invalid value for data-state [%s]=[%o] for [%o]", dataStateValue, value, values.this);
       throw new Error(`invalid value for ${DATA_STATE}`);
     }
+  }
+}
+
+function dataIfn(node: Element, values: any): boolean {
+  const ifnValue = (node as Element).getAttribute(DATA_IFN);
+  if (ifnValue !== null) {
+    const ifnPath = getTemplateTagPath(ifnValue);
+    if (!ifnPath) {
+      console.error("invalid value for data-ifn [%s] for [%o]", ifnValue, values.this);
+      throw new Error("invalid value for data-ifn");
+    }
+    let value = ifnPath && get(values, ifnPath);
+    value = typeof value === "function" ? (value.bind(values.this))() : value;
+    return !!!value;
+  } else {
+    return true;
   }
 }
 

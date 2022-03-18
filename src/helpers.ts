@@ -1,5 +1,3 @@
-import {parse} from "@miqro/parser";
-
 export const getTagName = (component: {
   new(...params: any[]): HTMLElement;
   tagName?: string;
@@ -11,10 +9,6 @@ export const normalizePath = (path: string) => {
   }
   return path;
 };
-
-export const decodeHTML = (str: string) => parse(str, "decodeHTML");
-
-export const encodeHTML = (str: string) => parse(str, "encodeHTML");
 
 export class EventEmitter {
 

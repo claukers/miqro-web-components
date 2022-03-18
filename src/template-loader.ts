@@ -1,5 +1,3 @@
-import {request} from "@miqro/request";
-
 interface TemplateLocation {
   url: string;
   method?: string;
@@ -57,13 +55,16 @@ export abstract class TemplateLoader {
         if ((l as TemplateLocation).url) {
           const key = TemplateLoader.getTemplateKey(l as TemplateLocation);
           if (force || !this.hasTemplate(l as TemplateLocation)) {
-            const response = await request(l as TemplateLocation);
+            const location = l as TemplateLocation;
+            const response = await fetch(location.url, {
+              method: location.method
+            });
             if (response.status < 200 || response.status >= 300) {
               throw new Error("bad template location");
             }
             const template = {
               location: l as TemplateLocation,
-              content: response.data
+              content: await response.text()
             };
             TemplateLoader._templateCache[key] = template;
             templates.push(template)
