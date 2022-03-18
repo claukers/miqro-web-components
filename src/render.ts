@@ -1,5 +1,6 @@
 import {get} from "@miqro/parser";
 import {evaluateTextTemplate, getTemplateTagPath} from "./template.js";
+import {TemplateLoader} from "./template-loader";
 
 export interface IComponent {
   state?: any;
@@ -7,19 +8,18 @@ export interface IComponent {
   setState?: (args: object, refresh?: boolean) => void;
 }
 
-export function renderComponentOnElement(component: IComponent, element: HTMLElement | ShadowRoot): void {
+export function renderTemplateOnElement(renderOutput: string | string[] | void, values: any, element: HTMLElement | ShadowRoot, clear = true): void {
   // console.log("renderOnElement [%s] dataset [%o] state [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset, component.state);
-  if (component && component.render) {
-    let renderOutput = component.render();
-    if (renderOutput instanceof Array) {
-      renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
-    }
-    if (typeof renderOutput === "string") {
-      const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
+  if (renderOutput instanceof Array) {
+    renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
+  }
+  if (typeof renderOutput === "string") {
+    const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
+    if (clear) {
       element.innerHTML = "";
-      const root = xmlDocument.children[0];
-      renderNodeChildrenOnElement(root.childNodes, {this: component}, element);
     }
+    const root = xmlDocument.children[0];
+    renderNodeChildrenOnElement(root.childNodes, values, element);
   }
 }
 
@@ -39,7 +39,15 @@ function renderNodeChildrenOnElement(nodes: NodeListOf<ChildNode>, values: any, 
     if (!node) {
       continue;
     }
-    if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+    if (node.nodeType === Node.COMMENT_NODE && node.textContent) {
+      const path = getTemplateTagPath(node.textContent);
+      if (path) {
+        const template = TemplateLoader.renderTemplate(values.this, path);
+        if (template) {
+          renderTemplateOnElement(template, values, element, false);
+        }
+      }
+    } else if (node.nodeType === Node.TEXT_NODE && node.textContent) {
       element.appendChild(document.createTextNode(evaluateTextTemplate(node.textContent, values)));
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       const childElements = renderElementNode(node, values);

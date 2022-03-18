@@ -99,6 +99,14 @@ for example this will call ```addEventListener``` on ```click``` event.
 <div data-on-click="{this.divClicked}"></div>
 ```
 
+#### include other templates
+
+to include other templates into the current one use a comment like this.
+
+```html
+<!--{common/other-template.html}-->
+```
+
 ### Lifecycle
 
 the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent, also

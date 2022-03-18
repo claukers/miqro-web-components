@@ -1,6 +1,6 @@
 import {EventEmitter, getTagName} from "./helpers.js";
 import {TemplateLoader} from "./template-loader.js";
-import {renderComponentOnElement} from "./render.js";
+import {renderTemplateOnElement} from "./render.js";
 
 export type ComponentState = { [p: string]: any };
 
@@ -48,7 +48,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   protected _renderOnElement(element: HTMLElement | ShadowRoot = this) {
-    return renderComponentOnElement(this, element);
+    return renderTemplateOnElement(this.render(), {this: this}, element);
   }
 
   public static define(component: {

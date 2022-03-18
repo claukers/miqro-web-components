@@ -13,7 +13,7 @@ export function getTemplateTagPath(str: string): string | undefined {
 }
 
 export function evaluateTextTemplate(textContent: string, values: any): string {
-  const re = /{[^{^}^\s]+}/g;
+  const re = /{[^%^{^}^\s]+}/g;
   return textContent.replace(re, (match) => {
     const path = getTemplateTagPath(match);
     if (path) {
