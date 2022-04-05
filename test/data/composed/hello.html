@@ -47,14 +47,14 @@
           {name: "dsa"}
         ]
       },
-      {
-        itemId: 3,
-        flag: true,
-        categories: [
-          {name: "dsa"}
-        ]
-      }];
-      return this.state.clickCount > 10 ? TemplateLoader.renderTemplate(this, "./ht22-2.html") : TemplateLoader.renderTemplate(this, "./ht22.html");
+        {
+          itemId: 3,
+          flag: true,
+          categories: [
+            {name: "dsa"}
+          ]
+        }];
+      return this.state.clickCount > 10 ? "<!--{ht22-2.html}-->" : "<!--{ht223.html}-->";
     }
   });
 </script>

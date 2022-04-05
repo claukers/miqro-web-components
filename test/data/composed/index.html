@@ -10,32 +10,33 @@
 <script>
   const {TemplateLoader, Component} = WebComponents;
 
-  TemplateLoader.preLoad([
+  /*TemplateLoader.preLoad([
     "./app.html",
     "./hello.html",
     "./ht22.html",
     "./ht22-2.html",
-  ]).then(() => {
-    Component.define(class extends Component {
-      static tagName = "my-app";
+  ]).then(() => {*/
+  Component.define(class extends Component {
+    static tagName = "my-app";
+    static template = "app.html";
 
-      constructor() {
-        super();
-        this.state.clickCount = 0;
-      }
+    constructor() {
+      super();
+      this.state.clickCount = 0;
+    }
 
-      custom(ev) {
-        console.log("asdsad " + ev.detail);
-        const clickCount = Math.floor(parseInt(ev.detail, 10) + Math.random() * 50);
-        this.setState({
-          warning: clickCount > 50000 ? "lol" : "lol you are persistent. i am going to mess up the count++.",
-          clickCount: clickCount > 9000 ? -Math.floor(Math.random() * 100 + 1) : clickCount
-        });
-      }
-    }, "./app.html");
-  }).catch(e => {
+    custom(ev) {
+      console.log("asdsad " + ev.detail);
+      const clickCount = Math.floor(parseInt(ev.detail, 10) + Math.random() * 50);
+      this.setState({
+        warning: clickCount > 50000 ? "lol" : "lol you are persistent. i am going to mess up the count++.",
+        clickCount: clickCount > 9000 ? -Math.floor(Math.random() * 100 + 1) : clickCount
+      });
+    }
+  });
+  /*}).catch(e => {
     console.error(e);
-  })
+  })*/
 </script>
 </body>
 </html>

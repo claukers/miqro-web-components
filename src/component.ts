@@ -1,28 +1,19 @@
-import {EventEmitter, getTagName} from "./helpers.js";
-import {TemplateLoader} from "./template-loader.js";
-import {renderTemplateOnElement} from "./render.js";
+import {renderTemplate} from "./template.js";
+import {getTemplateLocation} from "./cache.js";
 
 export type ComponentState = { [p: string]: any };
 
 export class Component<S extends ComponentState = ComponentState> extends HTMLElement {
 
   public state: S;
-  private readonly _emitter: EventEmitter;
 
   constructor() {
     super();
-    this._emitter = new EventEmitter();
     this.state = {} as S; // start empty
   }
 
-  public connectedCallback() {
-    this._renderOnElement();
-  }
-
-  /*
-  return string to render a template or undefined to render your component using standard api.
-   */
-  public render(): string[] | string | void {
+  public connectedCallback(): void {
+    return renderComponent(this);
   }
 
   /*
@@ -32,52 +23,37 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     return true;
   }
 
-  public emit(event: string, args?: any, eventOptions?: EventInit): void {
-    return this._emitter.emit(event, args, this);
+  public render(): string | string[] | void {
+
   }
 
-  public setState(args: Partial<S>, refresh = true) {
+  public setState(args: Partial<S>, refresh = true): void {
     const oldState = this.state;
     this.state = {
       ...this.state,
       ...args
     };
-    if (refresh && this.isConnected && this.didUpdate(oldState)) {
-      return this._renderOnElement();
-    }
-  }
-
-  protected _renderOnElement(element: HTMLElement | ShadowRoot = this) {
-    return renderTemplateOnElement(this.render(), {this: this}, element);
-  }
-
-  public static define(component: {
-    new(...params: any[]): Component;
-    tagName?: string;
-    template?: string;
-  }, template?: string, override: boolean = false): void {
-    const tagName = getTagName(component);
-    // console.log(`define tag [${tagName}]`);
-    try {
-      if (!customElements.get(tagName) || override) {
-        template = template ? template : component.hasOwnProperty("template") ? component.template : undefined;
-        if (typeof template === "string") {
-          const t = template;
-          customElements.define(tagName, class extends component {
-            constructor() {
-              super();
-              this.render = () => {
-                return TemplateLoader.renderTemplate(this, t);
-              };
-            }
-          });
-        } else {
-          customElements.define(tagName, component);
-        }
-      }
-    } catch (e) {
-      console.error(`cannot define tag ${tagName}`)
-      throw e;
+    if (this.didUpdate(oldState) && refresh && this.isConnected) {
+      return renderComponent(this);
     }
   }
 }
+
+function renderComponent(component: Component): void {
+  const template = component.constructor.hasOwnProperty("template") ?
+    getTemplateLocation((component.constructor as any).template) :
+    component.render();
+  if (template instanceof Promise) {
+    template.then(function queueRenderComponent(template) {
+      if (component.isConnected) {
+        renderTemplate(template, {this: component}, component);
+      }
+    }).catch(e => {
+      console.error("cannot render Component %o", component);
+      console.error(e);
+    });
+  } else {
+    return component.isConnected && component.render ? renderTemplate(template, {this: component}, component) : undefined;
+  }
+}
+

@@ -6,14 +6,13 @@
   "compileOnSave": true,
   "compilerOptions": {
     "lib": ["dom", "es2021"],
-    //"module": "es2022",
     "module": "CommonJS",
     "moduleResolution": "Node",
     "target": "es2021",
     "outDir": "./dist/cjs",
     "removeComments": false,
     "noImplicitAny": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "declaration": true,
     "strict": true
   },

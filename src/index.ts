@@ -1,6 +1,5 @@
-import {Component} from "./component.js";
-
+export {setCache, getTemplateLocation} from "./cache.js";
 export {Component, ComponentState} from "./component.js";
-export {TemplateLoader, Template} from "./template-loader.js";
 export {PathRouter, PathRouterState, RouteLink, historyPushPath, RouteLinkState} from "./router.js";
-export const define = Component.define;
+export {Store, Action, Reducer, StoreReducerMap, StoreListener, Selector, StoreOptions} from "./store.js";
+export {renderTemplate} from "./template.js";

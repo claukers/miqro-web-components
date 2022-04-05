@@ -14,7 +14,7 @@ customElements.define("my-element", class extends Component {
     this.setState({
       clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
     });
-    this.emit("user-click-me");
+    this.dispatchEvent(new CustomEvent("user-click-me"));
   }
 
   render() {
@@ -27,7 +27,7 @@ customElements.define("my-element", class extends Component {
 customElements.define("my-custom", class extends Component {
   render() {
     this.text = "<p>this p will not be rendered as html beacuse it is encoded.</p>";
-    return `<p>{text}</p>`
+    return `<p>{this.text}</p>`
     // this will render the inner p as HTML without enconding
     // return "<p>" + this.text + "</p>";
   }
@@ -106,6 +106,20 @@ to include other templates into the current one use a comment like this.
 ```html
 <!--{common/other-template.html}-->
 ```
+
+this will fetch ```common/other-template.html``` with fetch if not already fetched or in cache.
+
+to preload templtes use the ```setCache``` function with an object and the templates.
+
+```typescript
+setCache({
+  "common/other-template.html": "<p>{this.state.text}</p>"
+});
+```
+
+consider auto generating a ```cache.json``` file with 
+
+```npx miqro webcomponents:generate:cache src/ dist/cache.json```
 
 ### Lifecycle
 
@@ -314,7 +328,7 @@ customElements.define("my-app", class extends HTMLElement {
 customElements.define("my-home", class extends Component {
 
   click() {
-    this.emit("myEvent");
+    this.dispatchEvent(new CustomEvent("myEvent"));
   }
 
   render() {

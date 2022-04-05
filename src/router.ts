@@ -1,5 +1,11 @@
 import {Component, ComponentState} from "./component.js";
-import {normalizePath} from "./helpers.js";
+
+function normalizePath(path: string) {
+  if (path.length > 1 && path.charAt(path.length - 1) === "/") {
+    path = path.substring(0, path.length - 1);
+  }
+  return path;
+}
 
 const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}></${tagName}>`;
 
@@ -12,6 +18,7 @@ interface Route {
   isDefault?: boolean;
   element: string | (() => string);
 }
+
 
 export interface PathRouterState {
   active?: Route;
@@ -130,6 +137,7 @@ export function historyPushPath(path: string): void {
   window.history.pushState(null, null as any, BASE_PATH() + path);
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
+
 
 function updateRouter(router: PathRouter, setState = true): boolean {
   const active = getActiveRoute(router.state.routes, router.state.active);
