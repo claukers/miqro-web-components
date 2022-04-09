@@ -3,52 +3,52 @@
   <script src="./lib.js"></script>
 </head>
 <body>
-<a-component></a-component>
+  <a-component><p>0</p></a-component>
 <script>
   const {Component} = WebComponents;
-  Component.define(class extends Component {
-    static tagName = "a-component";
+
+  customElements.define("a-component", class extends Component {
 
     userEvent2() {
       alert("userEvent2");
     }
 
-    render() {
-      return `<b-component data-on-user-event2="{{userEvent2}}"></b-component>`;
-    }
-  });
-  Component.define(class extends Component {
-    static tagName = "b-component";
-
     userEvent1() {
-      this.emit("user-event2");
+      alert("userEvent1");
     }
 
     render() {
-      return `<c-component data-on-user-event1="{{userEvent1}}"></c-component>`;
+      return `<b-component data-on-user-event2="{this.userEvent2}"><c-component data-on-user-event1="{this.userEvent1}"><!--{children}--></c-component></b-component>`;
     }
   });
-  Component.define(class extends Component {
-    static tagName = "c-component";
-
-    userEvent0() {
-      alert("hello");
-      this.emit("user-event1");
-    }
-
-    render() {
-      return `<d-component data-on-user-event0="{{userEvent0}}"></d-component>`;
-    }
-  });
-  Component.define(class extends Component {
-    static tagName = "d-component";
+  customElements.define("b-component", class extends Component {
 
     click() {
-      this.emit("user-event0");
+      this.dispatchEvent(new CustomEvent("user-event2"));
     }
 
     render() {
-      return `<p data-on-click="{{click}}">d component</p>`;
+      return `<div><p data-on-click="{this.click}">hello</p><p>World</p><!--{children}--><p>3</p></div>`;
+    }
+  });
+  customElements.define("c-component", class extends Component {
+
+    userEvent0() {
+      this.dispatchEvent(new CustomEvent("user-event1"));
+    }
+
+    render() {
+      return `<!--{children}--><d-component data-on-user-event0="{this.userEvent0}"><p>2</p></d-component>`;
+    }
+  });
+  customElements.define("d-component", class extends Component {
+
+    click() {
+      this.dispatchEvent(new CustomEvent("user-event0"));
+    }
+
+    render() {
+      return `<p data-on-click="{this.click}"><p>1</p><!--{children}--></p>`;
     }
   });
 

@@ -1,5 +1,4 @@
-import {renderTemplate} from "./template.js";
-import {getTemplateLocation} from "./cache.js";
+import {renderComponent} from "./template.js";
 
 export type ComponentState = { [p: string]: any };
 
@@ -39,21 +38,5 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 }
 
-function renderComponent(component: Component): void {
-  const template = component.constructor.hasOwnProperty("template") ?
-    getTemplateLocation((component.constructor as any).template) :
-    component.render();
-  if (template instanceof Promise) {
-    template.then(function queueRenderComponent(template) {
-      if (component.isConnected) {
-        renderTemplate(template, {this: component}, component);
-      }
-    }).catch(e => {
-      console.error("cannot render Component %o", component);
-      console.error(e);
-    });
-  } else {
-    return component.isConnected && component.render ? renderTemplate(template, {this: component}, component) : undefined;
-  }
-}
+
 

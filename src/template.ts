@@ -1,23 +1,64 @@
 import {getTemplateLocation} from "./cache.js";
+import {Component} from "./component";
 
-export function renderTemplate(renderOutput: string | string[] | void, values: any, element: HTMLElement | ShadowRoot, clear = true): void {
-  // console.log("renderOnElement [%s] dataset [%o] state [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset, component.state);
+const templateChildrenMap = new WeakMap<HTMLElement, (HTMLElement | Node)[]>();
+
+export function renderComponent(component: Component): void {
+  const template = component.constructor.hasOwnProperty("template") ?
+    getTemplateLocation((component.constructor as any).template) :
+    component.render();
+  if (!component.isConnected) {
+    return;
+  }
+  if (typeof template === "string" || template instanceof Array) {
+    renderTemplateOnComponent(template, component);
+  } else if (template instanceof Promise) {
+    template.then(function queueRenderComponent(template) {
+      renderTemplateOnComponent(template, component);
+    }).catch(e => {
+      console.error("cannot render Component %o", component);
+      console.error(e);
+    });
+  }
+}
+
+function nodeList2Array(childNodes: NodeListOf<ChildNode>) {
+  const childrenNodes = [];
+  for (let i = 0; i < childNodes.length; i++) {
+    childrenNodes.push(childNodes[i])
+  }
+  return childrenNodes;
+}
+
+function renderTemplateOnComponent(template: string | string[], component: Component) {
+  if (component.isConnected) {
+    if (!templateChildrenMap.has(component)) {
+      templateChildrenMap.set(component, nodeList2Array(component.childNodes));
+    }
+    const output = renderTemplate(template, {this: component});
+    if (output) {
+      component.innerHTML = "";
+      for (let i = 0; i < output.length; i++) {
+        component.appendChild(output[i]);
+      }
+    }
+  }
+}
+
+function renderTemplate(renderOutput: string | string[] | void, values: any): Array<Node | HTMLElement> | undefined {
+  //console.log("renderOnElement [%s] dataset [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset);
   if (renderOutput instanceof Array) {
     renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
   }
   if (typeof renderOutput === "string") {
     const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
-    if (clear) {
-      element.innerHTML = "";
-    }
 
     const root = xmlDocument.children[0];
-    renderNodeChildrenOnElement(root.childNodes, values, element);
+    return renderNodeChildrenOnElement(root.childNodes, values);
   }
 }
 
 interface IComponent {
-  state?: any;
   setState?: (args: any, refresh?: boolean) => void;
 }
 
@@ -31,44 +72,22 @@ const DATA_STATE = "data-state";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
 
-function renderNodeChildrenOnElement(nodes: NodeListOf<ChildNode>, values: any, element: HTMLElement | ShadowRoot): void {
+function renderNodeChildrenOnElement(nodes: NodeListOf<ChildNode>, values: any): Array<Node | HTMLElement> {
+  let ret: Array<Node | HTMLElement> = [];
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (!node) {
       continue;
     }
     if (node.nodeType === Node.COMMENT_NODE && node.textContent) {
-      renderCommentNode(node, values, element);
+      ret = ret.concat(renderCommentNode(node, values));
     } else if (node.nodeType === Node.TEXT_NODE && node.textContent) {
-      element.appendChild(document.createTextNode(evaluateTextTemplate(node.textContent, values)));
+      ret.push(document.createTextNode(evaluateTextTemplate(node.textContent, values)));
     } else if (node.nodeType === Node.ELEMENT_NODE) {
-      const childElements = renderElementNode(node, values);
-      for (const c of childElements) {
-        element.appendChild(c);
-      }
+      ret = ret.concat(renderElementNode(node, values));
     }
   }
-}
-
-function renderCommentNode(node: Node, values: any, element: HTMLElement | ShadowRoot): Comment | undefined {
-  const path = getTemplateTagPath(node.textContent);
-  if (path) {
-    const template = getTemplateLocation(path);
-    if (template instanceof Promise) {
-      template.then(function queueRenderComponent(template) {
-        if (element.isConnected && values.this && values.this.isConnected) {
-          renderTemplate(template, values, element, false);
-        }
-      }).catch(e => {
-        console.error("cannot render node %o from %o", node, values.this);
-        console.error(e);
-      });
-    } else {
-      renderTemplate(template, values, element, false);
-    }
-  } else if (node.textContent) {
-    return document.createComment(evaluateTextTemplate(node.textContent, values));
-  }
+  return ret;
 }
 
 function renderElementNode(node: Node, v: any): HTMLElement[] {
@@ -78,11 +97,39 @@ function renderElementNode(node: Node, v: any): HTMLElement[] {
       dataState(node, values, childElement);
       dataRef(node, values, childElement);
       dataOnAndOtherAttributes(node, values, childElement);
-
-      renderNodeChildrenOnElement(node.childNodes, values, childElement);
+      const childrenNodes = renderNodeChildrenOnElement(node.childNodes, values);
+      for (const child of childrenNodes) {
+        childElement.appendChild(child);
+      }
       return childElement;
     }
   });
+}
+
+function renderCommentNode(node: Node, values: any): Array<HTMLElement | Node> {
+  const path = getTemplateTagPath(node.textContent);
+  if (path === "children") {
+    const templateChildren = values && values.this ? templateChildrenMap.get(values.this) : undefined;
+    return templateChildren ? templateChildren : [];
+  } else {
+    const template = path && getTemplateLocation(path);
+    if (template) {
+      if (typeof template === "string") {
+        const ret = renderTemplate(template, values);
+        return ret ? ret : [];
+      } else {
+        template.then(function queueRenderComponent(template) {
+          values.this.setState({});
+        }).catch(e => {
+          console.error("cannot render node %o from %o", node, values.this);
+          console.error(e);
+        });
+      }
+    } else if (node.textContent) {
+      return [document.createComment(node.textContent)];
+    }
+    return [];
+  }
 }
 
 function dataOnAndOtherAttributes(node: Node, values: any, childElement: HTMLElement): void {
@@ -166,7 +213,7 @@ function dataState(node: Node, values: any, childElement: HTMLElement): void {
     value = typeof value === "function" ? (value.bind(values.this))() : value;
     if (dataStatePath && value && typeof value === "object") {
       const asComponent = (childElement as IComponent);
-      if (asComponent && asComponent.state && typeof asComponent.setState === "function") {
+      if (asComponent && typeof asComponent.setState === "function") {
         asComponent.setState(value, false);
       } else {
         console.error("invalid value for data-state [%o] for [%o]", value, values.this);
