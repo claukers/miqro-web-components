@@ -27,21 +27,21 @@ export class Store<S = any> {
     };
   }
 
-  subscribe(selector: Selector<S>, listener: StoreListener<S>): any {
+  public subscribe(selector: Selector<S>, listener: StoreListener<S>): any {
     const lastResult = selector(this.state);
-    this.listenerMap.set(listener, {lastAction: null, lastResult, selector});
+    this.listenerMap.set(listener, {lastResult, selector});
     return lastResult;
   }
 
-  unSubscribe(listener: StoreListener<S>): boolean {
+  public unSubscribe(listener: StoreListener<S>): boolean {
     return this.listenerMap.delete(listener);
   }
 
-  getState(): S {
+  public getState(): S {
     return {...this.state};
   }
 
-  dispatch(action: Action, offload = true) {
+  public dispatch(action: Action) {
     const oldState = this.getState();
     this.state = typeof this.reducers === "function" ?
       this.reducers(action, oldState) :
@@ -49,16 +49,13 @@ export class Store<S = any> {
 
     clearTimeout(this.dispatchTimeout);
 
-    if (offload) {
-      return dispatch(action, this.getState(), this.listenerMap);
-    } else {
+    if (oldState !== this.state) {
       this.dispatchTimeout = setTimeout(() => dispatch(action, this.getState(), this.listenerMap), this.options.dispatchTimeout);
     }
   }
 }
 
 interface ListenerInfo<S = any> {
-  lastAction: any;
   lastResult: any;
   selector: Selector<S>;
 }
@@ -71,7 +68,6 @@ function dispatch<S = any>(action: Action, state: S, listenerMap: Map<StoreListe
       try {
         const result = listenerInfo.selector(state);
         if (result !== listenerInfo.lastResult) {
-          listenerInfo.lastAction = action;
           listenerInfo.lastResult = result;
           listener(result);
         }
