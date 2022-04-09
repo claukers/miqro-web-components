@@ -1,17 +1,43 @@
 <div>
   <h1>{this.dataset.name}</h1>
-  <hello-world data-click-count="{this.state.clickCount}" data-on-custom-event="{this.custom}"
-               data-name="{this.dataset.username}"></hello-world>
-  <p>{this.state.warning}</p>
+  <hello-world data-click-count="0" data-name="{this.dataset.username}"></hello-world>
 </div>
 <script>
 
-  Component.define(class extends Component {
-    static tagName = "hello-world";
+  customElements.define("hello-world", class extends Component {
     static template = "hello.html";
+
+    constructor() {
+      super();
+      this.list = [{
+        itemId: 1,
+        flag: false,
+        categories: [
+          {name: "bla"}
+        ]
+      }, {
+        itemId: 2,
+        flag: true,
+        categories: [
+          {name: "ads"},
+          {name: "dsa"}
+        ]
+      },
+        {
+          itemId: 3,
+          flag: true,
+          categories: [
+            {name: "dsa"}
+          ]
+        }];
+    }
 
     onClick() {
 
+    }
+
+    getText() {
+      return "some text";
     }
 
     stopIt(ev) {

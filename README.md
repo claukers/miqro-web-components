@@ -277,7 +277,7 @@ customElements.define("my-link", RouteLink);
 
 ## Importing
 
-this module is exported as a ```CommonJS``` and ```ESM``` module also, a minified ```bundle``` is provided.
+this module is exported as a ```CommonJS``` module and a minified ```bundle```.
 
 when using a packer like webpack just import the module and the packer will take care of the rest like.
 
@@ -291,13 +291,9 @@ or
 const {Component, Router, RouteLink, historyPushPath} = require("@miqro/web-components");
 ```
 
-### using the ESM module
-
-the esm version of the module is located in ```dist/esm```.
-
 ### using bundle directly with script tag
 
-you can also add the bundle located in ```dist/webcomponents.bundle.min.js``` in the html.
+you can also use the bundle located in ```dist/webcomponents.bundle.min.js```.
 
 using the bundle will add the global ```WebComponents``` that will house the module, so accessing for example
 the ```Component``` class you will have to use ```WebComponents.Component```.

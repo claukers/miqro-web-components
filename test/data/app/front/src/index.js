@@ -1,4 +1,4 @@
-const {Component, Router, RouteLink, ShadowRootComponent} = require("../../../../../dist/cjs/index.js");
+const {Component, PathRouter, RouteLink} = require("../../../../../dist/cjs/index.js");
 const {request} = require("@miqro/request");
 
 customElements.define("my-404", class extends Component {
@@ -29,13 +29,13 @@ customElements.define("my-home", class extends Component {
   }
 
   render() {
-    return `home <button data-on-click="{{click}}">click me</button> <p>{{state.data}}</p><p>{state.response.data}</p>`;
+    return `home <button data-on-click="{this.click}">click me</button> <p>{this.state.data}</p><p>{this.state.response.data}</p>`;
   }
 });
 
 customElements.define("route-link", RouteLink);
 
-customElements.define("my-router", class extends Router {
+customElements.define("my-router", class extends PathRouter {
   constructor() {
     super();
     this.state = {
@@ -48,7 +48,7 @@ customElements.define("my-router", class extends Router {
   }
 });
 
-customElements.define("my-app", class extends ShadowRootComponent {
+customElements.define("my-app", class extends Component {
   render() {
     return "<my-router></my-router>";
   }

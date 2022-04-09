@@ -1,8 +1,9 @@
-import {renderComponent} from "./template.js";
+import {IComponent} from "./template/index.js";
+import {render} from "./render.js";
 
 export type ComponentState = { [p: string]: any };
 
-export class Component<S extends ComponentState = ComponentState> extends HTMLElement {
+export class Component<S extends ComponentState = ComponentState> extends HTMLElement implements IComponent {
 
   public state: S;
 
@@ -12,7 +13,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   public connectedCallback(): void {
-    return renderComponent(this);
+    return render(this);
   }
 
   /*
@@ -33,10 +34,9 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
       ...args
     };
     if (this.didUpdate(oldState) && refresh && this.isConnected) {
-      return renderComponent(this);
+      return render(this);
     }
   }
 }
-
 
 

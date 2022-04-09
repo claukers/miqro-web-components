@@ -21,6 +21,6 @@ app.use((ctx) => {
   ctx.redirect("/public/not_found");
 })
 
-logger.info(`http://localhost:${port}/public`);
+logger.info(`http://localhost:${port}/public/`);
 
 app.listen(port);

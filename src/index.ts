@@ -1,4 +1,3 @@
-export {setCache, getTemplateLocation} from "./cache.js";
-export {Component, ComponentState} from "./component.js";
-export {PathRouter, PathRouterState, RouteLink, historyPushPath, RouteLinkState} from "./router.js";
-export {Store, Action, Reducer, StoreReducerMap, StoreListener, Selector, StoreOptions} from "./store.js";
+export {ComponentState, Component, setCache} from "./component/index.js";
+export {PathRouter, PathRouterState, RouteLink, historyPushPath, RouteLinkState} from "./router/index.js";
+export {Action, Reducer, StoreReducerMap, StoreListener, Selector, StoreOptions, Store} from "./store/index.js";
