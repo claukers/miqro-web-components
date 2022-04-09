@@ -1,5 +1,5 @@
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM, DATA_IF, DATA_ON, DATA_REF, DATA_STATE} from "./constants.js";
-import {evaluateTextTemplate, get, getTemplateTagPath} from "../utils.js";
+import {evaluateTextTemplate, get, getTemplateTagPath} from "../utils/index.js";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
 

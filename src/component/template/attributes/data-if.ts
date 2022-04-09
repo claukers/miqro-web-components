@@ -1,4 +1,4 @@
-import {get, getTemplateTagPath} from "../utils.js";
+import {get, getTemplateTagPath} from "../utils/index.js";
 import {DATA_IF, DATA_IFN} from "./constants.js";
 
 export function dataIfn(node: Element, values: any): boolean {

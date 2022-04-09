@@ -1,4 +1,4 @@
-import {get, getTemplateTagPath} from "../utils.js";
+import {get, getTemplateTagPath} from "../utils/index.js";
 import {DATA_REF} from "./constants.js";
 
 export function dataRef(node: Node, values: any, childElement: HTMLElement): void {

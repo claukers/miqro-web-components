@@ -5,7 +5,7 @@
 <body>
 <my-root></my-root>
 <script>
-  const {Component, ShadowRootComponent} = WebComponents;
+  const {Component} = WebComponents;
 
   class Root extends HTMLElement {
     constructor() {
@@ -14,79 +14,18 @@
       app.setAttribute("id", "MyApp");
       app.setAttribute("data-name", "nonameasd");
       this.appendChild(app);
-      setTimeout(() => {
-        console.log("set attribute");
-        app.setAttribute("data-name", "nonameasd2");
-      }, 2000)
     }
   }
 
-  class App extends ShadowRootComponent {
-
-    constructor() {
-      super();
-      this.state.obj = {
-        attr1: 1
-      };
-    }
-
-    reach5(ev) {
-      console.log("app::reach5");
-      console.log("app got data");
-      this.setState({
-        reach5: true
-      });
-    }
+  class App extends Component {
 
     render() {
-      console.log("app render");
-      return !this.state.reach5 ? `<hello-world attr1="{{state.obj.attr1}}" data-on-custom="{{reach5}}" data="{{dataset.name}}" data-obj="{state.obj}"></hello-world><p class="bla">{{dataset.name}}</p><my-bla data-ref="{{bla}}"></my-bla>` : "good bye";
-      // return "<p>{dataset.name}</p>"
+      return "<p>{this.dataset.name}</p>"
     }
   }
 
-  class Bla extends ShadowRootComponent {
-    render() {
-      this.p = "<p>GETP escaped</p>";
-      return `<p id="asd">private data</p><p id="asd">{{p}}</p>`;
-    }
-  }
-
-  class Hello extends ShadowRootComponent {
-
-    constructor() {
-      super();
-    }
-
-    click12(ev) {
-      console.log("hello::click");
-      this.setState({
-        clicked: true,
-        clickedCount: this.state.clickedCount ? this.state.clickedCount + 1 : 1
-      });
-      if (this.state.clickedCount === 5) {
-        this.emit("custom");
-      }
-    }
-
-    pref(ref) {
-      console.log("pref=");
-      console.log(ref.toString());
-    }
-
-    render() {
-      return `<style> p { color: blue; } </style><p data-ref="{{pref}}" data-on-click="{{click12}}">blabla {{props.data}} {{state.clicked}} {{state.clickedCount}}"</p>`;
-    }
-  }
-
-  customElements.define("hello-world", Hello);
   customElements.define("my-app", App);
-  customElements.define("my-bla", Bla);
   customElements.define("my-root", Root);
-
-  /*setTimeout(() => {
-    debugger;
-  }, 5000);*/
 </script>
 </body>
 </html>

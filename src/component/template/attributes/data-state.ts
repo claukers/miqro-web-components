@@ -1,4 +1,4 @@
-import {get, getTemplateTagPath, IComponent} from "../utils.js";
+import {get, getTemplateTagPath, IComponent} from "../utils/index.js";
 import {DATA_STATE} from "./constants.js";
 
 export function dataState(node: Node, values: any, childElement: HTMLElement): void {

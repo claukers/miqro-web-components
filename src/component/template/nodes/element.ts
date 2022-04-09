@@ -1,4 +1,4 @@
-import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef, dataState} from "../attributes";
+import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef, dataState} from "../attributes/index.js";
 import {renderNodeChildrenOnElement} from "./children.js";
 
 export function renderElementNode(node: Node, v: any, templateChildrenMap: WeakMap<HTMLElement, (HTMLElement | Node)[]>): HTMLElement[] {

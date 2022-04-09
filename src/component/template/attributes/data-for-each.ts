@@ -1,4 +1,4 @@
-import {get, getTemplateTagPath} from "../utils.js";
+import {get, getTemplateTagPath} from "../utils/index.js";
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM} from "./constants.js";
 
 export function dataForEach(node: Node, values: any, cb: (node: Node, values: any) => HTMLElement | undefined): HTMLElement[] {

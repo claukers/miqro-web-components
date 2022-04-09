@@ -1,4 +1,4 @@
-import {getTemplateTagPath} from "../utils.js";
+import {getTemplateTagPath} from "../utils/index.js";
 import {getTemplateLocation} from "../cache.js";
 import {renderTemplate} from "../render.js";
 
