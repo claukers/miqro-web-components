@@ -9,9 +9,9 @@ export function renderNodeChildrenOnElement(nodes: NodeListOf<ChildNode>, values
     if (!node) {
       continue;
     }
-    if (node.nodeType === Node.COMMENT_NODE && node.textContent) {
+    if (node.nodeType === Node.COMMENT_NODE && node.textContent !== null) {
       ret = ret.concat(renderCommentNode(node, values, templateChildrenMap));
-    } else if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+    } else if (node.nodeType === Node.TEXT_NODE && node.textContent !== null) {
       ret = ret.concat(renderTextNode(node, values, templateChildrenMap));
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       ret = ret.concat(renderElementNode(node, values, templateChildrenMap));
