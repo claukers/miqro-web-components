@@ -1,6 +1,6 @@
 # @miqro/web-components
 
-very basic and very ***experimental*** ```HTMLElements``` for creating dynamic components with a **very basic template** language
+very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **very basic template** language
 influenced by ***React***.
 
 ## Component class
@@ -120,6 +120,32 @@ setCache({
 consider auto generating a ```cache.json``` file with 
 
 ```npx miqro webcomponents:generate:cache src/ dist/cache.json```
+
+#### Separating template from the component class
+
+```components/my-tag.html```
+
+```html
+<p>template</p>
+```
+
+```components/my-tag.ts```
+
+```typescript
+customElements.define("my-tag", class extends Component {
+    static template = "components/my-tag.html";
+});
+```
+
+or
+
+```typescript
+customElements.define("my-tag", class extends Component {
+    render() {
+        return `<!--{components/my-tag.html}--->`
+    }
+});
+```
 
 ### Lifecycle
 
@@ -273,7 +299,7 @@ the esm version of the module is located in ```dist/esm```.
 
 you can also add the bundle located in ```dist/webcomponents.bundle.min.js``` in the html.
 
-this method will add the global ```WebComponents``` that will house the module, so accessing for example
+using the bundle will add the global ```WebComponents``` that will house the module, so accessing for example
 the ```Component``` class you will have to use ```WebComponents.Component```.
 
 ```html
