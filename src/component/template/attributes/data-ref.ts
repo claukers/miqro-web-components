@@ -1,10 +1,10 @@
-import {get, getTemplateTagPath} from "../utils/index.js";
+import {get, getTemplateTokenValue} from "../utils/index.js";
 import {DATA_REF} from "./constants.js";
 
 export function dataRef(node: Node, values: any, childElement: HTMLElement): void {
   const dataRefValue = (node as Element).getAttribute(DATA_REF);
   if (dataRefValue !== null) {
-    const dataRefPath = getTemplateTagPath(dataRefValue);
+    const dataRefPath = getTemplateTokenValue(dataRefValue);
     const value = dataRefPath ? get(values, dataRefPath) : undefined;
     const callback = value && typeof value == "function" ? (value as Function).bind(values.this) : undefined;
     if (callback) {

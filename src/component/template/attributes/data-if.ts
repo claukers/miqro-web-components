@@ -1,13 +1,13 @@
-import {get, getTemplateTagPath} from "../utils/index.js";
+import {get, getTemplateTokenValue} from "../utils/index.js";
 import {DATA_IF, DATA_IFN} from "./constants.js";
 
 export function dataIfn(node: Element, values: any): boolean {
   const ifnValue = (node as Element).getAttribute(DATA_IFN);
   if (ifnValue !== null) {
-    const ifnPath = getTemplateTagPath(ifnValue);
+    const ifnPath = getTemplateTokenValue(ifnValue);
     if (!ifnPath) {
-      console.error("invalid value for data-ifn [%s] for [%o]", ifnValue, values.this);
-      throw new Error("invalid value for data-ifn");
+      console.error("invalid value for %s [%s] for [%o]", DATA_IFN, ifnValue, values.this);
+      throw new Error(`invalid value for ${DATA_IFN}`);
     }
     let value = ifnPath && get(values, ifnPath);
     value = typeof value === "function" ? (value.bind(values.this))() : value;
@@ -20,10 +20,10 @@ export function dataIfn(node: Element, values: any): boolean {
 export function dataIf(node: Element, values: any): boolean {
   const ifValue = (node as Element).getAttribute(DATA_IF);
   if (ifValue !== null) {
-    const ifPath = getTemplateTagPath(ifValue);
+    const ifPath = getTemplateTokenValue(ifValue);
     if (!ifPath) {
-      console.error("invalid value for data-if [%s] for [%o]", ifValue, values.this);
-      throw new Error("invalid value for data-if");
+      console.error("invalid value for %s [%s] for [%o]", DATA_IF, ifValue, values.this);
+      throw new Error(`invalid value for ${DATA_IF}`);
     }
     let value = ifPath && get(values, ifPath);
     value = typeof value === "function" ? (value.bind(values.this))() : value;

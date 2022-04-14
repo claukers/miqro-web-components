@@ -1,4 +1,4 @@
-const {Component, PathRouter, RouteLink} = require("../../../../../dist/cjs/index.js");
+const {Component, PathRouter, RouteLink} = require("../../../../dist/cjs");
 const {request} = require("@miqro/request");
 
 customElements.define("my-404", class extends Component {

@@ -1,9 +1,16 @@
 const {fake, requireMock} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
+const {distPath} = require("../../setup-test.js");
+
+const testFilePath = resolve(distPath, "cjs", "component", "template", "cache.js");
+
+const testOptions = {
+  category: "component.template.cache unit tests"
+};
 
 it("cannot call setCache twice", async () => {
-  const {setCache} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "template", "cache.js"), {}, resolve(__dirname, "..", "dist"));
+  const {setCache} = requireMock(testFilePath, {}, distPath);
   setCache({});
   try {
     setCache({});
@@ -18,7 +25,7 @@ it("getTemplateLocation as string from cache returns string", async () => {
   const {
     setCache,
     getTemplateLocation
-  } = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "template", "cache.js"), {}, resolve(__dirname, "..", "dist"));
+  } = requireMock(testFilePath, {}, distPath);
   fetch = null;
   const template = "templateString";
   const templatePath = "some path";
@@ -27,15 +34,13 @@ it("getTemplateLocation as string from cache returns string", async () => {
   });
   strictEqual(getTemplateLocation(templatePath), template);
 
-}, {
-  category: "component.template.cache unit tests"
-});
+}, testOptions);
 
 it("getTemplateLocation as {url} from cache returns string", async () => {
   const {
     setCache,
     getTemplateLocation
-  } = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "template", "cache.js"), {}, resolve(__dirname, "..", "dist"));
+  } = requireMock(testFilePath, {}, distPath);
   fetch = null;
   const template = "templateString";
   const templatePath = "some path";
@@ -44,15 +49,13 @@ it("getTemplateLocation as {url} from cache returns string", async () => {
   });
   strictEqual(getTemplateLocation({url: templatePath}), template);
 
-}, {
-  category: "component.template.cache unit tests"
-});
+}, testOptions);
 
 it("getTemplateLocation as string not from cache uses fetch and returns promise", async () => {
   const {
     setCache,
     getTemplateLocation
-  } = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "template", "cache.js"), {}, resolve(__dirname, "..", "dist"));
+  } = requireMock(testFilePath, {}, distPath);
   const template = "templateString";
   const templatePath = "some path";
   setCache({});
@@ -71,15 +74,13 @@ it("getTemplateLocation as string not from cache uses fetch and returns promise"
   strictEqual(fakeResponse.text.callCount, 1);
   strictEqual(fetch.callCount, 1);
   strictEqual(fetch.callArgs[0][0], templatePath);
-}, {
-  category: "component.template.cache unit tests"
-});
+}, testOptions);
 
 it("getTemplateLocation as {url} not from cache uses fetch and returns promise", async () => {
   const {
     setCache,
     getTemplateLocation
-  } = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "template", "cache.js"), {}, resolve(__dirname, "..", "dist"));
+  } = requireMock(testFilePath, {}, distPath);
   const template = "templateString";
   const templatePath = "some path";
   setCache({});
@@ -98,15 +99,13 @@ it("getTemplateLocation as {url} not from cache uses fetch and returns promise",
   strictEqual(fakeResponse.text.callCount, 1);
   strictEqual(fetch.callCount, 1);
   strictEqual(fetch.callArgs[0][0], templatePath);
-}, {
-  category: "component.template.cache unit tests"
-});
+}, testOptions);
 
 it("getTemplateLocation as string not from cache uses fetch that fails and on second calls returns '' to avoid double fetch", async () => {
   const {
     setCache,
     getTemplateLocation
-  } = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "template", "cache.js"), {}, resolve(__dirname, "..", "dist"));
+  } = requireMock(testFilePath, {}, distPath);
   const template = "templateString";
   const templatePath = "some path";
   setCache({});
@@ -131,6 +130,4 @@ it("getTemplateLocation as string not from cache uses fetch that fails and on se
     strictEqual(getTemplateLocation(templatePath), "");
     strictEqual(fetch.callCount, 1);
   }
-}, {
-  category: "component.template.cache unit tests"
-});
+}, testOptions);

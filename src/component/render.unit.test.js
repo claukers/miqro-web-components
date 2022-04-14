@@ -1,6 +1,13 @@
 const {fake, requireMock} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
+const {distPath} = require("../setup-test.js");
+
+const testFilePath = resolve(distPath, "cjs", "component", "render.js");
+
+const testOptions = {
+  category: "render.unit.test"
+};
 
 HTMLElement = class {
 
@@ -27,23 +34,21 @@ it("isConnected render returns string calls renderTemplate and appendChild", asy
       strictEqual(child, nodeList[component.appendChild.callCount - 1]);
     })
   };
-  const {render} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "render.js"), {
+  const {render} = requireMock(testFilePath, {
     "./template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
   strictEqual(component.innerHTML, undefined);
   render(component);
   strictEqual(renderTemplate.callCount, 1);
   strictEqual(getTemplateLocation.callCount, 0);
   strictEqual(renderTemplate.callArgs[0][0], "stringtemplate");
   strictEqual(renderTemplate.callArgs[0][1].this, component);
-  strictEqual(renderTemplate.callArgs[0][2].get(component), nodeList2ArrayRet);
+  strictEqual(renderTemplate.callArgs[0][1].children, nodeList2ArrayRet);
   strictEqual(component.innerHTML, "");
   strictEqual(component.appendChild.callCount, 2);
-}, {
-  category: "component.render.unit.test"
-});
+}, testOptions);
 
 it("isConnected static template exists in cache calls renderTemplate and appendChild", async () => {
   const nodeList = ["node1", "node2"];
@@ -71,17 +76,17 @@ it("isConnected static template exists in cache calls renderTemplate and appendC
       strictEqual(child, nodeList[component.appendChild.callCount - 1]);
     })
   };
-  const {render} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "render.js"), {
+  const {render} = requireMock(testFilePath, {
     "./template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
   strictEqual(component.innerHTML, undefined);
   render(component);
   strictEqual(renderTemplate.callCount, 1);
   strictEqual(renderTemplate.callArgs[0][0], template);
   strictEqual(renderTemplate.callArgs[0][1].this, component);
-  strictEqual(renderTemplate.callArgs[0][2].get(component), nodeList2ArrayRet);
+  strictEqual(renderTemplate.callArgs[0][1].children, nodeList2ArrayRet);
   strictEqual(nodeList2Array.callCount, 1);
   strictEqual(nodeList2Array.callArgs[0][0], "childNodes");
   strictEqual(component.constructor.hasOwnProperty.callCount, 1);
@@ -90,9 +95,7 @@ it("isConnected static template exists in cache calls renderTemplate and appendC
   strictEqual(getTemplateLocation.callArgs[0][0], "templatePath");
   strictEqual(component.innerHTML, "");
   strictEqual(component.appendChild.callCount, 2);
-}, {
-  category: "component.render.unit.test"
-});
+}, testOptions);
 
 it("isConnected static template doesn't in cache calls renderTemplate and appendChild after promise resolves", async () => {
   const nodeList = ["node1", "node2"];
@@ -123,11 +126,11 @@ it("isConnected static template doesn't in cache calls renderTemplate and append
       strictEqual(child, nodeList[component.appendChild.callCount - 1]);
     })
   };
-  const {render} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "render.js"), {
+  const {render} = requireMock(testFilePath, {
     "./template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
   strictEqual(component.innerHTML, undefined);
   render(component);
   strictEqual(renderTemplate.callCount, 0);
@@ -139,16 +142,14 @@ it("isConnected static template doesn't in cache calls renderTemplate and append
   strictEqual(renderTemplate.callCount, 1);
   strictEqual(renderTemplate.callArgs[0][0], template);
   strictEqual(renderTemplate.callArgs[0][1].this, component);
-  strictEqual(renderTemplate.callArgs[0][2].get(component), nodeList2ArrayRet);
+  strictEqual(renderTemplate.callArgs[0][1].children, nodeList2ArrayRet);
   strictEqual(component.constructor.hasOwnProperty.callCount, 1);
   strictEqual(component.constructor.hasOwnProperty.callArgs[0][0], "template");
   strictEqual(getTemplateLocation.callCount, 1);
   strictEqual(getTemplateLocation.callArgs[0][0], "templatePath");
   strictEqual(component.innerHTML, "");
   strictEqual(component.appendChild.callCount, 2);
-}, {
-  category: "component.render.unit.test"
-});
+}, testOptions);
 
 it("isConnected false render returns string doesn't call renderTemplate", async () => {
   const getTemplateLocation = fake(() => {
@@ -168,15 +169,13 @@ it("isConnected false render returns string doesn't call renderTemplate", async 
     appendChild: fake(() => {
     })
   };
-  const {render} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "render.js"), {
+  const {render} = requireMock(testFilePath, {
     "./template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
   render(component);
   strictEqual(renderTemplate.callCount, 0);
   strictEqual(component.innerHTML, undefined);
   strictEqual(component.appendChild.callCount, 0);
-}, {
-  category: "component.render.unit.test"
-});
+}, testOptions);

@@ -1,28 +1,25 @@
-import {getTemplateTagPath} from "../utils/index.js";
+import {get, getTemplateTokenValue} from "../utils/index.js";
 import {getTemplateLocation} from "../cache.js";
 import {renderTemplate} from "../render.js";
 
-export function renderCommentNode(node: Node, values: any, templateChildrenMap: WeakMap<HTMLElement, (HTMLElement | Node)[]>): Array<HTMLElement | Node> {
-  const path = getTemplateTagPath(node.textContent);
-  if (path === "children") {
-    const templateChildren = values && values.this ? templateChildrenMap.get(values.this) : undefined;
-    return templateChildren ? templateChildren : [];
+export function renderCommentNode(node: Node, values: any): Array<HTMLElement | Node> {
+  const path = getTemplateTokenValue(node.textContent);
+  if (!path) {
+    return node.textContent ? [document.createComment(node.textContent)] : [];
+  } else if (path === "children") {
+    return values.children ? values.children : [];
   } else {
-    const template = path && getTemplateLocation(path);
-    if (template) {
-      if (typeof template === "string") {
-        const ret = renderTemplate(template, values, templateChildrenMap);
-        return ret ? ret : [];
-      } else {
-        template.then(function queueRenderComponent(template) {
-          values.this.setState({});
-        }).catch(e => {
-          console.error("cannot render node %o from %o", node, values.this);
-          console.error(e);
-        });
-      }
-    } else if (node.textContent) {
-      return [document.createComment(node.textContent)];
+    const templateLocation = getTemplateLocation(path.substring(1));
+    if (typeof templateLocation === "string") {
+      const ret = renderTemplate(templateLocation, values);
+      return ret ? ret : [];
+    } else {
+      templateLocation.then(function queueRenderComponent(template) {
+        values.this.setState({});
+      }).catch(e => {
+        console.error("cannot render node %o from %o", node, values.this);
+        console.error(e);
+      });
     }
     return [];
   }

@@ -1,6 +1,13 @@
 const {fake, requireMock} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
+const {distPath} = require("../setup-test.js");
+
+const testFilePath = resolve(distPath, "cjs", "component", "component.js");
+
+const testOptions = {
+  category: "component.unit.test"
+};
 
 HTMLElement = class {
 
@@ -10,19 +17,17 @@ it("connectCallback should call render", async () => {
   const render = fake(() => {
 
   });
-  const {Component} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "component.js"), {
+  const {Component} = requireMock(testFilePath, {
     "./render.js": {
       render
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
 
   const component = new Component();
   component.connectedCallback();
   strictEqual(render.callCount, 1);
   strictEqual(render.callArgs[0][0], component);
-}, {
-  category: "component.unit.test"
-});
+}, testOptions);
 
 it("setState shouldn't render when didUpdate returns false", async () => {
   const render = fake(() => {
@@ -31,11 +36,11 @@ it("setState shouldn't render when didUpdate returns false", async () => {
   const didUpdate = fake(() => {
     return false;
   });
-  const {Component} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "component.js"), {
+  const {Component} = requireMock(testFilePath, {
     "./render.js": {
       render
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
 
   const component = new (class extends Component {
     didUpdate() {
@@ -47,9 +52,7 @@ it("setState shouldn't render when didUpdate returns false", async () => {
   });
   strictEqual(didUpdate.callCount, 1);
   strictEqual(render.callCount, 0);
-}, {
-  category: "component.unit.test"
-});
+}, testOptions);
 
 it("setState shouldn't call render when didUpdate returns true and is not connected", async () => {
   const render = fake(() => {
@@ -58,11 +61,11 @@ it("setState shouldn't call render when didUpdate returns true and is not connec
   const didUpdate = fake(() => {
     return true;
   });
-  const {Component} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "component.js"), {
+  const {Component} = requireMock(testFilePath, {
     "./render.js": {
       render
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
 
   const component = new (class extends Component {
     didUpdate() {
@@ -75,9 +78,7 @@ it("setState shouldn't call render when didUpdate returns true and is not connec
   });
   strictEqual(didUpdate.callCount, 1);
   strictEqual(render.callCount, 0);
-}, {
-  category: "component.unit.test"
-});
+}, testOptions);
 
 it("setState shouldn't call render when didUpdate returns true and is connected and refresh = false", async () => {
   const render = fake(() => {
@@ -86,11 +87,11 @@ it("setState shouldn't call render when didUpdate returns true and is connected 
   const didUpdate = fake(() => {
     return true;
   });
-  const {Component} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "component.js"), {
+  const {Component} = requireMock(testFilePath, {
     "./render.js": {
       render
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
 
   const component = new (class extends Component {
     didUpdate() {
@@ -103,9 +104,7 @@ it("setState shouldn't call render when didUpdate returns true and is connected 
   }, false);
   strictEqual(didUpdate.callCount, 1);
   strictEqual(render.callCount, 0);
-}, {
-  category: "component.unit.test"
-});
+}, testOptions);
 
 it("setState should call render when didUpdate returns true and is connected", async () => {
   const render = fake(() => {
@@ -114,11 +113,11 @@ it("setState should call render when didUpdate returns true and is connected", a
   const didUpdate = fake(() => {
     return true;
   });
-  const {Component} = requireMock(resolve(__dirname, "..", "dist", "cjs", "component", "component.js"), {
+  const {Component} = requireMock(testFilePath, {
     "./render.js": {
       render
     }
-  }, resolve(__dirname, "..", "dist"));
+  }, distPath);
 
   const component = new (class extends Component {
     didUpdate() {
@@ -131,6 +130,4 @@ it("setState should call render when didUpdate returns true and is connected", a
   });
   strictEqual(didUpdate.callCount, 1);
   strictEqual(render.callCount, 1);
-}, {
-  category: "component.unit.test"
-});
+}, testOptions);

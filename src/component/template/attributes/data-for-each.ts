@@ -1,4 +1,4 @@
-import {get, getTemplateTagPath} from "../utils/index.js";
+import {get, getTemplateTokenValue} from "../utils/index.js";
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM} from "./constants.js";
 
 export function dataForEach(node: Node, values: any, cb: (node: Node, values: any) => HTMLElement | undefined): HTMLElement[] {
@@ -6,7 +6,7 @@ export function dataForEach(node: Node, values: any, cb: (node: Node, values: an
   const forEachItemValue = (node as Element).getAttribute(DATA_FOR_EACH_ITEM);
   if (forEachValue !== null) {
     const ret = [];
-    const forEachPath = getTemplateTagPath(forEachValue);
+    const forEachPath = getTemplateTokenValue(forEachValue);
     let value = forEachPath && get(values, forEachPath);
     value = typeof value === "function" ? (value.bind(values.this))() : value;
     if (forEachPath && value && value instanceof Array) {
@@ -23,7 +23,7 @@ export function dataForEach(node: Node, values: any, cb: (node: Node, values: an
       }
       return ret;
     } else {
-      console.error("invalid value for data-for-each [%s]=[%o] for [%o]", forEachValue, value, values.this);
+      console.error("invalid value for %s [%s]=[%o] for [%o]", DATA_FOR_EACH, forEachValue, value, values.this);
       throw new Error(`invalid value for ${DATA_FOR_EACH}`);
     }
   } else {

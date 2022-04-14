@@ -18,7 +18,7 @@ customElements.define("my-element", class extends Component {
   }
 
   render() {
-    return `<div><a href="#" data-on-click="{click}">click me</a><p>{state.clickCount}</p></div>`
+    return `<div><a href="#" data-on-click="{this.click}">click me</a><p>{this.state.clickCount}</p></div>`
   }
 })
 ```
@@ -107,9 +107,9 @@ to include other templates into the current one use a comment like this.
 <!--{common/other-template.html}-->
 ```
 
-this will fetch ```common/other-template.html``` with fetch if not already fetched or in cache.
+this will fetch ```common/other-template.html``` if not already in the cache.
 
-to preload templtes use the ```setCache``` function with an object and the templates.
+to preload templates use the ```setCache``` function with an object and the templates.
 
 ```typescript
 setCache({
@@ -121,7 +121,7 @@ consider auto generating a ```cache.json``` file with
 
 ```npx miqro webcomponents:generate:cache src/ dist/cache.json```
 
-#### Separating template from the component class
+#### Separating template from the Component class
 
 ```components/my-tag.html```
 

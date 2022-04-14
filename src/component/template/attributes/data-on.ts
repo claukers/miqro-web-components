@@ -1,5 +1,5 @@
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM, DATA_IF, DATA_ON, DATA_REF, DATA_STATE} from "./constants.js";
-import {evaluateTextTemplate, get, getTemplateTagPath} from "../utils/index.js";
+import {evaluateTextTemplate, get, getTemplateTokenValue} from "../utils/index.js";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
 
@@ -9,9 +9,10 @@ export function dataOnAndOtherAttributes(node: Node, values: any, childElement: 
     if (IGNORE_ATTRIBUTES.indexOf(attribute) === -1) {
       const attributeValue = (node as Element).getAttribute(attribute);
       if (attributeValue) {
+        // console.log("%o %o %o", childElement, attribute, attributeValue);
         if (attribute.indexOf(DATA_ON) === 0) {
           const eventName = attributeValue ? attribute.substring(DATA_ON.length) : undefined;
-          const dataOnPath = attributeValue ? getTemplateTagPath(attributeValue) : undefined;
+          const dataOnPath = attributeValue ? getTemplateTokenValue(attributeValue) : undefined;
           const value = dataOnPath ? get(values, dataOnPath) : undefined;
           const callback = value && typeof value == "function" ? (value as Function).bind(values.this) as () => void : undefined;
           if (callback && eventName) {

@@ -18,6 +18,25 @@ export function updateRouter(router: PathRouter, setState = true): boolean {
   return false;
 }
 
+export function isPathLocation(p?: string) {
+  if (p === undefined) {
+    return false;
+  }
+  const path = normalizePath(BASE_PATH() + p);
+  const pathname = normalizePath(location.pathname);
+  return pathname.toLowerCase() === path.toLowerCase();
+}
+
+export function isRouteActive(route: Route, activeRoute: Route | undefined, useDefault: boolean = true): boolean | undefined {
+  let active = useDefault ? route.isDefault || isPathLocation(route.path) : isPathLocation(route.path);
+
+  if (activeRoute && route.element !== activeRoute.element && active && isRouteActive(activeRoute, activeRoute, false)) {
+    active = false;
+  }
+  // console.log("default:%s path:%s on %s isActive %s", route.isDefault, path, pathname, active);
+  return active;
+}
+
 function getActiveRoute(routes: Route[], currentActive?: Route): Route | undefined {
   let activeRoute: Route | undefined;
 
@@ -41,23 +60,4 @@ function normalizePath(path: string) {
     path = path.substring(0, path.length - 1);
   }
   return path;
-}
-
-export function isPathLocation(p?: string) {
-  if (p === undefined) {
-    return false;
-  }
-  const path = normalizePath(BASE_PATH() + p);
-  const pathname = normalizePath(location.pathname);
-  return pathname.toLowerCase() === path.toLowerCase();
-}
-
-export function isRouteActive(route: Route, activeRoute: Route | undefined, useDefault: boolean = true): boolean | undefined {
-  let active = useDefault ? route.isDefault || isPathLocation(route.path) : isPathLocation(route.path);
-
-  if (activeRoute && route.element !== activeRoute.element && active && isRouteActive(activeRoute, activeRoute, false)) {
-    active = false;
-  }
-  // console.log("default:%s path:%s on %s isActive %s", route.isDefault, path, pathname, active);
-  return active;
 }

@@ -5,18 +5,25 @@ export interface IComponent {
   setState?: (args: any, refresh?: boolean) => void;
 }
 
-export function nodeList2Array(childNodes: NodeListOf<ChildNode>) {
+export interface TemplateValues {
+  this: HTMLElement;
+  children: Array<Node | HTMLElement>;
+}
+
+export function nodeList2Array(childNodes?: NodeListOf<ChildNode>): Array<Node | HTMLElement> {
   const childrenNodes = [];
-  for (let i = 0; i < childNodes.length; i++) {
-    childrenNodes.push(childNodes[i])
+  if (childNodes) {
+    for (let i = 0; i < childNodes.length; i++) {
+      childrenNodes.push(childNodes[i])
+    }
   }
   return childrenNodes;
 }
 
-export function getTemplateTagPath(str: string | null): string | undefined {
+export function getTemplateTokenValue(str: string | null): string | undefined {
   if (str && typeof str === "string" && str.length > 3 && str.charAt(0) === "{" && str.charAt(str.length - 1) === "}") {
     const path = str.substring(1, str.length - 1);
-    if (path.indexOf(" ") !== -1 && !path) {
+    if (!path || path.indexOf(" ") !== -1) {
       return undefined;
     } else {
       return path;
@@ -25,20 +32,25 @@ export function getTemplateTagPath(str: string | null): string | undefined {
   return undefined;
 }
 
+export const re = /{[^%^{^}^\s]+}/g;
+
+export function textTemplateReplace(value: any, functionBind: any): string {
+  if (typeof value === "function") {
+    //return encodeHTML(String(value()));
+    const callback = value.bind(functionBind);
+    return String(callback());
+  } else {
+    //return encodeHTML(String(value));
+    return String(value);
+  }
+}
+
 export function evaluateTextTemplate(textContent: string, values: any): string {
-  const re = /{[^%^{^}^\s]+}/g;
   return textContent.replace(re, (match) => {
-    const path = getTemplateTagPath(match);
+    const path = getTemplateTokenValue(match);
     if (path) {
       const value = get(values, path);
-      if (typeof value === "function") {
-        //return encodeHTML(String(value()));
-        const callback = value.bind(values.this);
-        return String(callback());
-      } else {
-        //return encodeHTML(String(value));
-        return String(value);
-      }
+      return textTemplateReplace(value, values.this);
     } else {
       return match;
     }

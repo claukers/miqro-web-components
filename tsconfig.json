@@ -12,7 +12,7 @@
     "outDir": "./dist/cjs",
     "removeComments": false,
     "noImplicitAny": true,
-    "sourceMap": false,
+    "sourceMap": true,
     "declaration": true,
     "strict": true
   },

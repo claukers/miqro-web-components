@@ -1,8 +1,10 @@
 import {getTemplateLocation, IComponent, nodeList2Array, renderTemplate} from "./template/index.js";
 
-const templateChildrenMap = new WeakMap<HTMLElement, (HTMLElement | Node)[]>();
-
 export function render(component: HTMLElement): void {
+  if (!component.isConnected) {
+    return;
+  }
+
   const template = getComponentTemplate(component as IComponent);
   if (typeof template === "string" || template instanceof Array) {
     renderTemplateOnComponent(template, component);
@@ -16,17 +18,24 @@ export function render(component: HTMLElement): void {
   }
 }
 
+const templateChildrenMap = new WeakMap<HTMLElement, Array<Node | HTMLElement>>();
+
+function getComponentChildren(component: HTMLElement): Array<Node | HTMLElement> {
+  let templateChildren = templateChildrenMap.get(component);
+  if (templateChildren === undefined) {
+    templateChildren = nodeList2Array(component.childNodes);
+    templateChildrenMap.set(component, templateChildren);
+  }
+  return templateChildren;
+}
+
 function renderTemplateOnComponent(template: string | string[], component: HTMLElement) {
-  if (component.isConnected) {
-    if (!templateChildrenMap.has(component)) {
-      templateChildrenMap.set(component, nodeList2Array(component.childNodes));
-    }
-    const output = renderTemplate(template, {this: component}, templateChildrenMap);
-    if (output) {
-      component.innerHTML = "";
-      for (let i = 0; i < output.length; i++) {
-        component.appendChild(output[i]);
-      }
+  const children = getComponentChildren(component);
+  const output = renderTemplate(template, {this: component, children});
+  if (output) {
+    component.innerHTML = "";
+    for (let i = 0; i < output.length; i++) {
+      component.appendChild(output[i]);
     }
   }
 }
