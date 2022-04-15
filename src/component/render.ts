@@ -1,4 +1,4 @@
-import {getTemplateLocation, IComponent, nodeList2Array, renderTemplate} from "./template/index.js";
+import {getTemplateLocation, IComponent, nodeList2Array, renderTemplate} from "../template/index.js";
 
 export function render(component: HTMLElement): void {
   if (!component.isConnected) {
@@ -18,13 +18,13 @@ export function render(component: HTMLElement): void {
   }
 }
 
-const templateChildrenMap = new WeakMap<HTMLElement, Array<Node | HTMLElement>>();
+const childrenMap = new WeakMap<HTMLElement, Array<Node | HTMLElement>>();
 
 function getComponentChildren(component: HTMLElement): Array<Node | HTMLElement> {
-  let templateChildren = templateChildrenMap.get(component);
+  let templateChildren = childrenMap.get(component);
   if (templateChildren === undefined) {
     templateChildren = nodeList2Array(component.childNodes);
-    templateChildrenMap.set(component, templateChildren);
+    childrenMap.set(component, templateChildren);
   }
   return templateChildren;
 }

@@ -1,9 +1,10 @@
-import {renderCommentNode, renderElementNode, renderTextNode} from "./nodes/index.js";
+import {renderCommentNode, renderElementNode, renderTextNode} from "./nodes";
+import {TemplateValues} from "./utils";
 
-export function renderNodeChildrenOnElement(nodes: NodeListOf<ChildNode>, values: any): Array<Node | HTMLElement> {
+export function renderChildNodes(childNodes: NodeListOf<ChildNode>, values: TemplateValues): Array<Node | HTMLElement> {
   let ret: Array<Node | HTMLElement> = [];
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
+  for (let i = 0; i < childNodes.length; i++) {
+    const node = childNodes[i];
     if (!node) {
       continue;
     }

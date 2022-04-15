@@ -1,9 +1,9 @@
 const {fake, requireMock} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
-const {distPath} = require("../../setup-test.js");
+const {distPath} = require("../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "component", "template", "render-children.js");
+const testFilePath = resolve(distPath, "cjs", "template", "render-children.js");
 
 const testOptions = {
   category: "component.template.render-children unit tests"
@@ -51,9 +51,9 @@ it("render text, comment, element nodes, ignore others and concat results", asyn
     }
   ];
   const {
-    renderNodeChildrenOnElement
+    renderChildNodes
   } = requireMock(testFilePath, mocks, distPath);
-  const ret = renderNodeChildrenOnElement(childNodes, fakeValues);
+  const ret = renderChildNodes(childNodes, fakeValues);
   strictEqual(ret.length, 6);
   strictEqual(ret[0], "5");
   strictEqual(ret[1], "6");

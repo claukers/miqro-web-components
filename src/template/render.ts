@@ -1,4 +1,4 @@
-import {renderNodeChildrenOnElement} from "./render-children.js";
+import {renderChildNodes} from "./render-children.js";
 import {TemplateValues} from "./utils/template";
 
 export function renderTemplate(renderOutput: string | string[] | void, values: TemplateValues): Array<Node | HTMLElement> | undefined {
@@ -10,7 +10,7 @@ export function renderTemplate(renderOutput: string | string[] | void, values: T
     const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
 
     const root = xmlDocument.children[0];
-    return renderNodeChildrenOnElement(root.childNodes, values);
+    return renderChildNodes(root.childNodes, values);
   }
 }
 

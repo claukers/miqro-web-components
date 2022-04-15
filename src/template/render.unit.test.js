@@ -1,9 +1,9 @@
 const {fake, requireMock} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
-const {distPath} = require("../../setup-test.js");
+const {distPath} = require("../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "component", "template", "render.js");
+const testFilePath = resolve(distPath, "cjs", "template", "render.js");
 
 const testOptions = {
   category: "component.template.render unit tests"
@@ -19,8 +19,7 @@ it("happy path renderTemplate doesn't call renderNodeChildrenOnElement when temp
 
   });
   const {renderTemplate} = requireMock(testFilePath, {
-    "./render-children.js": {
-    }
+    "./render-children.js": {}
   }, distPath);
 
   renderTemplate(template, values, fakeMap);
@@ -55,20 +54,20 @@ it("happy path renderTemplate calls renderNodeChildrenOnElement when template is
     }
   }
 
-  const renderNodeChildrenOnElement = fake(() => {
+  const renderChildNodes = fake(() => {
     return fakeRenderReturn;
   });
   const {renderTemplate} = requireMock(testFilePath, {
     "./render-children.js": {
-      renderNodeChildrenOnElement
+      renderChildNodes
     }
   }, distPath);
 
   const ret = renderTemplate(template, values);
   strictEqual(ret, fakeRenderReturn);
-  strictEqual(renderNodeChildrenOnElement.callCount, 1);
-  strictEqual(renderNodeChildrenOnElement.callArgs[0][0], childNodes);
-  strictEqual(renderNodeChildrenOnElement.callArgs[0][1], values);
+  strictEqual(renderChildNodes.callCount, 1);
+  strictEqual(renderChildNodes.callArgs[0][0], childNodes);
+  strictEqual(renderChildNodes.callArgs[0][1], values);
   strictEqual(DOMParserCtor.callCount, 1);
   strictEqual(DOMParserCtor.callArgs[0].length, 0);
   strictEqual(parseFromString.callCount, 1);
@@ -101,21 +100,21 @@ it("happy path renderTemplate calls renderNodeChildrenOnElement when template is
       return parseFromString(...arguments);
     }
   }
-  const renderNodeChildrenOnElement = fake(() => {
+  const renderChildNodes = fake(() => {
     return fakeRenderReturn;
   });
   const {renderTemplate} = requireMock(testFilePath, {
     "./render-children.js": {
-      renderNodeChildrenOnElement
+      renderChildNodes
     }
   }, distPath);
 
   const ret = renderTemplate(template, values);
-  strictEqual(renderNodeChildrenOnElement.callCount, 1);
+  strictEqual(renderChildNodes.callCount, 1);
   strictEqual(ret, fakeRenderReturn);
-  strictEqual(renderNodeChildrenOnElement.callCount, 1);
-  strictEqual(renderNodeChildrenOnElement.callArgs[0][0], childNodes);
-  strictEqual(renderNodeChildrenOnElement.callArgs[0][1], values);
+  strictEqual(renderChildNodes.callCount, 1);
+  strictEqual(renderChildNodes.callArgs[0][0], childNodes);
+  strictEqual(renderChildNodes.callArgs[0][1], values);
   strictEqual(DOMParserCtor.callCount, 1);
   strictEqual(DOMParserCtor.callArgs[0].length, 0);
   strictEqual(parseFromString.callCount, 1);

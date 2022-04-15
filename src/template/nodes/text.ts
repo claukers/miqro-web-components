@@ -1,12 +1,12 @@
-import {get, getTemplateTokenValue} from "../utils/index.js";
-import {re} from "../utils/template";
+import {re, TemplateValues, get, getTemplateTokenValue} from "../utils";
 
-export function renderTextNode(node: Node, values: any): Array<HTMLElement | Node> {
+export function renderTextNode(node: Node, values: TemplateValues): Array<HTMLElement | Node> {
   let ret: Array<HTMLElement | Node> = [];
   if (node.textContent) {
     const firstTextNode = document.createTextNode("");
     let currentTextNode = firstTextNode;
     firstTextNode.textContent = node.textContent.replace(re, (match) => {
+      debugger;
       const path = getTemplateTokenValue(match);
       if (path) {
         let value = get(values, path);
@@ -14,8 +14,8 @@ export function renderTextNode(node: Node, values: any): Array<HTMLElement | Nod
           const callback = value.bind(values.this);
           value = callback();
         }
-        const isHTMLElementArray = value instanceof Array && value.filter(v => !(v instanceof HTMLElement)).length === 0;
-        if (isHTMLElementArray || value instanceof HTMLElement) {
+        const isNodeArray = value instanceof Array && value.filter(v => !(v instanceof Node)).length === 0;
+        if (isNodeArray || value instanceof HTMLElement) {
           ret.push(currentTextNode);
           ret = ret.concat(value);
           currentTextNode = document.createTextNode("");

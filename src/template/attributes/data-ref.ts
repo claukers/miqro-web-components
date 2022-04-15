@@ -1,7 +1,7 @@
-import {get, getTemplateTokenValue} from "../utils/index.js";
+import {get, getTemplateTokenValue, TemplateValues} from "../utils";
 import {DATA_REF} from "./constants.js";
 
-export function dataRef(node: Node, values: any, childElement: HTMLElement): void {
+export function dataRef(node: Node, values: TemplateValues, childElement: HTMLElement): void {
   const dataRefValue = (node as Element).getAttribute(DATA_REF);
   if (dataRefValue !== null) {
     const dataRefPath = getTemplateTokenValue(dataRefValue);

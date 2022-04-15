@@ -1,9 +1,9 @@
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM, DATA_IF, DATA_ON, DATA_REF, DATA_STATE} from "./constants.js";
-import {evaluateTextTemplate, get, getTemplateTokenValue} from "../utils/index.js";
+import {evaluateTextTemplate, get, getTemplateTokenValue, TemplateValues} from "../utils";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
 
-export function dataOnAndOtherAttributes(node: Node, values: any, childElement: HTMLElement): void {
+export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, childElement: HTMLElement): void {
   const attributes = (node as Element).getAttributeNames();
   for (const attribute of attributes) {
     if (IGNORE_ATTRIBUTES.indexOf(attribute) === -1) {

@@ -1,7 +1,7 @@
-import {get, getTemplateTokenValue} from "../utils/index.js";
+import {get, getTemplateTokenValue, TemplateValues} from "../utils";
 import {DATA_IF, DATA_IFN} from "./constants.js";
 
-export function dataIfn(node: Element, values: any): boolean {
+export function dataIfn(node: Element, values: TemplateValues): boolean {
   const ifnValue = (node as Element).getAttribute(DATA_IFN);
   if (ifnValue !== null) {
     const ifnPath = getTemplateTokenValue(ifnValue);
@@ -17,7 +17,7 @@ export function dataIfn(node: Element, values: any): boolean {
   }
 }
 
-export function dataIf(node: Element, values: any): boolean {
+export function dataIf(node: Element, values: TemplateValues): boolean {
   const ifValue = (node as Element).getAttribute(DATA_IF);
   if (ifValue !== null) {
     const ifPath = getTemplateTokenValue(ifValue);

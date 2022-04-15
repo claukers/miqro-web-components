@@ -1,13 +1,16 @@
 # @miqro/web-components
 
-very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **very basic template** language
-influenced by ***React***.
+very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **very basic template**
+language influenced by ***React***.
 
 ## Component class
 
 the ```Component``` class extends from ```HTMLElement``` and it is the base for creating custom HTMLElements.
 
+```script.js```
+
 ```typescript
+// component with inline template
 customElements.define("my-element", class extends Component {
   click(ev) {
     ev.preventDefault();
@@ -16,27 +19,28 @@ customElements.define("my-element", class extends Component {
     });
     this.dispatchEvent(new CustomEvent("user-click-me"));
   }
-
+  
   render() {
-    return `<div><a href="#" data-on-click="{this.click}">click me</a><p>{this.state.clickCount}</p></div>`
+    return `<div><my-custom/><a href="#" data-on-click="{this.click}">click me</a><p>{this.state.clickCount}</p></div>`
   }
+});
+
+// component external template
+customElements.define("my-custom", class extends Component {
+  static template = "template.html";
 })
 ```
 
-```typescript
-customElements.define("my-custom", class extends Component {
-  render() {
-    this.text = "<p>this p will not be rendered as html beacuse it is encoded.</p>";
-    return `<p>{this.text}</p>`
-    // this will render the inner p as HTML without enconding
-    // return "<p>" + this.text + "</p>";
-  }
-})
+```template.html```
+
+```html
+<p>{this.text}</p>
 ```
 
 ### Template
 
 ```html
+
 <div>
   hello {this.state.name}
 </div>
@@ -49,6 +53,7 @@ to avoid rendering elements use ```data-if```.
 ***the value must be a boolean.***
 
 ```html
+
 <div data-if="{this.state.showDiv}"></div>
 ```
 
@@ -59,6 +64,7 @@ to loop list. the value for ```data-for-each``` must be an Array or a function t
 ***the value must be an Array.***
 
 ```html
+
 <ul>
   <li data-for-each="{this.state.list}">
     {item.name}
@@ -77,8 +83,10 @@ set the initial state of a custom component and to transfer objects though attri
 for example this will call ```this.setState(...)``` on ```custom-element``` before it is connected to the dom.
 
 ```html
+
 <custom-element data-data="{this.state.divData}"></custom-element>
 ```
+
 #### data-ref
 
 get the actual ```HTMLElement``` reference of an element rendered.
@@ -86,6 +94,7 @@ get the actual ```HTMLElement``` reference of an element rendered.
 for example this will call ```this.setDivRef``` with the div's ```HTMLElement``` reference.
 
 ```html
+
 <div data-ref="{this.setDivRef}"></div>
 ```
 
@@ -96,6 +105,7 @@ to listen to the element's events.
 for example this will call ```addEventListener``` on ```click``` event.
 
 ```html
+
 <div data-on-click="{this.divClicked}"></div>
 ```
 
@@ -117,7 +127,7 @@ setCache({
 });
 ```
 
-consider auto generating a ```cache.json``` file with 
+consider auto generating a ```cache.json``` file with
 
 ```npx miqro webcomponents:generate:cache src/ dist/cache.json```
 
@@ -133,7 +143,7 @@ consider auto generating a ```cache.json``` file with
 
 ```typescript
 customElements.define("my-tag", class extends Component {
-    static template = "components/my-tag.html";
+  static template = "components/my-tag.html";
 });
 ```
 
@@ -141,9 +151,9 @@ or
 
 ```typescript
 customElements.define("my-tag", class extends Component {
-    render() {
-        return `<!--{components/my-tag.html}--->`
-    }
+  render() {
+    return `<!--{components/my-tag.html}--->`
+  }
 });
 ```
 
@@ -175,7 +185,8 @@ class MyComponent extends Component {
 
 this callback is called when ```this.setState(...)``` function is invoked.
 
-can be overridden to stop the call to ```this.render()``` by returning false. by default, it returns true for all changes.
+can be overridden to stop the call to ```this.render()``` by returning false. by default, it returns true for all
+changes.
 
 **Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.**
 
@@ -192,88 +203,6 @@ when needed.
 
 Also, if ```this.render()``` returns ```undefined``` ```this.innerHtml``` will not be changed, avoiding a complete
 re-render of all child elements.
-
-## Router class
-
-the ```Router``` class extends from ```Component``` and watches changes on the ```popstate``` event on window. If the
-change matches a ```Route``` child element it will render that element.
-
-```typescript
-customElements.define("my-404", class extends Component {
-  render() {
-    return "not found";
-  }
-});
-customElements.define("my-home", class extends Component {
-  render() {
-    return "home";
-  }
-});
-customElements.define("my-about", class extends Component {
-  render() {
-    return "about";
-  }
-});
-customElements.define("my-app", class extends Router {
-  constructor() {
-    super();
-    this.state = {
-      routes: [
-        {path: "/", element: "my-home"},
-        {path: "/about", element: "my-about"},
-      ],
-      defaultElement: "my-404"
-    }
-  }
-});
-```
-
-### Change path without reloading.
-
-the ```Router``` class attaches a listener on ```popstate``` event to listen to url changes.
-
-to change the path without reloading the page use the standard ```window.history.pushState(null, null as any, path);```
-or the helper ```historyPushPath(path)``` to trigger programmatically without user interaction.
-
-```typescript
-window.history.pushState(null, null as any, "/about");
-// if you do it programmatically emit the popstate event
-// window.dispatchEvent(new PopStateEvent("popstate"));
-```
-
-or use the helper
-
-```typescript
-historyPushPath("/about");
-```
-
-### base path
-
-setting the attribute ```data-router-base-path``` to the HTML element to allow the router to be nested.
-
-```html
-
-<html data-router-base-path="/public/front">
-....
-</html>
-```
-
-this will affect ```RouteLink``` elements also.
-
-## RouteLink Class
-
-to change the current path without reloading the page you can use the helper ```RouteLink``` to provide clickable
-elements to change the current route without reloading. The benefit of using ```RouteLink``` is that it takes into
-account the **base path**.
-
-```typescript
-customElements.define("my-link", RouteLink);
-```
-
-```html
-
-<my-link data-path="/about">go to about page</my-link>
-```
 
 ## Importing
 
@@ -319,42 +248,4 @@ the ```Component``` class you will have to use ```WebComponents.Component```.
 </script>
 </body>
 </html>
-```
-
-## Integrating with standard WebComponents API
-
-the ```Component``` class is just a standard WebComponent element, it extends ```HTMLElement``` so integrating it into
-standard WebComponent projects is straight forward.
-
-```typescript
-// Standard WebComponent
-customElements.define("my-app", class extends HTMLElement {
-  constructor() {
-    super();
-    const myHome = new document.createElement("my-home");
-    // myHome this.props will be re-populated and the component re-render
-    myHome.setAttribute("name", "no-name");
-    setTimeout(() => {
-      // myHome this.props will be re-populated and the component re-render  
-      myHome.setAttribute("name", "some-name");
-    }, 1000);
-    // listen to custom event from standard HTMLElement
-    myHome.addEventListener("myEvent", () => {
-
-    });
-    this.appendChild(myHome);
-  }
-});
-
-// Custom "Component"
-customElements.define("my-home", class extends Component {
-
-  click() {
-    this.dispatchEvent(new CustomEvent("myEvent"));
-  }
-
-  render() {
-    return `<p data-on-click="{click}">{props.name}</p>`;
-  }
-});
 ```

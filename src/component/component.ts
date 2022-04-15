@@ -1,4 +1,4 @@
-import {IComponent} from "./template/index.js";
+import {IComponent} from "../template/index.js";
 import {render} from "./render.js";
 
 export type ComponentState = { [p: string]: any };

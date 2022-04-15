@@ -1,7 +1,7 @@
-import {get, getTemplateTokenValue, IComponent} from "../utils/index.js";
+import {get, getTemplateTokenValue, IComponent, TemplateValues} from "../utils";
 import {DATA_STATE} from "./constants.js";
 
-export function dataState(node: Node, values: any, childElement: HTMLElement): void {
+export function dataState(node: Node, values: TemplateValues, childElement: HTMLElement): void {
   const dataStateValue = (node as Element).getAttribute(DATA_STATE);
   if (dataStateValue !== null) {
     const dataStatePath = getTemplateTokenValue(dataStateValue);

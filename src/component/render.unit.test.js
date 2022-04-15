@@ -35,7 +35,7 @@ it("isConnected render returns string calls renderTemplate and appendChild", asy
     })
   };
   const {render} = requireMock(testFilePath, {
-    "./template/index.js": {
+    "../template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
   }, distPath);
@@ -77,7 +77,7 @@ it("isConnected static template exists in cache calls renderTemplate and appendC
     })
   };
   const {render} = requireMock(testFilePath, {
-    "./template/index.js": {
+    "../template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
   }, distPath);
@@ -127,7 +127,7 @@ it("isConnected static template doesn't in cache calls renderTemplate and append
     })
   };
   const {render} = requireMock(testFilePath, {
-    "./template/index.js": {
+    "../template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
   }, distPath);
@@ -170,7 +170,7 @@ it("isConnected false render returns string doesn't call renderTemplate", async 
     })
   };
   const {render} = requireMock(testFilePath, {
-    "./template/index.js": {
+    "../template/index.js": {
       getTemplateLocation, nodeList2Array, renderTemplate
     }
   }, distPath);
