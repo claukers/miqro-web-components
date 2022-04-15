@@ -1,7 +1,0 @@
-<h1 data-on-click="{this.onClick}">{this.getText}</h1>
-<p>click count {this.state.clickCount}</p>
-<p data-for-each="{this.list}">
-  <p data-for-each="{item.categories}" data-for-each-item="category">{item.itemId} {item.flag} {category.name}</p>
-</p>
-<p>flagged itemIds</p>
-<p data-for-each="{this.list}" data-if="{item.flag}">{item.itemId}</p>

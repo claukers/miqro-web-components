@@ -1,6 +1,6 @@
-import {getTemplateLocation, IComponent, nodeList2Array, renderTemplate} from "../template/index.js";
+import {getTemplateFromLocation, IComponent, renderTemplate} from "../template/index.js";
 
-export function render(component: HTMLElement): void {
+export function render(component: IComponent): void {
   if (!component.isConnected) {
     return;
   }
@@ -18,20 +18,11 @@ export function render(component: HTMLElement): void {
   }
 }
 
-const childrenMap = new WeakMap<HTMLElement, Array<Node | HTMLElement>>();
-
-function getComponentChildren(component: HTMLElement): Array<Node | HTMLElement> {
-  let templateChildren = childrenMap.get(component);
-  if (templateChildren === undefined) {
-    templateChildren = nodeList2Array(component.childNodes);
-    childrenMap.set(component, templateChildren);
-  }
-  return templateChildren;
-}
-
-function renderTemplateOnComponent(template: string | string[], component: HTMLElement) {
-  const children = getComponentChildren(component);
-  const output = renderTemplate(template, {this: component, children});
+function renderTemplateOnComponent(template: string | string[], component: IComponent) {
+  const output = renderTemplate(template, {
+    this: component,
+    children: component.templateChildren ? component.templateChildren : []
+  });
   if (output) {
     component.innerHTML = "";
     for (let i = 0; i < output.length; i++) {
@@ -42,6 +33,6 @@ function renderTemplateOnComponent(template: string | string[], component: HTMLE
 
 function getComponentTemplate(component: IComponent): string | string[] | void | Promise<string> {
   return component.constructor && component.constructor.hasOwnProperty("template") ?
-    getTemplateLocation((component.constructor as any).template) :
+    getTemplateFromLocation((component.constructor as any).template) :
     (component.render ? component.render() : undefined)
 }

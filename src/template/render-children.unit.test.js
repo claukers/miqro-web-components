@@ -6,7 +6,7 @@ const {distPath} = require("../setup-test.js");
 const testFilePath = resolve(distPath, "cjs", "template", "render-children.js");
 
 const testOptions = {
-  category: "component.template.render-children unit tests"
+  category: "template.render-children unit tests"
 };
 
 it("render text, comment, element nodes, ignore others and concat results", async () => {

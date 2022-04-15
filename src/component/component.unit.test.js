@@ -9,10 +9,6 @@ const testOptions = {
   category: "component.unit.test"
 };
 
-HTMLElement = class {
-
-}
-
 it("connectCallback should call render", async () => {
   const render = fake(() => {
 

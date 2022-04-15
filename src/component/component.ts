@@ -1,4 +1,4 @@
-import {IComponent} from "../template/index.js";
+import {IComponent, nodeList2Array} from "../template/index.js";
 import {render} from "./render.js";
 
 export type ComponentState = { [p: string]: any };
@@ -6,14 +6,17 @@ export type ComponentState = { [p: string]: any };
 export class Component<S extends ComponentState = ComponentState> extends HTMLElement implements IComponent {
 
   public state: S;
+  public templateChildren: Array<Node | HTMLElement>;
 
   constructor() {
     super();
     this.state = {} as S; // start empty
+    this.templateChildren = [];
   }
 
   public connectedCallback(): void {
-    return render(this);
+    this.templateChildren = nodeList2Array(this.childNodes);
+    return this.refresh();
   }
 
   /*
@@ -34,8 +37,12 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
       ...args
     };
     if (this.didUpdate(oldState) && refresh && this.isConnected) {
-      return render(this);
+      return this.refresh();
     }
+  }
+
+  public refresh(): void {
+    return render(this);
   }
 }
 

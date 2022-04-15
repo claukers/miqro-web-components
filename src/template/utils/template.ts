@@ -1,13 +1,15 @@
 import {get} from "./get.js";
 
-export interface IComponent {
+export interface IComponent extends HTMLElement {
+  templateChildren?: Array<Node | HTMLElement>;
   render?: () => string | string[] | void;
   setState?: (args: any, refresh?: boolean) => void;
+  refresh?: () => void;
 }
 
 export interface TemplateValues {
-  this: HTMLElement;
-  children: Array<Node | HTMLElement>;
+  this: IComponent;
+  children: Array<Node | HTMLElement>; // alias to this.templateChildren
 }
 
 export function nodeList2Array(childNodes?: NodeListOf<ChildNode>): Array<Node | HTMLElement> {

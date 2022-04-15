@@ -206,7 +206,7 @@ re-render of all child elements.
 
 ## Importing
 
-this module is exported as a ```CommonJS``` module and a minified ```bundle```.
+this module is exported as a ```CommonJS```.
 
 when using a packer like webpack just import the module and the packer will take care of the rest like.
 
@@ -218,34 +218,4 @@ or
 
 ```typescript
 const {Component, Router, RouteLink, historyPushPath} = require("@miqro/web-components");
-```
-
-### using bundle directly with script tag
-
-you can also use the bundle located in ```dist/webcomponents.bundle.min.js```.
-
-using the bundle will add the global ```WebComponents``` that will house the module, so accessing for example
-the ```Component``` class you will have to use ```WebComponents.Component```.
-
-```html
-
-<html>
-<head>
-  <!-- this will add the WebComponents global with the module -->
-  <script src="webcomponents.bundle.min.js"></script>
-</head>
-<body>
-<my-element></my-element>
-<script>
-  // the WebComponents global contains the @miqro/webcomponents module.
-  const {Component} = WebComponents;
-
-  customElements.define("my-element", class extends Component {
-    render() {
-      return `<p>{props.text}</p>`
-    }
-  });
-</script>
-</body>
-</html>
 ```

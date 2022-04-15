@@ -9,18 +9,11 @@ const testOptions = {
   category: "render.unit.test"
 };
 
-HTMLElement = class {
-
-}
-
 it("isConnected render returns string calls renderTemplate and appendChild", async () => {
   const nodeList = ["node1", "node2"];
   const nodeList2ArrayRet = "some value";
   const getTemplateLocation = fake(() => {
 
-  });
-  const nodeList2Array = fake(() => {
-    return nodeList2ArrayRet;
   });
   const renderTemplate = fake(() => {
     return nodeList;
@@ -36,7 +29,7 @@ it("isConnected render returns string calls renderTemplate and appendChild", asy
   };
   const {render} = requireMock(testFilePath, {
     "../template/index.js": {
-      getTemplateLocation, nodeList2Array, renderTemplate
+      getTemplateLocation, renderTemplate
     }
   }, distPath);
   strictEqual(component.innerHTML, undefined);
@@ -45,7 +38,6 @@ it("isConnected render returns string calls renderTemplate and appendChild", asy
   strictEqual(getTemplateLocation.callCount, 0);
   strictEqual(renderTemplate.callArgs[0][0], "stringtemplate");
   strictEqual(renderTemplate.callArgs[0][1].this, component);
-  strictEqual(renderTemplate.callArgs[0][1].children, nodeList2ArrayRet);
   strictEqual(component.innerHTML, "");
   strictEqual(component.appendChild.callCount, 2);
 }, testOptions);
@@ -54,11 +46,8 @@ it("isConnected static template exists in cache calls renderTemplate and appendC
   const nodeList = ["node1", "node2"];
   const nodeList2ArrayRet = ["node1-1", "node2-1"];
   const template = "templateString";
-  const getTemplateLocation = fake(() => {
+  const getTemplateFromLocation = fake(() => {
     return template;
-  });
-  const nodeList2Array = fake(() => {
-    return nodeList2ArrayRet;
   });
   const renderTemplate = fake(() => {
     return nodeList;
@@ -78,7 +67,7 @@ it("isConnected static template exists in cache calls renderTemplate and appendC
   };
   const {render} = requireMock(testFilePath, {
     "../template/index.js": {
-      getTemplateLocation, nodeList2Array, renderTemplate
+      getTemplateFromLocation, renderTemplate
     }
   }, distPath);
   strictEqual(component.innerHTML, undefined);
@@ -86,13 +75,10 @@ it("isConnected static template exists in cache calls renderTemplate and appendC
   strictEqual(renderTemplate.callCount, 1);
   strictEqual(renderTemplate.callArgs[0][0], template);
   strictEqual(renderTemplate.callArgs[0][1].this, component);
-  strictEqual(renderTemplate.callArgs[0][1].children, nodeList2ArrayRet);
-  strictEqual(nodeList2Array.callCount, 1);
-  strictEqual(nodeList2Array.callArgs[0][0], "childNodes");
   strictEqual(component.constructor.hasOwnProperty.callCount, 1);
   strictEqual(component.constructor.hasOwnProperty.callArgs[0][0], "template");
-  strictEqual(getTemplateLocation.callCount, 1);
-  strictEqual(getTemplateLocation.callArgs[0][0], "templatePath");
+  strictEqual(getTemplateFromLocation.callCount, 1);
+  strictEqual(getTemplateFromLocation.callArgs[0][0], "templatePath");
   strictEqual(component.innerHTML, "");
   strictEqual(component.appendChild.callCount, 2);
 }, testOptions);
@@ -101,15 +87,12 @@ it("isConnected static template doesn't in cache calls renderTemplate and append
   const nodeList = ["node1", "node2"];
   const template = "templateString";
   const nodeList2ArrayRet = "other value";
-  const getTemplateLocation = fake(() => {
+  const getTemplateFromLocation = fake(() => {
     return new Promise(resolve => {
       setTimeout(() => {
         resolve(template);
       }, 0);
     });
-  });
-  const nodeList2Array = fake(() => {
-    return nodeList2ArrayRet;
   });
   const renderTemplate = fake(() => {
     return nodeList;
@@ -128,7 +111,7 @@ it("isConnected static template doesn't in cache calls renderTemplate and append
   };
   const {render} = requireMock(testFilePath, {
     "../template/index.js": {
-      getTemplateLocation, nodeList2Array, renderTemplate
+      getTemplateFromLocation, renderTemplate
     }
   }, distPath);
   strictEqual(component.innerHTML, undefined);
@@ -142,17 +125,16 @@ it("isConnected static template doesn't in cache calls renderTemplate and append
   strictEqual(renderTemplate.callCount, 1);
   strictEqual(renderTemplate.callArgs[0][0], template);
   strictEqual(renderTemplate.callArgs[0][1].this, component);
-  strictEqual(renderTemplate.callArgs[0][1].children, nodeList2ArrayRet);
   strictEqual(component.constructor.hasOwnProperty.callCount, 1);
   strictEqual(component.constructor.hasOwnProperty.callArgs[0][0], "template");
-  strictEqual(getTemplateLocation.callCount, 1);
-  strictEqual(getTemplateLocation.callArgs[0][0], "templatePath");
+  strictEqual(getTemplateFromLocation.callCount, 1);
+  strictEqual(getTemplateFromLocation.callArgs[0][0], "templatePath");
   strictEqual(component.innerHTML, "");
   strictEqual(component.appendChild.callCount, 2);
 }, testOptions);
 
 it("isConnected false render returns string doesn't call renderTemplate", async () => {
-  const getTemplateLocation = fake(() => {
+  const getTemplateFromLocation = fake(() => {
 
   });
   const nodeList2Array = fake(() => {
@@ -171,7 +153,7 @@ it("isConnected false render returns string doesn't call renderTemplate", async 
   };
   const {render} = requireMock(testFilePath, {
     "../template/index.js": {
-      getTemplateLocation, nodeList2Array, renderTemplate
+      getTemplateFromLocation, nodeList2Array, renderTemplate
     }
   }, distPath);
   render(component);

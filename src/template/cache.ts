@@ -20,7 +20,7 @@ export function setCache(cache: { [key: string]: string }) {
   }
 }
 
-export function getTemplateLocation(location: TemplateLocation | string): Promise<string> | string {
+export function getTemplateFromLocation(location: TemplateLocation | string): Promise<string> | string {
   location = typeof location === "string" ? {
     url: location
   } : location;

@@ -1,78 +1,26 @@
-<html data-router-base-path="/miqro/test/data/router">
-<head>
-  <script src="lib.js"></script>
-</head>
+<html>
 <body>
-<a-component><p>0</p></a-component>
-<script>
-  const {Component} = WebComponents;
+<my-root><p>children2</p></my-root>
+<script type="module">
+  import {Component} from "./lib/index.js";
 
-  customElements.define("a-component", class extends Component {
-
-    userEvent2() {
-      alert("userEvent2");
-      console.log("userEvent2")
-    }
-
-    userEvent1() {
-      alert("userEvent1");
-      console.log("userEvent2")
-    }
-
+  customElements.define("my-root", class extends Component {
     render() {
-      return `<b-component data-on-user-event2="{this.userEvent2}"><c-component data-on-user-event1="{this.userEvent1}"><!--{children}--></c-component></b-component>`;
+      return "<c-component/><b-component>children1</b-component><p>b</p>{children}<p>/b</p>";
     }
   });
+
   customElements.define("b-component", class extends Component {
-
-    constructor() {
-      super();
-      this.superDiv = document.createElement("div");
-      this.superDiv.innerText = "super div";
-
-      this.divList = ["div1", "div2"].map(t => {
-        const e = document.createElement("div");
-        e.innerText = t;
-        return e;
-      });
-    }
-
-    click() {
-      debugger;
-      this.dispatchEvent(new CustomEvent("user-event2"));
-    }
-
-    getDiv() {
-      const div = document.createElement("div");
-      div.innerText = "div";
-      return div;
-    }
-
     render() {
-      return `{this.getDiv}<div><p data-on-click="{this.click}">hello</p>{this.superDiv}{this.divList}<p>World</p><!--{children}--><p>3</p></div>`;
+      return "<p>a</p>{children}<p>/a</p>";
     }
   });
+
   customElements.define("c-component", class extends Component {
-
-    userEvent0() {
-      this.dispatchEvent(new CustomEvent("user-event1"));
-    }
-
     render() {
-      return `<!--{children}--><d-component data-on-user-event0="{this.userEvent0}"><p>2</p></d-component>`;
+      return "<p>c component</p>";
     }
   });
-  customElements.define("d-component", class extends Component {
-
-    click() {
-      this.dispatchEvent(new CustomEvent("user-event0"));
-    }
-
-    render() {
-      return `<p data-on-click="{this.click}"><p>1</p><!--{children}--></p>`;
-    }
-  });
-
 </script>
 </body>
 </html>

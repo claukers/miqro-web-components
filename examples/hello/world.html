@@ -1,11 +1,8 @@
 <html>
-<head>
-  <script src="lib.js"></script>
-</head>
 <body>
 <my-root></my-root>
-<script>
-  const {Component} = WebComponents;
+<script type="module">
+  import {Component} from "./esm/index.js";
 
   class Root extends HTMLElement {
     constructor() {

@@ -6,7 +6,7 @@ const {distPath} = require("../setup-test.js");
 const testFilePath = resolve(distPath, "cjs", "template", "cache.js");
 
 const testOptions = {
-  category: "component.template.cache unit tests"
+  category: "template.cache unit tests"
 };
 
 it("cannot call setCache twice", async () => {
@@ -17,14 +17,12 @@ it("cannot call setCache twice", async () => {
   } catch (e) {
     strictEqual(e.message, "cannot reset cache");
   }
-}, {
-  category: "component.template.cache unit tests"
-});
+}, testOptions);
 
-it("getTemplateLocation as string from cache returns string", async () => {
+it("getTemplateFromLocation as string from cache returns string", async () => {
   const {
     setCache,
-    getTemplateLocation
+    getTemplateFromLocation
   } = requireMock(testFilePath, {}, distPath);
   fetch = null;
   const template = "templateString";
@@ -32,14 +30,14 @@ it("getTemplateLocation as string from cache returns string", async () => {
   setCache({
     [templatePath]: template
   });
-  strictEqual(getTemplateLocation(templatePath), template);
+  strictEqual(getTemplateFromLocation(templatePath), template);
 
 }, testOptions);
 
-it("getTemplateLocation as {url} from cache returns string", async () => {
+it("getTemplateFromLocation as {url} from cache returns string", async () => {
   const {
     setCache,
-    getTemplateLocation
+    getTemplateFromLocation
   } = requireMock(testFilePath, {}, distPath);
   fetch = null;
   const template = "templateString";
@@ -47,14 +45,14 @@ it("getTemplateLocation as {url} from cache returns string", async () => {
   setCache({
     [templatePath]: template
   });
-  strictEqual(getTemplateLocation({url: templatePath}), template);
+  strictEqual(getTemplateFromLocation({url: templatePath}), template);
 
 }, testOptions);
 
-it("getTemplateLocation as string not from cache uses fetch and returns promise", async () => {
+it("getTemplateFromLocation as string not from cache uses fetch and returns promise", async () => {
   const {
     setCache,
-    getTemplateLocation
+    getTemplateFromLocation
   } = requireMock(testFilePath, {}, distPath);
   const template = "templateString";
   const templatePath = "some path";
@@ -68,7 +66,7 @@ it("getTemplateLocation as string not from cache uses fetch and returns promise"
   fetch = fake(async () => {
     return fakeResponse;
   });
-  const promise = getTemplateLocation(templatePath);
+  const promise = getTemplateFromLocation(templatePath);
   strictEqual(promise instanceof Promise, true);
   strictEqual(await promise, template);
   strictEqual(fakeResponse.text.callCount, 1);
@@ -76,10 +74,10 @@ it("getTemplateLocation as string not from cache uses fetch and returns promise"
   strictEqual(fetch.callArgs[0][0], templatePath);
 }, testOptions);
 
-it("getTemplateLocation as {url} not from cache uses fetch and returns promise", async () => {
+it("getTemplateFromLocation as {url} not from cache uses fetch and returns promise", async () => {
   const {
     setCache,
-    getTemplateLocation
+    getTemplateFromLocation
   } = requireMock(testFilePath, {}, distPath);
   const template = "templateString";
   const templatePath = "some path";
@@ -93,7 +91,7 @@ it("getTemplateLocation as {url} not from cache uses fetch and returns promise",
   fetch = fake(async () => {
     return fakeResponse;
   });
-  const promise = getTemplateLocation({url: templatePath});
+  const promise = getTemplateFromLocation({url: templatePath});
   strictEqual(promise instanceof Promise, true);
   strictEqual(await promise, template);
   strictEqual(fakeResponse.text.callCount, 1);
@@ -101,10 +99,10 @@ it("getTemplateLocation as {url} not from cache uses fetch and returns promise",
   strictEqual(fetch.callArgs[0][0], templatePath);
 }, testOptions);
 
-it("getTemplateLocation as string not from cache uses fetch that fails and on second calls returns '' to avoid double fetch", async () => {
+it("getTemplateFromLocation as string not from cache uses fetch that fails and on second calls returns '' to avoid double fetch", async () => {
   const {
     setCache,
-    getTemplateLocation
+    getTemplateFromLocation
   } = requireMock(testFilePath, {}, distPath);
   const template = "templateString";
   const templatePath = "some path";
@@ -118,7 +116,7 @@ it("getTemplateLocation as string not from cache uses fetch that fails and on se
   fetch = fake(async () => {
     return fakeResponse;
   });
-  const promise = getTemplateLocation(templatePath);
+  const promise = getTemplateFromLocation(templatePath);
   strictEqual(promise instanceof Promise, true);
   try {
     await promise;
@@ -127,7 +125,7 @@ it("getTemplateLocation as string not from cache uses fetch that fails and on se
     strictEqual(fakeResponse.text.callCount, 0);
     strictEqual(fetch.callCount, 1);
     strictEqual(fetch.callArgs[0][0], templatePath);
-    strictEqual(getTemplateLocation(templatePath), "");
+    strictEqual(getTemplateFromLocation(templatePath), "");
     strictEqual(fetch.callCount, 1);
   }
 }, testOptions);

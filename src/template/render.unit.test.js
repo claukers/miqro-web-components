@@ -6,7 +6,7 @@ const {distPath} = require("../setup-test.js");
 const testFilePath = resolve(distPath, "cjs", "template", "render.js");
 
 const testOptions = {
-  category: "component.template.render unit tests"
+  category: "template.render unit tests"
 };
 
 it("happy path renderTemplate doesn't call renderNodeChildrenOnElement when template is some thing else", async () => {
