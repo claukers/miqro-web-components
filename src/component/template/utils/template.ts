@@ -1,4 +1,4 @@
-import {get} from "./get";
+import {get} from "./get.js";
 
 export interface IComponent {
   render?: () => string | string[] | void;

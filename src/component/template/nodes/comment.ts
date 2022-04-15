@@ -1,4 +1,4 @@
-import {get, getTemplateTokenValue} from "../utils/index.js";
+import {getTemplateTokenValue} from "../utils/index.js";
 import {getTemplateLocation} from "../cache.js";
 import {renderTemplate} from "../render.js";
 
@@ -9,7 +9,7 @@ export function renderCommentNode(node: Node, values: any): Array<HTMLElement | 
   } else if (path === "children") {
     return values.children ? values.children : [];
   } else {
-    const templateLocation = getTemplateLocation(path.substring(1));
+    const templateLocation = getTemplateLocation(path);
     if (typeof templateLocation === "string") {
       const ret = renderTemplate(templateLocation, values);
       return ret ? ret : [];
