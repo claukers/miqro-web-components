@@ -1,5 +1,6 @@
 node_modules/
 coverage/
+examples/
 .nyc_output/
 *.log
 test/data/*.log
