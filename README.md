@@ -9,6 +9,8 @@ the ```Component``` class extends from ```HTMLElement```.
 
 ```typescript
 // script.js
+import {Component} from "@miqro/web-components";
+
 // component external template
 customElements.define("my-element", class extends Component {
   static template = "my-element.html";
