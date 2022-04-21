@@ -9,9 +9,9 @@ the ```Component``` class extends from ```HTMLElement```.
 
 ```typescript
 // script.js
-// component with inline template
+// component external template
 customElements.define("my-element", class extends Component {
-  static template = "template.html";
+  static template = "my-element.html";
 
   click(ev) {
     ev.preventDefault();
@@ -20,8 +20,7 @@ customElements.define("my-element", class extends Component {
     });
   }
 });
-
-// component external template
+// component with inline template
 customElements.define("my-custom", class extends Component {
   render() {
     return `<p>{this.dataset.text}</p>`;
@@ -30,7 +29,7 @@ customElements.define("my-custom", class extends Component {
 ```
 
 ```html
-<!--template.html-->
+<!--my-element.html-->
 <div>
   <my-custom data-text="clicked {this.state.clickCount}"/>
   <a href="#" data-on-click="{this.click}">click me</a>
@@ -141,7 +140,7 @@ for example this will call ```this.setState(...)``` on ```custom-element``` befo
 
 get the actual ```HTMLElement``` reference of an element rendered.
 
-for example this will call ```this.setDivRef``` with the div's ```HTMLElement``` reference.
+for example this will call ```this.setDivRef``` with the p's ```HTMLElement``` reference.
 
 ```html
 <p data-ref="{this.setDivRef}"></p>
