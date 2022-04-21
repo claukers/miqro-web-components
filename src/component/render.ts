@@ -12,7 +12,7 @@ export function render(component: IComponent): void {
     template.then(function queueRenderComponent(template) {
       renderTemplateOnComponent(template, component);
     }).catch(e => {
-      console.error("cannot render Index %o", component);
+      console.error("cannot render template %s for %o", (component.constructor as any).template, component);
       console.error(e);
     });
   }
