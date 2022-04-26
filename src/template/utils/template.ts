@@ -3,7 +3,7 @@ import {get} from "./get.js";
 export interface IComponent extends HTMLElement {
   templateChildren?: Array<Node | HTMLElement>;
   render?: () => string | string[] | void;
-  setState?: (args: any, refresh?: boolean) => void;
+  setState?: (args: any, callback?: () => void, refresh?: boolean) => void;
   refresh?: () => void;
 }
 

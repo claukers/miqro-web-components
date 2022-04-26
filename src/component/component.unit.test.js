@@ -13,7 +13,7 @@ describe("component.unit.test", () => {
 
     });
     const {Component} = requireMock(testFilePath, {
-      "./render.js": {
+      "./render-queue.js": {
         render
       }
     }, distPath);
@@ -32,7 +32,7 @@ describe("component.unit.test", () => {
       return false;
     });
     const {Component} = requireMock(testFilePath, {
-      "./render.js": {
+      "./render-queue.js": {
         render
       }
     }, distPath);
@@ -57,7 +57,7 @@ describe("component.unit.test", () => {
       return true;
     });
     const {Component} = requireMock(testFilePath, {
-      "./render.js": {
+      "./render-queue.js": {
         render
       }
     }, distPath);
@@ -83,7 +83,7 @@ describe("component.unit.test", () => {
       return true;
     });
     const {Component} = requireMock(testFilePath, {
-      "./render.js": {
+      "./render-queue.js": {
         render
       }
     }, distPath);
@@ -96,7 +96,7 @@ describe("component.unit.test", () => {
     component.isConnected = true;
     component.setState({
       someValue: 1
-    }, false);
+    }, undefined, false);
     strictEqual(didUpdate.callCount, 1);
     strictEqual(render.callCount, 0);
   });
@@ -108,8 +108,9 @@ describe("component.unit.test", () => {
     const didUpdate = fake(() => {
       return true;
     });
+    const callback = "callback";
     const {Component} = requireMock(testFilePath, {
-      "./render.js": {
+      "./render-queue.js": {
         render
       }
     }, distPath);
@@ -122,8 +123,10 @@ describe("component.unit.test", () => {
     component.isConnected = true;
     component.setState({
       someValue: 1
-    });
+    }, callback);
     strictEqual(didUpdate.callCount, 1);
     strictEqual(render.callCount, 1);
+    strictEqual(render.callArgs[0][0], component);
+    strictEqual(render.callArgs[0][1], callback);
   });
 });

@@ -1,22 +1,52 @@
 import {IComponent, nodeList2Array} from "../template/index.js";
-import {render} from "./render.js";
+import {Selector, Store, StoreListener} from "../store/store.js";
+import {set} from "../template/utils";
+import {render} from "./render-queue";
 
 export type ComponentState = { [p: string]: any };
+
+interface ComponentSubscriptionInfo {
+  path: string;
+  store: Store,
+  selector: Selector,
+  listener: StoreListener
+}
 
 export class Component<S extends ComponentState = ComponentState> extends HTMLElement implements IComponent {
 
   public state: S;
-  public templateChildren: Array<Node | HTMLElement>;
+  public templateChildren: Array<Node | HTMLElement> | undefined;
+  public storeListeners: ComponentSubscriptionInfo[] = [];
 
   constructor() {
     super();
     this.state = {} as S; // start empty
-    this.templateChildren = [];
+  }
+
+  public subscribe<S, R>(store: Store<S>, path: string, selector: Selector<S, R>) {
+    this.storeListeners.push({
+      path,
+      store,
+      selector,
+      listener: (value: R) => {
+        this.setState(set(this.state, path, value));
+      }
+    });
   }
 
   public connectedCallback(): void {
-    this.templateChildren = nodeList2Array(this.childNodes);
+    this.templateChildren = this.templateChildren ? this.templateChildren : nodeList2Array(this.childNodes);
+    for (const info of this.storeListeners) {
+      set(this.state, info.path, info.store.subscribe(info.selector, info.listener));
+    }
     return this.refresh();
+  }
+
+  public disconnectedCallback() {
+    for (const info of this.storeListeners) {
+      info.store.unSubscribe(info.listener);
+    }
+    this.storeListeners.splice(0, this.storeListeners.length);
   }
 
   /*
@@ -30,20 +60,22 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
 
   }
 
-  public setState(args: Partial<S>, refresh = true): void {
+  public setState(args: Partial<S>, callback?: () => void, refresh = true): void {
     const oldState = this.state;
     this.state = {
       ...this.state,
       ...args
     };
     if (this.didUpdate(oldState) && refresh && this.isConnected) {
-      return this.refresh();
+      return this.refresh(callback);
     }
   }
 
-  public refresh(): void {
-    return render(this);
+  public refresh(callback?: () => void): void {
+    return render(this, callback);
   }
 }
+
+
 
 

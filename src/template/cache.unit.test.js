@@ -1,4 +1,4 @@
-const {fake, requireMock} = require("@miqro/test");
+const {fake, requireMock, describe, it} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
 const {distPath} = require("../setup-test.js");
@@ -6,7 +6,6 @@ const {distPath} = require("../setup-test.js");
 const testFilePath = resolve(distPath, "cjs", "template", "cache.js");
 
 describe("template.cache unit tests", () => {
-
   it("cannot call setCache twice", async () => {
     const {setCache} = requireMock(testFilePath, {}, distPath);
     setCache({});
@@ -16,7 +15,6 @@ describe("template.cache unit tests", () => {
       strictEqual(e.message, "cannot reset cache");
     }
   });
-
   it("getTemplateFromLocation as string from cache returns string", async () => {
     const {
       setCache,
@@ -31,7 +29,6 @@ describe("template.cache unit tests", () => {
     strictEqual(getTemplateFromLocation(templatePath), template);
 
   });
-
   it("getTemplateFromLocation as {url} from cache returns string", async () => {
     const {
       setCache,
@@ -46,7 +43,6 @@ describe("template.cache unit tests", () => {
     strictEqual(getTemplateFromLocation({url: templatePath}), template);
 
   });
-
   it("getTemplateFromLocation as string not from cache uses fetch and returns promise", async () => {
     const {
       setCache,
@@ -71,7 +67,6 @@ describe("template.cache unit tests", () => {
     strictEqual(fetch.callCount, 1);
     strictEqual(fetch.callArgs[0][0], templatePath);
   });
-
   it("getTemplateFromLocation as {url} not from cache uses fetch and returns promise", async () => {
     const {
       setCache,
@@ -96,7 +91,6 @@ describe("template.cache unit tests", () => {
     strictEqual(fetch.callCount, 1);
     strictEqual(fetch.callArgs[0][0], templatePath);
   });
-
   it("getTemplateFromLocation as string not from cache uses fetch that fails and on second calls returns '' to avoid double fetch", async () => {
     const {
       setCache,
@@ -127,5 +121,4 @@ describe("template.cache unit tests", () => {
       strictEqual(fetch.callCount, 1);
     }
   });
-
 });

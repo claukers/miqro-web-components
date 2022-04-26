@@ -10,7 +10,7 @@ export function dataState(node: Node, values: TemplateValues, childElement: HTML
     if (dataStatePath && value && typeof value === "object") {
       const asComponent = (childElement as IComponent);
       if (asComponent && typeof asComponent.setState === "function") {
-        asComponent.setState(value, false);
+        asComponent.setState(value, undefined, false);
       } else {
         console.error("invalid value for %s [%o] for [%o]", DATA_STATE, value, values.this);
         throw new Error(`invalid value for ${DATA_STATE}`);
