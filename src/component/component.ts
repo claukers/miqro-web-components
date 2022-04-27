@@ -1,7 +1,7 @@
 import {IComponent, nodeList2Array} from "../template/index.js";
-import {Selector, Store, StoreListener} from "../store/store.js";
-import {set} from "../template/utils";
-import {render} from "./render-queue";
+import {Selector, Store, StoreListener} from "../store.js";
+import {set} from "../template/utils/index.js";
+import {render} from "./render-queue.js";
 
 export type ComponentState = { [p: string]: any };
 
@@ -34,19 +34,27 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     });
   }
 
-  public connectedCallback(): void {
-    this.templateChildren = this.templateChildren ? this.templateChildren : nodeList2Array(this.childNodes);
+  public subscribeAll(): void {
     for (const info of this.storeListeners) {
+      info.store.unSubscribe(info.listener);
       set(this.state, info.path, info.store.subscribe(info.selector, info.listener));
     }
+  }
+
+  public unSubscribeAll(): void {
+    for (const info of this.storeListeners) {
+      info.store.unSubscribe(info.listener);
+    }
+  }
+
+  public connectedCallback(): void {
+    this.templateChildren = this.templateChildren ? this.templateChildren : nodeList2Array(this.childNodes);
+    this.subscribeAll();
     return this.refresh();
   }
 
   public disconnectedCallback() {
-    for (const info of this.storeListeners) {
-      info.store.unSubscribe(info.listener);
-    }
-    this.storeListeners.splice(0, this.storeListeners.length);
+    return this.unSubscribeAll();
   }
 
   /*
