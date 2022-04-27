@@ -38,65 +38,13 @@ customElements.define("my-custom", class extends Component {
 </div>
 ```
 
-### Lifecycle
-
-the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent. The class
-implements the ```connectedCallback``` to render the template.
-
-- ```this.connectedCallback()``` ```->``` ```this.refresh()```
-- ```this.setState(partialState)``` ```->``` ```this.didUpdate(prevState)``` ```->``` ```this.refresh()```
-
-***Important Notice***
-
-when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to
-call ```super.connectedCallback()```
-to maintain the ```Component's``` normal lifecycle.
-
-example
-
-```typescript
-class MyComponent extends Component {
-  connectedCallback() {
-    // do my stuff before this.render
-    // remember to call super to not alter the Component's lifecyle
-    super.connectedCallback();
-    // do my stuff after this.render is called
-  }
-}
-```
-
-#### this.refresh(): void
-
-calling ```this.refresh()``` will render the component's template to ```this.innerHtml```.
-
-```this.refresh()``` will be called on the standard connectedCallback and when ```this.setState(...)``` is called.
-
-It will use as template ```Class.template``` static attribute or the result of ```this.render()``` as template to
-render.
-
-#### this.didUpdate(prevState): boolean
-
-this callback is called when ```this.setState(...)``` function is invoked.
-
-can be overridden to stop the call to ```this.render()``` by returning ```false```. by default, it returns ```true```.
-
-***Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.***
-
-example
-
-```typescript
-customElements.define(class extends Component {
-  didUpdate(prevState) {
-    return prevState.text !== this.state.text;
-  }
-
-  render() {
-    return "<p>{this.state.text}</p>";
-  }
-})
-```
-
 ## Template
+
+```html
+<p>{this.dataset.someAttribute}</p>
+<p>{this.state.someStateValue}</p>
+<div>{children}</div>
+```
 
 ### data-if
 
@@ -158,6 +106,12 @@ for example this will call ```addEventListener``` on ```click``` event.
 <p data-on-click="{this.divClicked}"></p>
 ```
 
+or a custom event
+
+```html
+<p data-on-custom-event="{this.customEventListener}"></p>
+```
+
 ### include
 
 to include other templates into the current one use a comment like this.
@@ -182,7 +136,17 @@ consider auto generating a ```cache.json``` file with
 
 ```npx miqro webcomponents:generate:cache src/ dist/cache.json```
 
-## Separating template from the Component class
+### Inline templates
+
+```typescript
+customElements.define("my-tag", class extends Component {
+  render() {
+      return "<p>{this.dataset.name}</p>"
+  }
+});
+```
+
+### Separating template from the Component class
 
 ```components/my-tag.html```
 
@@ -204,6 +168,78 @@ or use include comment
 customElements.define("my-tag", class extends Component {
   render() {
     return `<!--{components/my-tag.html}--->`
+  }
+});
+```
+
+## Lifecycle
+
+the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent. The class
+implements the ```connectedCallback``` to render the template.
+
+- ```this.connectedCallback()``` ```->``` ```render template```
+- ```this.setState(partialState)``` ```->``` ```this.didUpdate(prevState)``` ```->``` ```render template```
+
+***Important Notice***
+
+when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to
+call ```super.connectedCallback()```
+to maintain the ```Component's``` normal lifecycle.
+
+example
+
+```typescript
+class MyComponent extends Component {
+  connectedCallback() {
+    // do my stuff before this.render
+    // remember to call super to not alter the Component's lifecyle
+    super.connectedCallback();
+    // do my stuff after this.render is called
+  }
+}
+```
+
+#### this.didUpdate(prevState): boolean
+
+this callback is called when ```this.setState(...)``` function is invoked.
+
+can be overridden to stop the call to ```this.render()``` by returning ```false```. by default, it returns ```true```.
+
+***Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.***
+
+example
+
+```typescript
+customElements.define("custom-element", class extends Component {
+  didUpdate(prevState) {
+    return prevState.text !== this.state.text;
+  }
+
+  render() {
+    return "<p>{this.state.text}</p>";
+  }
+})
+```
+
+## Component class without templates
+
+if ```Component.template``` isn't defined and ```component.render``` returns undefined no template is rendered.
+
+for example
+
+```typescript
+customElements.define("my-custom", class extends Component {
+  constructor() {
+    super();
+    this.state = {
+      name: ""
+    }
+    this.p = new HTMLParagraphElement();
+    this.appendChild(p);
+  }
+
+  render() {
+    this.p.textContent = this.state.name;
   }
 });
 ```
