@@ -9,7 +9,7 @@ export function dataState(node: Node, values: TemplateValues, childElement: HTML
     value = typeof value === "function" ? (value.bind(values.this))() : value;
     if (dataStatePath && value && typeof value === "object") {
       const asComponent = (childElement as IComponent);
-      if (asComponent && typeof asComponent.setState === "function") {
+      if (asComponent && typeof asComponent.state !== undefined && typeof asComponent.state === "object") {
         asComponent.state = {
           ...asComponent.state,
           value
