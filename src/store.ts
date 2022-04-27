@@ -1,5 +1,5 @@
-export type Selector<S = any> = (state: S) => any;
-export type StoreListener<S = any> = (value: any) => void;
+export type Selector<S = any, R = any> = (state: S) => R;
+export type StoreListener<S = any, R = any> = (value: R) => void;
 export type Reducer<S = any> = (action: Action, state: S) => S;
 
 export interface Action {
@@ -27,13 +27,13 @@ export class Store<S = any> {
     };
   }
 
-  public subscribe(selector: Selector<S>, listener: StoreListener<S>): any {
+  public subscribe<R = any>(selector: Selector<S, R>, listener: StoreListener<S, R>): R {
     const lastResult = selector(this.state);
     this.listenerMap.set(listener, {lastResult, selector});
     return lastResult;
   }
 
-  public unSubscribe(listener: StoreListener<S>): boolean {
+  public unSubscribe<R = any>(listener: StoreListener<S, R>): boolean {
     return this.listenerMap.delete(listener);
   }
 
