@@ -129,4 +129,38 @@ describe("component.render-queue.unit.test", () => {
     strictEqual(renderCallback.callCount, 0);
 
   });
+
+  it("queue two times on components calls render one time", async () => {
+    const realRender = fake(() => {
+
+    });
+    const renderCallback1 = fake(() => {
+
+    });
+    const renderCallback2 = fake(() => {
+
+    });
+
+    const component = {
+      isConnected: true
+    }
+    const {render} = requireMock(testFilePath, {
+      "./render.js": {
+        render: realRender
+      }
+    }, distPath);
+
+    render(component, renderCallback1);
+    render(component, renderCallback2);
+
+    strictEqual(realRender.callCount, 0);
+    strictEqual(renderCallback1.callCount, 0);
+    strictEqual(renderCallback2.callCount, 0);
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+    strictEqual(realRender.callCount, 1);
+    strictEqual(renderCallback1.callCount, 1);
+    strictEqual(renderCallback2.callCount, 1);
+
+  });
 });

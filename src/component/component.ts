@@ -60,13 +60,13 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
 
   }
 
-  public setState(args: Partial<S>, callback?: () => void, refresh = true): void {
+  public setState(args: Partial<S>, callback?: () => void): void {
     const oldState = this.state;
     this.state = {
       ...this.state,
       ...args
     };
-    if (this.didUpdate(oldState) && refresh && this.isConnected) {
+    if (this.didUpdate(oldState) && this.isConnected) {
       return this.refresh(callback);
     }
   }

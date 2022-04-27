@@ -75,32 +75,6 @@ describe("component.unit.test", () => {
     strictEqual(render.callCount, 0);
   });
 
-  it("setState shouldn't call render when didUpdate returns true and is connected and refresh = false", async () => {
-    const render = fake(() => {
-
-    });
-    const didUpdate = fake(() => {
-      return true;
-    });
-    const {Component} = requireMock(testFilePath, {
-      "./render-queue.js": {
-        render
-      }
-    }, distPath);
-
-    const component = new (class extends Component {
-      didUpdate() {
-        return didUpdate(...arguments);
-      }
-    });
-    component.isConnected = true;
-    component.setState({
-      someValue: 1
-    }, undefined, false);
-    strictEqual(didUpdate.callCount, 1);
-    strictEqual(render.callCount, 0);
-  });
-
   it("setState should call render when didUpdate returns true and is connected", async () => {
     const render = fake(() => {
 
