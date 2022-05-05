@@ -1,10 +1,11 @@
 import {get} from "./get.js";
 import {ComponentState} from "../../component";
 
-export interface IComponent extends HTMLElement {
+export interface IComponent<S extends ComponentState = ComponentState> extends HTMLElement {
+  stateChangedCallback?(oldState: S): boolean;
   state?: { [p: string]: any };
   templateChildren?: Array<Node | HTMLElement>;
-  render?: () => string | string[] | void;
+  render?: () => string | void;
   setState?: (args: any, callback?: () => void) => void;
   refresh?: () => void;
 }

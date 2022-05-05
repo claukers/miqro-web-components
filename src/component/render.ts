@@ -1,5 +1,7 @@
 import {getTemplateFromLocation, IComponent, renderTemplate} from "../template/index.js";
 
+const lastTemplateMap = new WeakMap<IComponent, string>();
+
 export function render(component: IComponent): void {
   if (!component.isConnected) {
     return;
@@ -8,7 +10,7 @@ export function render(component: IComponent): void {
   console.log("render %s", component.tagName);
 
   const template = getComponentTemplate(component as IComponent);
-  if (typeof template === "string" || template instanceof Array) {
+  if (typeof template === "string") {
     renderTemplateOnComponent(template, component);
   } else if (template instanceof Promise) {
     template.then(function queueRenderComponent(template) {
@@ -20,7 +22,12 @@ export function render(component: IComponent): void {
   }
 }
 
-function renderTemplateOnComponent(template: string | string[], component: IComponent) {
+function renderTemplateOnComponent(template: string, component: IComponent) {
+  const oldTemplate = lastTemplateMap.get(component);
+  const doCompleteRefresh = oldTemplate !== template;
+  if (doCompleteRefresh) {
+    lastTemplateMap.set(component, template);
+  }
   const output = renderTemplate(template, {
     this: component,
     children: component.templateChildren ? component.templateChildren : []
@@ -33,7 +40,7 @@ function renderTemplateOnComponent(template: string | string[], component: IComp
   }
 }
 
-function getComponentTemplate(component: IComponent): string | string[] | void | Promise<string> {
+function getComponentTemplate(component: IComponent): string | void | Promise<string> {
   return component.constructor && component.constructor.hasOwnProperty("template") ?
     getTemplateFromLocation((component.constructor as any).template) :
     (component.render ? component.render() : undefined)

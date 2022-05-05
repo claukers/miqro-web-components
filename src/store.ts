@@ -14,12 +14,13 @@ export interface StoreOptions {
   dispatchTimeout?: number;
 }
 
-export class Store<S = any> {
+export class Store<S = any> extends EventTarget {
   private readonly listenerMap: Map<StoreListener<S>, ListenerInfo<S>>;
   private dispatchTimeout?: any;
   private options: { dispatchTimeout: number };
 
   constructor(private reducers: StoreReducerMap | Reducer, private state: S, options?: StoreOptions) {
+    super();
     this.listenerMap = new Map<StoreListener<S>, ListenerInfo<S>>();
     this.options = {
       dispatchTimeout: 0,
@@ -41,7 +42,7 @@ export class Store<S = any> {
     return {...this.state};
   }
 
-  public dispatch(action: Action) {
+  public dispatch(action: Action): void {
     const oldState = this.getState();
     this.state = typeof this.reducers === "function" ?
       this.reducers(action, oldState) :
@@ -50,7 +51,7 @@ export class Store<S = any> {
     clearTimeout(this.dispatchTimeout);
 
     if (oldState !== this.state) {
-      this.dispatchTimeout = setTimeout(() => dispatch(action, this.getState(), this.listenerMap), this.options.dispatchTimeout);
+      this.dispatchTimeout = setTimeout(() => dispatch<S>(this, action, this.listenerMap), this.options.dispatchTimeout);
     }
   }
 }
@@ -60,7 +61,8 @@ interface ListenerInfo<S = any> {
   selector: Selector<S>;
 }
 
-function dispatch<S = any>(action: Action, state: S, listenerMap: Map<StoreListener<S>, ListenerInfo<S>>): void {
+function dispatch<S = any>(store: Store, action: Action, listenerMap: Map<StoreListener<S>, ListenerInfo<S>>): void {
+  const state = store.getState();
   const listeners = listenerMap.keys();
   for (const listener of listeners) {
     const listenerInfo = listenerMap.get(listener);
@@ -73,6 +75,7 @@ function dispatch<S = any>(action: Action, state: S, listenerMap: Map<StoreListe
         }
       } catch (e) {
         console.error(e);
+        store.dispatchEvent(new ErrorEvent(String(e) + " " + String((e as Error).stack)));
       }
     }
   }

@@ -1,6 +1,10 @@
 const {resolve} = require("path");
 
-HTMLElement = class {
+globalThis.HTMLElement = class {
+
+}
+
+globalThis.window = {
 
 }
 

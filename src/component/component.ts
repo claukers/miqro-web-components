@@ -20,7 +20,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
 
   constructor() {
     super();
-    this.state = {} as S; // start empty
+    this.state = Object.create(null) as S; // start empty
   }
 
   public subscribe<S, R>(store: Store<S>, path: string, selector: Selector<S, R>) {
@@ -57,15 +57,15 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     return this.unSubscribeAll();
   }
 
+  public render(): string | void {
+
+  }
+
   /*
   will be called before a render if returns true this.render will be called.
    */
   protected didUpdate(oldState: S): boolean {
     return true;
-  }
-
-  public render(): string | string[] | void {
-
   }
 
   public setState(args: Partial<S>, callback?: () => void): void {
@@ -74,9 +74,18 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
       ...this.state,
       ...args
     };
+    const asIComponent = this as IComponent;
     if (this.didUpdate(oldState) && this.isConnected) {
-      return this.refresh(callback);
+      this.refresh(callback);
     }
+    if (asIComponent.stateChangedCallback) {
+      try {
+        asIComponent.stateChangedCallback(oldState);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return;
   }
 
   public refresh(callback?: () => void): void {

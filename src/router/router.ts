@@ -53,12 +53,10 @@ export class PathRouter<S extends PathRouterState = PathRouterState> extends Com
     return super.connectedCallback();
   }
 
-  public didUpdate(prevState: S) {
+  public stateChangedCallback(prevState: S) {
     if (updateRouter(this)) {
       return false;
     }
-
-    return super.didUpdate(prevState);
   }
 
   public disconnectedCallback(): void {

@@ -37,7 +37,7 @@ export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Compon
     this.removeEventListener("click", this.clickListener);
   }
 
-  public render(): string[] | string | void {
+  public render(): string | void {
     if (this.classList.contains("active") && !this.state.active) {
       this.classList.remove("active");
     } else if (!this.classList.contains("active") && this.state.active) {

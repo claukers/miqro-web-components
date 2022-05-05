@@ -2,22 +2,35 @@
 <body>
 <my-root></my-root>
 <script type="module">
-  import {Component} from "./esm/index.js";
+  import {Component, setCache} from "./esm/index.js";
 
   class Root extends HTMLElement {
     constructor() {
       super();
       const app = document.createElement("my-app");
-      app.setAttribute("id", "MyApp");
-      app.setAttribute("data-name", "nonameasd");
       this.appendChild(app);
+      setTimeout(() => {
+        app.setAttribute("id", "MyApp");
+        app.setAttribute("data-name", "nonameasd");
+      }, 1000);
     }
   }
 
+  setCache({
+    "blabla": "<p>{this.dataset.name}</p>"
+  });
+
   class App extends Component {
 
-    render() {
-      return "<p>{this.dataset.name}</p>"
+    static get template() { return "blabla"; };
+
+    static get observedAttributes() { return ['data-name']; }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      console.log(name);
+      console.log(oldValue);
+      console.log(newValue);
+      this.refresh();
     }
   }
 

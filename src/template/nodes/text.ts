@@ -1,4 +1,4 @@
-import {re, TemplateValues, get, getTemplateTokenValue} from "../utils";
+import {get, getTemplateTokenValue, re, TemplateValues} from "../utils";
 
 export function renderTextNode(node: Node, values: TemplateValues): Array<HTMLElement | Node> {
   let ret: Array<HTMLElement | Node> = [];
@@ -6,7 +6,6 @@ export function renderTextNode(node: Node, values: TemplateValues): Array<HTMLEl
     const firstTextNode = document.createTextNode("");
     let currentTextNode = firstTextNode;
     firstTextNode.textContent = node.textContent.replace(re, (match) => {
-      debugger;
       const path = getTemplateTokenValue(match);
       if (path) {
         let value = get(values, path);
@@ -42,6 +41,4 @@ export function renderTextNode(node: Node, values: TemplateValues): Array<HTMLEl
     }
   }
   return ret;
-
-  // return node.textContent ? [document.createTextNode(evaluateTextTemplate(node.textContent, values))] : []
 }
