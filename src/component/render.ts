@@ -8,7 +8,7 @@ export function render(component: IComponent): void {
     return;
   }
 
-  console.log("render %s", component.tagName);
+  // console.log("render %s", component.tagName);
 
   const template = getComponentTemplate(component as IComponent);
   if (typeof template === "string") {

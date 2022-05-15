@@ -12,7 +12,7 @@ export function render(component: IComponent, listener?: () => void, preRender?:
     refreshTimeouts.delete(component);
     return;
   }
-  console.log("queue render for %s", component.tagName);
+  // console.log("queue render for %s", component.tagName);
   const listeners = (refreshTimeout && refreshTimeout.listeners ? refreshTimeout.listeners : []);
   const preRenders = (refreshTimeout && refreshTimeout.preRenders ? refreshTimeout.preRenders : []);
   refreshTimeouts.set(component, {

@@ -1,0 +1,73 @@
+<html>
+<body>
+<my-root></my-root>
+<script type="module">
+  import {Component, PathRouter, RouteLink} from "./lib/index.js";
+
+  let rootRef;
+  customElements.define(PathRouter.tagName, PathRouter);
+
+  customElements.define(RouteLink.tagName, RouteLink);
+
+  customElements.define("nav-component", class extends Component {
+
+    static get observedAttributes() {
+      return ['data-count'];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      this.refresh();
+    }
+
+    click() {
+      this.dispatchEvent(new CustomEvent("nav-click", {
+        detail: parseInt(this.dataset.count, 10) + 1
+      }))
+    }
+
+    render() {
+      return '<div><p data-on-click="{this.click}">nav {this.dataset.count}</p></div>';
+    }
+  });
+
+  customElements.define("home-page", class extends Component {
+    render() {
+      return "<p>home page</p>";
+    }
+  });
+
+  customElements.define("not-found", class extends Component {
+    render() {
+      return '<p>not found</p><route-link data-path="/"><a href="#">home</a></route-link>';
+    }
+  });
+
+  customElements.define("my-root", class extends Component {
+    constructor() {
+      super();
+      this.state.count = 0;
+      this.state.routerState = {
+        defaultElement: "not-found",
+        routes: [{
+          path: "/404",
+          element: "not-found"
+        }, {
+          path: "/",
+          element: "home-page"
+        }]
+      };
+    }
+
+    navClick(ev) {
+      this.setState({
+        count: ev.detail
+      });
+    }
+
+    render() {
+      return '<nav-component data-count="{this.state.count}" data-on-nav-click="{this.navClick}"/><path-router data-state="{this.state.routerState}"/>'
+    }
+  });
+</script>
+</body>
+</html>
