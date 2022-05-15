@@ -87,7 +87,9 @@ export class TemplateCommentNode extends TemplateNode<Comment> {
 
   public update(ref: Comment): void {
     super.update(ref);
-    ref.textContent = this.textContent;
+    if (ref.textContent !== this.textContent) {
+      ref.textContent = this.textContent;
+    }
   }
 }
 
@@ -108,8 +110,9 @@ export class TemplateTextNode extends TemplateNode<Text> {
 
   public update(ref: Text): void {
     super.update(ref);
-
-    ref.textContent = this.textContent;
+    if (ref.textContent !== this.textContent) {
+      ref.textContent = this.textContent;
+    }
   }
 }
 
@@ -161,7 +164,9 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
       };
     }
     for (const attribute of this.attributes) {
-      ref.setAttribute(attribute.attribute, attribute.value);
+      if (ref.getAttribute(attribute.attribute) !== attribute.value) {
+        ref.setAttribute(attribute.attribute, attribute.value);
+      }
     }
 
     for (const listener of this.listeners) {

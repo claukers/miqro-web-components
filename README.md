@@ -163,7 +163,9 @@ customElements.define("my-element", class extends Component {
 
 ### Built-in Template
 
-to use the build-in template system just return the html in the ```render()``` method;
+to use the build-in template system just return the html in the ```render()``` method.
+
+all renders are compared to the old render output and apply similar to the [Reconciliation](https://reactjs.org/docs/reconciliation.html) algorithm to avoid re-creating the same HTMLElements.
 
 inline template example
 
