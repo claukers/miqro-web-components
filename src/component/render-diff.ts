@@ -45,7 +45,7 @@ export function renderTemplateNodeDiff(root: HTMLElement, current?: ITemplateNod
     const oldTemplateNode = old[i];
 
     if (oldTemplateNode === undefined) {
-      console.log("render node create on $s", currentTemplateNode.toString());
+      console.log("render node create on %s", currentTemplateNode.toString());
       const createdRef = currentTemplateNode.create(root);
       appendChildren(root, createdRef);
     } else {
