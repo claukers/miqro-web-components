@@ -29,8 +29,8 @@ describe("template.nodes.comment unit tests", () => {
       })
     };
     const ret = renderCommentNode(fakeNode, fakeValues);
-    strictEqual(document.createComment.callCount, 1);
-    strictEqual(document.createComment.callArgs[0][0], fakeNode.textContent);
+    strictEqual(ret.length, 1);
+    strictEqual(ret[0].textContent, fakeNode.textContent);
     delete globalThis.document;
   });
 

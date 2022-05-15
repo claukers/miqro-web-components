@@ -3,10 +3,25 @@ import {ComponentState} from "../../component/component.js";
 
 export type TemplateNodeType = "Element" | "Text" | "Comment" | "HTMLElementRef";
 
-export class TemplateNode<S extends Node = Node> {
+export interface ITemplateNode<S extends Node = Node> {
+  ref?: S;
+  children?: ITemplateNode[];
+  type: TemplateNodeType;
+  parent?: HTMLElement;
+
+  create(parent: HTMLElement): S;
+
+  update(ref: S): void;
+
+  dispose(ref: S): void;
+
+  compare(other: ITemplateNode<S>): boolean;
+}
+
+export class TemplateNode<S extends Node = Node> implements ITemplateNode<S> {
 
   public ref?: S;
-  public children?: TemplateNode<Node>[];
+  public children?: TemplateNode[];
   public parent?: HTMLElement;
 
   constructor(public type: TemplateNodeType) {
