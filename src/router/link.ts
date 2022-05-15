@@ -24,9 +24,6 @@ export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Compon
     };
     this.clickListener = (ev) => {
       ev.preventDefault();
-      this.setState({
-        active: !this.state.active
-      } as Partial<S>);
       historyPushPath(this.dataset.path as string);
     };
   }
@@ -34,6 +31,10 @@ export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Compon
   public connectedCallback() {
     this.addEventListener("click", this.clickListener);
     window.addEventListener("popstate", this.popStateListener);
+    const isActive = isPathLocation(this.dataset.path);
+    if (this.state.active !== isActive) {
+      this.state.active = isActive;
+    }
     return super.connectedCallback();
   }
 
