@@ -163,7 +163,7 @@ to use the build-in template system just return the html in the ```render()``` m
 all renders are compared to the old render output and apply similar to
 the [Reconciliation](https://reactjs.org/docs/reconciliation.html) algorithm to avoid re-creating the same HTMLElements.
 
-inline template example
+#### inline template example
 
 ```typescript
 customElements.define("my-element", class extends Component {
@@ -175,7 +175,9 @@ customElements.define("my-element", class extends Component {
 })
 ```
 
-or define the static attribute ```template``` to your component's class.
+#### external template file
+
+define the static attribute ```template``` to your component's class.
 
 ```typescript
 customElements.define("my-element", class extends Component {
