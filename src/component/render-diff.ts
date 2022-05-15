@@ -2,7 +2,6 @@ import {ITemplateNode} from "../template/utils/template";
 
 function removeChild(c: ITemplateNode) {
   if (c.ref) {
-    //splicedOld[i].dispose(c.ref);
     if (c.parent) {
       removeChildren(c.parent, c.ref);
     } else {
