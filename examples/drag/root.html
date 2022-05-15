@@ -1,5 +1,12 @@
 <div
-  style="background-color: black; position: absolute; height: 100%; width: 100%; top: 0; left: 0;"
+  style="
+    overflow: hidden;
+    background-color: black;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    left: 0;"
   data-on-mousedown="{this.mouseDown}"
   data-on-mouseover="{this.mouseOver}"
   data-on-mouseup="{this.mouseUp}"
@@ -9,9 +16,21 @@
     data-for-each="{this.state.nodes}"
     data-node-name="{item.name}"
     data-node-index="{index}"
-    data-y="{item.location.x}"
     data-x="{item.location.x}"
+    data-y="{item.location.y}"
+    data-selected="{item.selected}"
     data-offset-y="{this.state.offset.y}"
     data-offset-x="{this.state.offset.x}"
     data-color="{item.color}"/>
+  <span
+    style="color: white;"
+  >offset {this.state.offset.x},{this.state.offset.y}</span>
+  <span
+    data-if="{this.state.gestureOrigin}"
+    style="color: white;"
+  >gesture origin {this.state.gestureOrigin.x},{this.state.gestureOrigin.y}</span>
+  <p
+    data-for-each="{this.state.nodes}"
+    style="color: white;"
+  >{item.location.x}, {item.location.y}</p>
 </div>

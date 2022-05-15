@@ -1,6 +1,9 @@
 <div
   data-on-mousedown="{this.mouseDown}"
   style="
+    border-radius: 100px;
+    padding: 10px;
+    text-align: center;
     height: 100px;
     width: 100px;
     z-index: 999;
@@ -9,10 +12,7 @@
     left: {this.state.position.left}px;
     top: {this.state.position.top}px;"
   >
-  node {this.dataset.nodeName}
-  <ul>
-    <li>{this.dataset.x},{this.dataset.y}</li>
-    <li>{this.dataset.offsetX},{this.dataset.offsetY}</li>
-  </ul>
-  <span data-if="{this.state.selected}">selected</span>
+  <p>node {this.dataset.nodeName}</p>
+  <p>{this.dataset.x},{this.dataset.y}</p>
+  <p data-if="{this.state.selected}">selected</p>
 </div>
