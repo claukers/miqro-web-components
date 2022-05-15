@@ -1,0 +1,17 @@
+<div
+  style="background-color: black; position: absolute; height: 100%; width: 100%; top: 0; left: 0;"
+  data-on-mousedown="{this.mouseDown}"
+  data-on-mouseover="{this.mouseOver}"
+  data-on-mouseup="{this.mouseUp}"
+  data-on-mouseout="{this.mouseOut}"
+  data-on-mousemove="{this.mouseMove}">
+  <node-element
+    data-for-each="{this.state.nodes}"
+    data-node-name="{item.name}"
+    data-node-index="{index}"
+    data-y="{item.location.x}"
+    data-x="{item.location.x}"
+    data-offset-y="{this.state.offset.y}"
+    data-offset-x="{this.state.offset.x}"
+    data-color="{item.color}"/>
+</div>
