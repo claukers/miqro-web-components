@@ -1,11 +1,12 @@
 import {TemplateValues, getTemplateTokenValue, IComponent} from "../utils/index.js";
 import {getTemplateFromLocation} from "../cache.js";
 import {renderTemplate} from "../render.js";
+import {TemplateCommentNode, TemplateNode} from "../utils/template.js";
 
-export function renderCommentNode(node: Node, values: TemplateValues): Array<HTMLElement | Node> {
+export function renderCommentNode(node: Node, values: TemplateValues): Array<TemplateNode> {
   const path = getTemplateTokenValue(node.textContent);
   if (!path) {
-    return node.textContent ? [document.createComment(node.textContent)] : [];
+    return node.textContent ? [new TemplateCommentNode(node.textContent)] : [];
   } else {
     const templateLocation = getTemplateFromLocation(path);
     if (typeof templateLocation === "string") {

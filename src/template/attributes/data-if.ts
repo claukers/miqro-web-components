@@ -1,4 +1,4 @@
-import {get, getTemplateTokenValue, TemplateValues} from "../utils";
+import {get, getTemplateTokenValue, TemplateValues} from "../utils/index.js";
 import {DATA_IF, DATA_IFN} from "./constants.js";
 
 export function dataIfn(node: Element, values: TemplateValues): boolean {

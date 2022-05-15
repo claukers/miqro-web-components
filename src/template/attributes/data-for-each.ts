@@ -1,7 +1,8 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../utils";
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM} from "./constants.js";
+import {TemplateNode} from "../utils/template.js";
 
-export function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => HTMLElement | undefined): HTMLElement[] {
+export function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => TemplateNode | undefined): TemplateNode[] {
   const forEachValue = (node as Element).getAttribute(DATA_FOR_EACH);
   const forEachItemValue = (node as Element).getAttribute(DATA_FOR_EACH_ITEM);
   if (forEachValue !== null) {

@@ -11,8 +11,15 @@
   });
 
   customElements.define("b-component", class extends Component {
+    onClick(ev) {
+      ev.preventDefault();
+      console.log("clicked " + this.state.count);
+      this.setState({
+        count: this.state.count ? this.state.count + 1 : 1
+      })
+    }
     render() {
-      return "<p>a</p>{children}<p>/a</p>";
+      return '<p data-on-click="{this.onClick}">a {this.state.count}</p>{children}<p>/a</p>';
     }
   });
 

@@ -1,9 +1,10 @@
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM, DATA_IF, DATA_ON, DATA_REF, DATA_STATE} from "./constants.js";
-import {evaluateTextTemplate, get, getTemplateTokenValue, TemplateValues} from "../utils";
+import {evaluateTextTemplate, get, getTemplateTokenValue, TemplateValues} from "../utils/index.js";
+import {TemplateElementNode} from "../utils/template.js";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
 
-export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, childElement: HTMLElement): void {
+export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, childElement: TemplateElementNode): void {
   const attributes = (node as Element).getAttributeNames();
   for (const attribute of attributes) {
     if (IGNORE_ATTRIBUTES.indexOf(attribute) === -1) {
@@ -16,16 +17,19 @@ export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, chi
           const value = dataOnPath ? get(values, dataOnPath) : undefined;
           const callback = value && typeof value == "function" ? (value as Function).bind(values.this) as () => void : undefined;
           if (callback && eventName) {
-            childElement.addEventListener(eventName, callback);
+            childElement.listeners.push({eventName, callback});
+            // childElement.addEventListener(eventName, callback);
           } else {
             console.error("invalid value for %s [%s]=[%o] for [%o]", attribute, attributeValue, value, values.this);
             throw new Error(`invalid value for ${attribute}`);
           }
         } else {
-          childElement.setAttribute(attribute, evaluateTextTemplate(attributeValue, values));
+          childElement.attributes.push({attribute, value: evaluateTextTemplate(attributeValue, values)});
+          //childElement.setAttribute(attribute, evaluateTextTemplate(attributeValue, values));
         }
       } else {
-        childElement.setAttribute(attribute, "");
+        childElement.attributes.push({attribute, value: ""});
+        //childElement.setAttribute(attribute, "");
       }
     }
   }

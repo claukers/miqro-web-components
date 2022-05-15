@@ -1,7 +1,7 @@
 import {renderChildNodes} from "./render-children.js";
-import {TemplateValues} from "./utils/template";
+import {TemplateNode, TemplateValues} from "./utils/template.js";
 
-export function renderTemplate(renderOutput: string | string[] | void, values: TemplateValues): Array<Node | HTMLElement> | undefined {
+export function renderTemplate(renderOutput: string | string[] | void, values: TemplateValues): Array<TemplateNode> | undefined {
   //console.log("renderOnElement [%s] dataset [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset);
   if (renderOutput instanceof Array) {
     renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
