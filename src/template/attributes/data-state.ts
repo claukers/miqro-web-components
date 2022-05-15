@@ -11,7 +11,7 @@ export function dataState(node: Node, values: TemplateValues, childElement: Temp
     if (dataStatePath && value && typeof value === "object") {
       childElement.state = {
         ...childElement.state,
-        value
+        ...value
       };
       /*const asComponent = (childElement as IComponent);
       if (asComponent && typeof asComponent.state !== undefined && typeof asComponent.state === "object") {

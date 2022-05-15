@@ -10,7 +10,7 @@ export function dataRef(node: Node, values: TemplateValues, childElement: Templa
     const callback = value && typeof value == "function" ? (value as Function).bind(values.this) : undefined;
     if (callback) {
       // callback(childElement);
-      childElement.refListeners.push(callback);
+      childElement.refListeners.push({listener: callback});
     } else {
       console.error("invalid value for %s [%s]=[%o] for [%o]", DATA_REF, dataRefValue, value, values.this);
       throw new Error(`invalid value for ${DATA_REF}`);
