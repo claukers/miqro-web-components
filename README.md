@@ -9,7 +9,7 @@ language included.
 the ```Component``` class extends from ```HTMLElement``` so behaves as a standard web component.
 
 ```typescript
-// script.js
+// my-element.js
 import {Component} from "@miqro/web-components";
 
 // component external template
@@ -23,19 +23,13 @@ customElements.define("my-element", class extends Component {
     });
   }
 });
-// component with inline template
-customElements.define("my-custom", class extends Component {
-  render() {
-    return `<p>{this.dataset.text}</p>`;
-  }
-})
 ```
 
 ```html
 <!--my-element.html-->
 <div>
-  <my-custom data-text="clicked {this.state.clickCount}"/>
   <a href="#" data-on-click="{this.click}">click me</a>
+  <p>{this.dataset.text}</p>
 </div>
 ```
 
@@ -90,7 +84,8 @@ customElements.define("custom-element", class extends Component {
 
 ## without templates
 
-if static attribute ```Component.template``` isn't defined and ```component.render``` returns undefined no template is rendered.
+if static attribute ```Component.template``` isn't defined and ```component.render``` returns undefined no template is
+rendered.
 
 for example
 
@@ -165,7 +160,8 @@ customElements.define("my-element", class extends Component {
 
 to use the build-in template system just return the html in the ```render()``` method.
 
-all renders are compared to the old render output and apply similar to the [Reconciliation](https://reactjs.org/docs/reconciliation.html) algorithm to avoid re-creating the same HTMLElements.
+all renders are compared to the old render output and apply similar to
+the [Reconciliation](https://reactjs.org/docs/reconciliation.html) algorithm to avoid re-creating the same HTMLElements.
 
 inline template example
 
