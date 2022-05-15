@@ -28,6 +28,15 @@ customElements.define("my-root", class extends Component {
           x: 500,
           y: 600
         }
+      },
+      {
+        name: "C",
+        color: "blue",
+        selected: false,
+        location: {
+          x: 800,
+          y: 150
+        }
       }
     ];
   }

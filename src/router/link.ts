@@ -10,31 +10,36 @@ export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Compon
   private readonly clickListener: (ev: Event) => void;
 
   public static tagName: string = "route-link";
+  private readonly popStateListener: () => void;
 
   constructor() {
     super();
-    this.clickListener = (ev) => {
-      ev.preventDefault();
-      if (!this.state.active) {
+    this.popStateListener = () => {
+      const isActive = isPathLocation(this.dataset.path);
+      if (this.state.active !== isActive) {
         this.setState({
-          active: true
+          active: isActive
         } as Partial<S>);
       }
+    };
+    this.clickListener = (ev) => {
+      ev.preventDefault();
+      this.setState({
+        active: !this.state.active
+      } as Partial<S>);
       historyPushPath(this.dataset.path as string);
     };
   }
 
   public connectedCallback() {
     this.addEventListener("click", this.clickListener);
-    const isActive = isPathLocation(this.dataset.path);
-    if (this.state.active !== isActive) {
-      this.state.active = isActive;
-    }
+    window.addEventListener("popstate", this.popStateListener);
     return super.connectedCallback();
   }
 
   public disconnectedCallback() {
     this.removeEventListener("click", this.clickListener);
+    window.removeEventListener("popstate", this.popStateListener);
   }
 
   public render(): string | void {
