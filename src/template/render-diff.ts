@@ -1,4 +1,4 @@
-import {ITemplateNode} from "../template/utils/template";
+import {ITemplateNode} from "./utils/template.js";
 
 function removeChild(c: ITemplateNode) {
   if (c.ref) {

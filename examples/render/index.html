@@ -1,0 +1,32 @@
+<html>
+<body>
+<my-root><p>children2</p></my-root>
+<script type="module">
+  import {render, nodeList2Array} from "./lib/index.js";
+
+  customElements.define("my-root", class extends HTMLElement {
+    constructor() {
+      super();
+      const children = nodeList2Array(this.childNodes);
+      const div = document.createElement("div");
+      this.append(div);
+
+      let count = 0;
+
+      const refresh = (div) => {
+        render(div, '<p>hello</p>{children}<p>{text}</p><!--{template.html}--><button data-on-click="{click}">clicked {count}</button>', {
+          children,
+          count,
+          text: "wORLD",
+          click: () => {
+            count++;
+            refresh(div);
+          }
+        });
+      }
+      refresh(div);
+    }
+  });
+</script>
+</body>
+</html>

@@ -24,12 +24,13 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   public subscribe<S, R>(store: Store<S>, path: string, selector: Selector<S, R>) {
+    set(this.state, path, selector(store.getState()));
     this.storeListeners.push({
       path,
       store,
       selector,
       listener: (value: R) => {
-        this.setState(set(this.state, path, value));
+        this.setState(set({...this.state}, path, value));
       }
     });
   }
@@ -69,7 +70,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   public setState(args: Partial<S>, callback?: () => void): void {
-    const oldState = this.state;
+    const oldState = {...this.state};
     this.state = {
       ...this.state,
       ...args
@@ -89,7 +90,10 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   public refresh(callback?: () => void): void {
-    return render(this, callback);
+    if (!this.isConnected) {
+      return;
+    }
+    return render(this, undefined, undefined, callback, undefined, () => this.refresh(callback));
   }
 }
 

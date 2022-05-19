@@ -70,6 +70,7 @@ function dispatch<S = any>(store: Store, action: Action, listenerMap: Map<StoreL
       try {
         const result = listenerInfo.selector(state);
         if (result !== listenerInfo.lastResult) {
+          console.log("dispatch listener");
           listenerInfo.lastResult = result;
           listener(result);
         }

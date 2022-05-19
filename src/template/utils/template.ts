@@ -1,6 +1,8 @@
 import {get} from "./get.js";
 import {ComponentState} from "../../component/component.js";
 
+export type RefreshCallback = () => void;
+
 export type TemplateNodeType = "Element" | "Text" | "Comment" | "HTMLElementRef";
 
 export interface ITemplateNode<S extends Node = Node> {
@@ -62,6 +64,7 @@ export class TemplateHTMLElementRefNode extends TemplateNode<HTMLElement> {
 
   public create(parent: HTMLElement) {
     this.parent = parent;
+    this.update(this.ref);
     return this.ref;
   }
 
@@ -201,8 +204,11 @@ export interface IComponent<S extends ComponentState = ComponentState> extends H
 }
 
 export interface TemplateValues {
-  this: IComponent;
-  children: Array<Node | HTMLElement>; // alias to this.templateChildren
+  //this: undefined;
+  [key: string]: any;
+
+  //this: any;//IComponent;
+  //children: Array<Node | HTMLElement>; // alias to this.templateChildren
 }
 
 export function nodeList2Array(childNodes?: NodeListOf<ChildNode>): Array<Node | HTMLElement> {

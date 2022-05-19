@@ -1,18 +1,19 @@
 import {IComponent} from "../template/index.js";
 import {render as realRender} from "./render.js";
+import {TemplateValues} from "../template/utils/index.js";
+import {RefreshCallback} from "../template/utils/template.js";
 
 const refreshTimeouts = new WeakMap<IComponent, { timeout: any, preRenders: (() => void)[], listeners: (() => void)[] }>();
 
-export function render(component: IComponent, listener?: () => void, preRender?: () => void): void {
+export function render(component: IComponent, template?: string, values?: TemplateValues, listener?: () => void, preRender?: () => void, refresh?: RefreshCallback): void {
   const refreshTimeout = refreshTimeouts.get(component);
   if (refreshTimeout) {
     clearTimeout(refreshTimeout.timeout);
   }
-  if (!component.isConnected) {
-    refreshTimeouts.delete(component);
-    return;
-  }
   // console.log("queue render for %s", component.tagName);
+  refresh = refresh ? refresh : () => {
+    render(component, template, values, undefined, undefined, refresh);
+  };
   const listeners = (refreshTimeout && refreshTimeout.listeners ? refreshTimeout.listeners : []);
   const preRenders = (refreshTimeout && refreshTimeout.preRenders ? refreshTimeout.preRenders : []);
   refreshTimeouts.set(component, {
@@ -30,7 +31,7 @@ export function render(component: IComponent, listener?: () => void, preRender?:
               console.error(e);
             }
           }
-          realRender(component);
+          realRender(component, template, values, refresh);
           for (const listener of listeners) {
             try {
               listener();
