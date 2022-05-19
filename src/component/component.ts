@@ -1,4 +1,4 @@
-import {IComponent, nodeList2Array} from "../template/index.js";
+import {dispose, IComponent, nodeList2Array} from "../template/index.js";
 import {Selector, Store, StoreListener} from "../store.js";
 import {set} from "../template/utils/index.js";
 import {render} from "./render-queue.js";
@@ -55,6 +55,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
   }
 
   public disconnectedCallback() {
+    dispose(this);
     return this.unSubscribeAll();
   }
 
