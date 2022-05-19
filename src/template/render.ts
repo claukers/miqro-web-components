@@ -15,16 +15,15 @@ export function renderTemplate(renderOutput: string | string[] | void, values: T
   }
 }
 
-export function renderTemplateOnElement(template: string, element: HTMLElement, values?: TemplateValues, refresh?: RefreshCallback) {
+export function renderTemplateOnElement(template: string, element: HTMLElement, values?: TemplateValues, refresh?: RefreshCallback): void {
   const component = element as IComponent;
-
   const output = renderTemplate(template, values ? values : {
     this: component,
     children: component.templateChildren ? component.templateChildren : []
   }, refresh);
   if (output) {
-    const oldTemplate = lastTemplateMap.get(component);
-    lastTemplateMap.set(component, output);
+    const oldTemplate = weakMapGet.call(lastTemplateMap, component);
+    weakMapSet.call(lastTemplateMap, component, output);
     renderTemplateNodeDiff(component, output, oldTemplate);
     if (oldTemplate) {
       disposeAll(oldTemplate);
@@ -34,13 +33,17 @@ export function renderTemplateOnElement(template: string, element: HTMLElement, 
 
 export function dispose(element: HTMLElement) {
   const component = element as IComponent;
-  const oldTemplate = lastTemplateMap.get(component);
+  const oldTemplate = weakMapGet.call(lastTemplateMap, component);
   if (oldTemplate) {
     disposeAll(oldTemplate);
+    weakMapDelete.call(lastTemplateMap, component);
   }
 }
 
 const lastTemplateMap = new WeakMap<IComponent, ITemplateNode[]>();
+const weakMapGet = WeakMap.prototype.get;
+const weakMapSet = WeakMap.prototype.set;
+const weakMapDelete = WeakMap.prototype.delete;
 
 function disposeAll(nodes: ITemplateNode[]): void {
   for (const n of nodes) {

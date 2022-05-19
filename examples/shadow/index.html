@@ -1,0 +1,46 @@
+<html>
+<body>
+<my-root></my-root>
+<script type="module">
+  import {render, dispose} from "./lib/index.js";
+
+  const weakMapGet = WeakMap.prototype.get;
+  const weakMapSet = WeakMap.prototype.set;
+  const attachShadow = HTMLElement.prototype.attachShadow;
+
+  const shadowMap = new WeakMap();
+
+  customElements.define("my-root", class extends HTMLElement {
+    constructor() {
+      super();
+      const shadowRoot = attachShadow.call(this, {
+        mode: "closed"
+      });
+      weakMapSet.call(shadowMap, this, shadowRoot);
+      let count = 0;
+      let showButton = true;
+      const refresh = () => {
+        render(shadowRoot, '<p>hello</p><p>{text}</p><!--{template.html}--><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>', {
+          count,
+          showButton,
+          text: "wORLD",
+          click: () => {
+            count++;
+            if(count > 10) {
+              showButton = false;
+            }
+            refresh();
+          }
+        });
+      }
+      refresh();
+    }
+
+    disconnectedCallback() {
+      const shadowRoot = weakMapGet.prototype.call(shadowMap, this);
+      dispose(shadowRoot);
+    }
+  });
+</script>
+</body>
+</html>
