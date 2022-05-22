@@ -12,7 +12,7 @@ export function render(component: IComponent, template?: string, values?: Templa
   const currentListeners = (oldRefreshTimeout && oldRefreshTimeout.listeners ? oldRefreshTimeout.listeners : []);
   const currentPreRenders = (oldRefreshTimeout && oldRefreshTimeout.preRenders ? oldRefreshTimeout.preRenders : []);
   refreshTimeouts.set(component, {
-    timeout: setTimeout(() => {
+    timeout: setTimeout(function queueRenderTrigger() {
       try {
         const refreshTimeout = refreshTimeouts.get(component);
         if (refreshTimeout) {
