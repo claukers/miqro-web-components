@@ -10,7 +10,6 @@ customElements.define("node-element", class extends Component {
       top: parseInt(this.dataset.y, 10) + parseInt(this.dataset.offsetY, 10)
     };
     this.state.selected = this.dataset.selected === "true" ? true : false;
-    console.log("Node Created!");
   }
 
   static get observedAttributes() {

@@ -25,7 +25,6 @@ export function renderTemplateNodeDiff(root: Node, current?: ITemplateNode<Node>
         // append new element
         const createdRef = currentTemplateNode.create(root);
         appendChildren(root, createdRef);
-        continue;
       } else {
         if (!currentTemplateNode.compare(oldTemplateNode)) {
           //console.log("render node create on %s", currentTemplateNode.toString());
