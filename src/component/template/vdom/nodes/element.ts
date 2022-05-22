@@ -28,7 +28,7 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
     }
     this.parent = parent;
     const ref = document.createElement(this.tagName);
-    this.update(ref);
+    this.update(ref, true);
     for (const refListener of this.refListeners) {
       refListener.listener(ref);
     }
@@ -41,15 +41,8 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
     return ref;
   }
 
-  public update(ref: HTMLElement): void {
+  public update(ref: HTMLElement, first = false): void {
     super.update(ref);
-    const asComponent = ref as IComponent;
-    if (asComponent.state) {
-      asComponent.state = {
-        ...asComponent.state,
-        ...this.state
-      };
-    }
     for (const attribute of this.attributes) {
       if (ref.getAttribute(attribute.attribute) !== attribute.value) {
         ref.setAttribute(attribute.attribute, attribute.value);
@@ -58,6 +51,16 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
 
     for (const listener of this.listeners) {
       ref.addEventListener(listener.eventName, listener.callback);
+    }
+
+    const asComponent = ref as IComponent;
+    if (first && asComponent.state) {
+      asComponent.state = {
+        ...asComponent.state,
+        ...this.state
+      };
+    } else if (!first && asComponent.setState && typeof asComponent.setState === "function") {
+      asComponent.setState(this.state);
     }
   }
 
