@@ -27,6 +27,7 @@ describe("component.unit.test", () => {
     }, distPath);
 
     const component = new Component();
+    component.isConnected = true;
     component.childNodes = "childNodes";
     component.connectedCallback();
     strictEqual(render.callCount, 1);
@@ -50,12 +51,17 @@ describe("component.unit.test", () => {
 
       });
 
+      const dispose = fake(() => {
+
+      });
+
       const {Component} = requireMock(testFilePath, {
         "./render-queue.js": {
           render
         },
         "./template/index.js": {
           nodeList2Array,
+          dispose,
           set
         },
         "../store.js": {}
@@ -63,6 +69,16 @@ describe("component.unit.test", () => {
 
       const component = new Component();
       const store = {
+        getState: fake(() => {
+          return {
+            currentUser: {
+              name: "name",
+              details: {
+                info: "info"
+              }
+            }
+          };
+        }),
         subscribe: fake(() => {
           switch (store.subscribe.callCount) {
             case 1:
@@ -118,6 +134,7 @@ describe("component.unit.test", () => {
 
       component.disconnectedCallback();
 
+      strictEqual(dispose.callCount, 1);
       strictEqual(store.subscribe.callCount, 2);
       strictEqual(store.unSubscribe.callCount, 4);
       strictEqual(component.storeListeners.length, 2);
@@ -162,7 +179,7 @@ describe("component.unit.test", () => {
       "./render-queue.js": {
         render
       },
-      "../template/index.js": {},
+      "./template/index.js": {},
       "../store.js": {}
     }, distPath);
 
@@ -207,6 +224,6 @@ describe("component.unit.test", () => {
     strictEqual(didUpdate.callCount, 1);
     strictEqual(render.callCount, 1);
     strictEqual(render.callArgs[0][0], component);
-    strictEqual(render.callArgs[0][1], callback);
+    strictEqual(render.callArgs[0][3], callback);
   });
 });

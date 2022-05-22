@@ -18,7 +18,7 @@ describe("template.nodes.comment unit tests", () => {
       return fakeTokenPath;
     });
     const {renderCommentNode} = requireMock(testFilePath, {
-      ["../utils/index.js"]: {
+      ["../../utils/index.js"]: {
         getTemplateTokenValue
       },
     }, distPath);
@@ -28,7 +28,7 @@ describe("template.nodes.comment unit tests", () => {
 
       })
     };
-    const ret = renderCommentNode(fakeNode, fakeValues);
+    const ret = await renderCommentNode(fakeNode, fakeValues);
     strictEqual(ret.length, 1);
     strictEqual(ret[0].textContent, fakeNode.textContent);
     delete globalThis.document;
@@ -52,17 +52,17 @@ describe("template.nodes.comment unit tests", () => {
       return fakeRender;
     });
     const {renderCommentNode} = requireMock(testFilePath, {
-      ["../utils/index.js"]: {
+      ["../../utils/index.js"]: {
         getTemplateTokenValue
       },
-      ["../cache.js"]: {
+      ["../../cache.js"]: {
         getTemplateFromLocation
       },
-      ["../render.js"]: {
+      ["../../render.js"]: {
         renderTemplate
       }
     }, distPath);
-    const ret = renderCommentNode(fakeNode, fakeValues);
+    const ret = await renderCommentNode(fakeNode, fakeValues);
     strictEqual(ret, fakeRender);
     strictEqual(getTemplateTokenValue.callCount, 1);
     strictEqual(getTemplateTokenValue.callArgs[0][0], fakeNode.textContent);
@@ -72,7 +72,7 @@ describe("template.nodes.comment unit tests", () => {
     strictEqual(renderTemplate.callArgs[0][0], fakeTemplate);
   });
 
-  it("template path templateLocation as promise calls this.refresh after resolve", async () => {
+  it("template path templateLocation as promise", async () => {
     const fakeNode = {
       textContent: "fakeTextContent"
     };
@@ -100,32 +100,25 @@ describe("template.nodes.comment unit tests", () => {
       return fakeRender;
     });
     const {renderCommentNode} = requireMock(testFilePath, {
-      ["../utils/index.js"]: {
+      ["../../utils/index.js"]: {
         getTemplateTokenValue
       },
-      ["../cache.js"]: {
+      ["../../cache.js"]: {
         getTemplateFromLocation
       },
-      ["../render.js"]: {
+      ["../../render.js"]: {
         renderTemplate
       }
     }, distPath);
-    const ret = renderCommentNode(fakeNode, fakeValues);
-    strictEqual(ret.length, 0);
+    const ret = await renderCommentNode(fakeNode, fakeValues);
+    console.dir(ret);
+    strictEqual(ret.length, 10);
     strictEqual(getTemplateTokenValue.callCount, 1);
     strictEqual(getTemplateTokenValue.callArgs[0][0], fakeNode.textContent);
     strictEqual(getTemplateFromLocation.callCount, 1);
     strictEqual(getTemplateFromLocation.callArgs[0][0], fakeTokenPath);
-    strictEqual(renderTemplate.callCount, 0);
-
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 5);
-    });
-
-    strictEqual(renderTemplate.callCount, 0);
-    strictEqual(fakeValues.this.refresh.callCount, 1);
+    strictEqual(renderTemplate.callCount, 1);
+    strictEqual(renderTemplate.callArgs[0][0], fakeTemplate);
 
   });
 });

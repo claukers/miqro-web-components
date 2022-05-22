@@ -3,7 +3,7 @@ const {resolve} = require("path");
 const {strictEqual} = require("assert");
 const {distPath} = require("../../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "template", "cache.js");
+const testFilePath = resolve(distPath, "cjs", "component", "template", "cache.js");
 
 describe("template.cache unit tests", () => {
   it("cannot call setCache twice", async () => {

@@ -47,7 +47,7 @@ describe("template.nodes.element unit tests", () => {
         return renderChildNodesRet;
       });
       const {renderElementNode} = requireMock(testFilePath, {
-        ["../attributes/index.js"]: {
+        ["./attributes/index.js"]: {
           dataForEach,
           dataIf,
           dataIfn,
@@ -55,7 +55,7 @@ describe("template.nodes.element unit tests", () => {
           dataRef,
           dataOnAndOtherAttributes
         },
-        ["../render-children.js"]: {
+        ["../../render-children.js"]: {
           renderChildNodes
         }
       }, distPath);

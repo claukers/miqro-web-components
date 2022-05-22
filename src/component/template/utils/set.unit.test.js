@@ -3,7 +3,7 @@ const {resolve} = require("path");
 const {strictEqual} = require("assert");
 const {distPath} = require("../../../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "template", "utils", "set.js");
+const testFilePath = resolve(distPath, "cjs", "component", "template", "utils", "set.js");
 
 describe("template.util.set unit tests", () => {
   it("happy path nested with {}", async () => {

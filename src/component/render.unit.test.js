@@ -13,7 +13,7 @@ describe("render.unit.test", () => {
     const getTemplateLocation = fake(() => {
 
     });
-    const renderTemplate = fake(() => {
+    const renderTemplate = fake(async () => {
       return nodeList;
     });
     const renderTemplateNodeDiff = fake(() => {
@@ -29,22 +29,19 @@ describe("render.unit.test", () => {
       })
     };
     const {render} = requireMock(testFilePath, {
-      "./render-diff.js": {
-        renderTemplateNodeDiff
-      },
-      "../template/index.js": {
-        getTemplateLocation, renderTemplate
+      "./template/index.js": {
+        getTemplateLocation, renderTemplateOnElement: renderTemplate
       }
     }, distPath);
     strictEqual(component.innerHTML, undefined);
-    render(component);
+    await render(component);
     strictEqual(renderTemplate.callCount, 1);
-    strictEqual(renderTemplateNodeDiff.callCount, 1);
+    /*strictEqual(renderTemplateNodeDiff.callCount, 1);
     strictEqual(renderTemplateNodeDiff.callArgs[0][0], component);
-    strictEqual(renderTemplateNodeDiff.callArgs[0][1], nodeList);
+    strictEqual(renderTemplateNodeDiff.callArgs[0][1], nodeList);*/
     strictEqual(getTemplateLocation.callCount, 0);
     strictEqual(renderTemplate.callArgs[0][0], "stringtemplate");
-    strictEqual(renderTemplate.callArgs[0][1].this, component);
+    strictEqual(renderTemplate.callArgs[0][1], component);
     strictEqual(component.innerHTML, undefined);
     strictEqual(component.appendChild.callCount, 0);
   });
@@ -56,7 +53,7 @@ describe("render.unit.test", () => {
     const getTemplateFromLocation = fake(() => {
       return template;
     });
-    const renderTemplate = fake(() => {
+    const renderTemplate = fake(async () => {
       return nodeList;
     });
     const renderTemplateNodeDiff = fake(() => {
@@ -76,18 +73,15 @@ describe("render.unit.test", () => {
       })
     };
     const {render} = requireMock(testFilePath, {
-      "./render-diff.js": {
-        renderTemplateNodeDiff
-      },
-      "../template/index.js": {
-        getTemplateFromLocation, renderTemplate
+      "./template/index.js": {
+        getTemplateFromLocation, renderTemplateOnElement: renderTemplate
       }
     }, distPath);
     strictEqual(component.innerHTML, undefined);
-    render(component);
+    await render(component);
     strictEqual(renderTemplate.callCount, 1);
     strictEqual(renderTemplate.callArgs[0][0], template);
-    strictEqual(renderTemplate.callArgs[0][1].this, component);
+    strictEqual(renderTemplate.callArgs[0][1], component);
     strictEqual(component.constructor.hasOwnProperty.callCount, 1);
     strictEqual(component.constructor.hasOwnProperty.callArgs[0][0], "template");
     strictEqual(getTemplateFromLocation.callCount, 1);
@@ -107,7 +101,7 @@ describe("render.unit.test", () => {
         }, 0);
       });
     });
-    const renderTemplate = fake(() => {
+    const renderTemplate = fake(async () => {
       return nodeList;
     });
     const renderTemplateNodeDiff = fake(() => {
@@ -125,15 +119,12 @@ describe("render.unit.test", () => {
       })
     };
     const {render} = requireMock(testFilePath, {
-      "./render-diff.js": {
-        renderTemplateNodeDiff
-      },
-      "../template/index.js": {
-        getTemplateFromLocation, renderTemplate
+      "./template/index.js": {
+        getTemplateFromLocation, renderTemplateOnElement: renderTemplate
       }
     }, distPath);
     strictEqual(component.innerHTML, undefined);
-    render(component);
+    await render(component);
     strictEqual(renderTemplate.callCount, 0);
     await new Promise((resolve) => {
       setTimeout(() => {
@@ -142,43 +133,14 @@ describe("render.unit.test", () => {
     });
     strictEqual(renderTemplate.callCount, 1);
     strictEqual(renderTemplate.callArgs[0][0], template);
-    strictEqual(renderTemplateNodeDiff.callCount, 1);
+    /*strictEqual(renderTemplateNodeDiff.callCount, 1);
     strictEqual(renderTemplateNodeDiff.callArgs[0][0], component);
-    strictEqual(renderTemplateNodeDiff.callArgs[0][1], nodeList);
-    strictEqual(renderTemplate.callArgs[0][1].this, component);
+    strictEqual(renderTemplateNodeDiff.callArgs[0][1], nodeList);*/
+    strictEqual(renderTemplate.callArgs[0][1], component);
     strictEqual(component.constructor.hasOwnProperty.callCount, 1);
     strictEqual(component.constructor.hasOwnProperty.callArgs[0][0], "template");
     strictEqual(getTemplateFromLocation.callCount, 1);
     strictEqual(getTemplateFromLocation.callArgs[0][0], "templatePath");
-    strictEqual(component.innerHTML, undefined);
-    strictEqual(component.appendChild.callCount, 0);
-  });
-
-  it("isConnected false render returns string doesn't call renderTemplate", async () => {
-    const getTemplateFromLocation = fake(() => {
-
-    });
-    const nodeList2Array = fake(() => {
-
-    });
-    const renderTemplate = fake(() => {
-
-    });
-    const component = {
-      isConnected: false,
-      render: fake(() => {
-        return "stringtemplate"
-      }),
-      appendChild: fake(() => {
-      })
-    };
-    const {render} = requireMock(testFilePath, {
-      "../template/index.js": {
-        getTemplateFromLocation, nodeList2Array, renderTemplate
-      }
-    }, distPath);
-    render(component);
-    strictEqual(renderTemplate.callCount, 0);
     strictEqual(component.innerHTML, undefined);
     strictEqual(component.appendChild.callCount, 0);
   });

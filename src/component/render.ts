@@ -1,10 +1,4 @@
-import {
-  RefreshCallback,
-  TemplateValues,
-  getTemplateFromLocation,
-  IComponent,
-  renderTemplateOnElement
-} from "./template/index.js";
+import {getTemplateFromLocation, IComponent, renderTemplateOnElement, TemplateValues} from "./template/index.js";
 
 export function render(component: IComponent, optionalTemplate?: string | Promise<string>, values?: TemplateValues): void {
   // console.log("render %s", component.tagName);

@@ -1,6 +1,5 @@
-import {renderCommentNode, renderElementNode, renderTextNode} from "./vdom/nodes";
+import {renderCommentNode, renderElementNode, renderTextNode} from "./vdom/nodes/index.js";
 import {TemplateValues} from "./utils";
-import {RefreshCallback} from "./utils/template.js";
 import {TemplateNode} from "./vdom";
 
 export async function renderChildNodes(childNodes: NodeListOf<ChildNode>, values: TemplateValues): Promise<Array<TemplateNode>> {

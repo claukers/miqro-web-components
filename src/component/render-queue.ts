@@ -1,4 +1,4 @@
-import {TemplateValues, RefreshCallback, IComponent} from "./template/index.js";
+import {IComponent, TemplateValues} from "./template/index.js";
 import {render as realRender} from "./render.js";
 
 const refreshTimeouts = new WeakMap<IComponent, { timeout: any, preRenders: (() => void)[], listeners: (() => void)[] }>();
