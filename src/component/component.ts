@@ -60,9 +60,6 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
 
   }
 
-  /*
-  will be called before a render if returns true this.render will be called.
-   */
   protected didUpdate(oldState: S): boolean {
     return true;
   }
