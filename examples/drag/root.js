@@ -50,8 +50,8 @@ customElements.define("my-root", class extends Component {
   }
 
   isMatch(ev, n) {
-    const x = (n.location.x + this.state.offset.x);
-    const y = (n.location.y + this.state.offset.y);
+    const x = (n.location.x - this.state.offset.x);
+    const y = (n.location.y - this.state.offset.y);
     const mX = parseInt(ev.clientX, 10);
     const mY = parseInt(ev.clientY, 10);
     const match = mX >= x && mX <= (x + 100) && mY >= y && mY <= y + 100;

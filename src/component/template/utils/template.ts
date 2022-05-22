@@ -5,12 +5,12 @@ export type RefreshCallback = () => void;
 
 export type ComponentState = { [p: string]: any };
 
-export interface IComponent<S extends ComponentState = ComponentState> extends HTMLElement {
+export interface IComponent<S extends ComponentState = ComponentState> extends Node {
   stateChangedCallback?(oldState: S): boolean;
 
   state?: S;
   templateChildren?: Array<Node | HTMLElement>;
-  render?: () => string | void;
+  render?: () => Promise<string> | string | void;
   setState?: (args: any, callback?: () => void) => void;
   refresh?: () => void;
 }
@@ -85,7 +85,7 @@ export function removeChildrenFrom(old: ITemplateNode[], from: number): void {
   splicedOld.forEach(removeChild);
 }
 
-export function appendChildren(root: HTMLElement, children: Node | Node[]) {
+export function appendChildren(root: Node, children: Node | Node[]) {
   if (children instanceof Array) {
     for (const cR of children) {
       root.appendChild(cR);

@@ -1,7 +1,6 @@
 import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef, dataState} from "./attributes";
 import {renderChildNodes} from "../../render-children.js";
 import {IComponent, TemplateValues} from "../../utils";
-import {RefreshCallback} from "../../utils/template.js";
 import {TemplateNode} from "./node.js";
 
 export class TemplateElementNode extends TemplateNode<HTMLElement> {
@@ -78,22 +77,15 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
   }
 }
 
-export function renderElementNode(node: Node, values: TemplateValues, refresh?: RefreshCallback): TemplateNode[] {
-  return dataForEach(node, values, (node: Node, values: TemplateValues) => {
+export async function renderElementNode(node: Node, values: TemplateValues): Promise<TemplateNode[]> {
+  return dataForEach(node, values, async (node: Node, values: TemplateValues) => {
     if (dataIf(node as Element, values) && dataIfn(node as Element, values)) {
       const tagName = (node as Element).tagName;
-      //const childElement = document.createElement(tagName);
       const childElement = new TemplateElementNode(tagName);
       dataState(node, values, childElement);
       dataRef(node, values, childElement);
       dataOnAndOtherAttributes(node, values, childElement);
-
-      childElement.children = renderChildNodes(node.childNodes, values, refresh);
-      /*const childrenNodes = renderChildNodes(node.childNodes, values);
-      for (const child of childrenNodes) {
-        childElement.appendChild(child);
-      }*/
-
+      childElement.children = await renderChildNodes(node.childNodes, values);
       return childElement;
     }
   });

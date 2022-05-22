@@ -3,7 +3,7 @@ export {ITemplateNode, TemplateNode} from "./nodes/node.js";
 import {ITemplateNode} from "./nodes/node.js";
 import {appendChildren, removeChildrenFrom} from "../utils/template.js";
 
-export function renderTemplateNodeDiff(root: HTMLElement, current?: ITemplateNode<Node>[], old?: ITemplateNode<Node>[]): void {
+export function renderTemplateNodeDiff(root: Node, current?: ITemplateNode<Node>[], old?: ITemplateNode<Node>[]): void {
   // do some copying to not alter the original three
   old = old ? [...old] : [];
   current = current ? [...current] : [];

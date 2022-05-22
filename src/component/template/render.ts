@@ -1,46 +1,59 @@
 import {renderChildNodes} from "./render-children.js";
-import {IComponent, RefreshCallback, TemplateValues} from "./utils/template.js";
-import {ITemplateNode, TemplateNode, renderTemplateNodeDiff} from "./vdom";
+import {IComponent, TemplateValues} from "./utils/template.js";
+import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "./vdom";
 
-export function renderTemplate(renderOutput: string | string[] | void, values: TemplateValues, refresh?: RefreshCallback): Array<TemplateNode> | undefined {
+export function renderTemplate(renderOutput: string | string[] | void, values: TemplateValues, xml?: XMLDocument): Promise<Array<TemplateNode>> | undefined {
   //console.log("renderOnElement [%s] dataset [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset);
   if (renderOutput instanceof Array) {
     renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
   }
   if (typeof renderOutput === "string") {
-    const xmlDocument: XMLDocument = (new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument;
+    const xmlDocument: XMLDocument = xml ? xml : ((new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument);
 
     const root = xmlDocument.children[0];
-    return renderChildNodes(root.childNodes, values, refresh);
+    return renderChildNodes(root.childNodes, values);
   }
 }
 
-export function renderTemplateOnElement(template: string, element: HTMLElement, values?: TemplateValues, refresh?: RefreshCallback): void {
+export async function renderTemplateOnElement(template: string, element: Node, values?: TemplateValues): Promise<void> {
   const component = element as IComponent;
-  const output = renderTemplate(template, values ? values : {
+  const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, component);
+
+  const xmlDocument = oldTemplate && oldTemplate.template === template ?
+    oldTemplate.xmlDocument :
+    ((new DOMParser()).parseFromString(`<root>${template}</root>`, "text/xml") as XMLDocument);
+
+
+  const output = await renderTemplate(template, values ? values : {
     this: component,
     children: component.templateChildren ? component.templateChildren : []
-  }, refresh);
+  }, xmlDocument);
+
   if (output) {
-    const oldTemplate = weakMapGet.call(lastTemplateMap, component);
-    weakMapSet.call(lastTemplateMap, component, output);
-    renderTemplateNodeDiff(component, output, oldTemplate);
+    weakMapSet.call(lastTemplateMap, component, {output, template, xmlDocument} as TemplateMapValue);
+    renderTemplateNodeDiff(element, output, oldTemplate?.output);
     if (oldTemplate) {
-      disposeAll(oldTemplate);
+      disposeAll(oldTemplate.output);
     }
   }
 }
 
 export function dispose(element: HTMLElement) {
   const component = element as IComponent;
-  const oldTemplate = weakMapGet.call(lastTemplateMap, component);
+  const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, component);
   if (oldTemplate) {
-    disposeAll(oldTemplate);
+    disposeAll(oldTemplate.output);
     weakMapDelete.call(lastTemplateMap, component);
   }
 }
 
-const lastTemplateMap = new WeakMap<IComponent, ITemplateNode[]>();
+interface TemplateMapValue {
+  output: ITemplateNode[];
+  xmlDocument: XMLDocument;
+  template: string;
+}
+
+const lastTemplateMap = new WeakMap<IComponent, TemplateMapValue>();
 const weakMapGet = WeakMap.prototype.get;
 const weakMapSet = WeakMap.prototype.set;
 const weakMapDelete = WeakMap.prototype.delete;

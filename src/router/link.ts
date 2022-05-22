@@ -43,7 +43,7 @@ export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Compon
     window.removeEventListener("popstate", this.popStateListener);
   }
 
-  public render(): string | void {
+  public render(): Promise<string> | string | void {
     if (this.classList.contains("active") && !this.state.active) {
       this.classList.remove("active");
     } else if (!this.classList.contains("active") && this.state.active) {

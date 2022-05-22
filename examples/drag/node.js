@@ -34,8 +34,8 @@ customElements.define("node-element", class extends Component {
     } else {
       this.setState({
         position: {
-          left: parseInt(this.dataset.x, 10) + parseInt(this.dataset.offsetX, 10),
-          top: parseInt(this.dataset.y, 10) + parseInt(this.dataset.offsetY, 10)
+          left: parseInt(this.dataset.x, 10) - parseInt(this.dataset.offsetX, 10),
+          top: parseInt(this.dataset.y, 10) - parseInt(this.dataset.offsetY, 10)
         }
       });
     }

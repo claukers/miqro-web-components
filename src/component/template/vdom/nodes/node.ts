@@ -6,7 +6,7 @@ export interface ITemplateNode<S extends Node = Node> {
   type: TemplateNodeType;
   parent?: HTMLElement;
 
-  create(parent: HTMLElement): S;
+  create(parent: Node): S;
 
   update(ref: S): void;
 

@@ -56,7 +56,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     return this.unSubscribeAll();
   }
 
-  public render(): string | void {
+  public render(): Promise<string> | string | void {
 
   }
 
@@ -91,7 +91,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     if (!this.isConnected) {
       return;
     }
-    return render(this, undefined, undefined, callback, undefined, () => this.refresh(callback));
+    return render(this, undefined, undefined, callback, undefined);
   }
 }
 

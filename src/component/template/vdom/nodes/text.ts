@@ -43,7 +43,6 @@ class TemplateHTMLElementRefNode extends TemplateNode<HTMLElement> {
 export function renderTextNode(node: Node, values: TemplateValues): Array<TemplateNode> {
   let ret: Array<TemplateNode> = [];
   if (node.textContent) {
-    //const firstTextNode = document.createTextNode("");
     const firstTextNode = new TemplateTextNode("");
     let currentTextNode = firstTextNode;
     firstTextNode.textContent = node.textContent.replace(re, (match) => {
@@ -58,7 +57,6 @@ export function renderTextNode(node: Node, values: TemplateValues): Array<Templa
         if (isNodeArray || value instanceof HTMLElement) {
           ret.push(currentTextNode);
           ret = ret.concat(new TemplateHTMLElementRefNode(value as HTMLElement));
-          //currentTextNode = document.createTextNode("");
           currentTextNode = new TemplateTextNode("");
           return "";
         } else {

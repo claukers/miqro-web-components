@@ -2,7 +2,7 @@ import {get, getTemplateTokenValue, TemplateValues} from "../../../utils";
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM} from "./constants.js";
 import {TemplateNode} from "../node.js";
 
-export function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => TemplateNode | undefined): TemplateNode[] {
+export async function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => Promise<TemplateNode | undefined>): Promise<TemplateNode[]> {
   const forEachValue = (node as Element).getAttribute(DATA_FOR_EACH);
   const forEachItemValue = (node as Element).getAttribute(DATA_FOR_EACH_ITEM);
   if (forEachValue !== null) {
@@ -17,7 +17,7 @@ export function dataForEach(node: Node, values: TemplateValues, cb: (node: Node,
       for (let index = 0; index < value.length; index++) {
         vValues[forEachItemValue !== null ? forEachItemValue : "item"] = value[index];
         vValues.index = index;
-        const r = cb(node, vValues);
+        const r = await cb(node, vValues);
         if (r) {
           ret.push(r);
         }
@@ -28,7 +28,7 @@ export function dataForEach(node: Node, values: TemplateValues, cb: (node: Node,
       throw new Error(`invalid value for ${DATA_FOR_EACH}`);
     }
   } else {
-    const ret = cb(node, values);
+    const ret = await cb(node, values);
     return ret ? [ret] : [];
   }
 }

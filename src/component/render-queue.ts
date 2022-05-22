@@ -3,17 +3,14 @@ import {render as realRender} from "./render.js";
 
 const refreshTimeouts = new WeakMap<IComponent, { timeout: any, preRenders: (() => void)[], listeners: (() => void)[] }>();
 
-export function render(component: IComponent, template?: string, values?: TemplateValues, listener?: () => void, preRender?: () => void, refresh?: RefreshCallback): void {
-  const refreshTimeout = refreshTimeouts.get(component);
-  if (refreshTimeout) {
-    clearTimeout(refreshTimeout.timeout);
+export function render(component: IComponent, template?: string, values?: TemplateValues, listener?: () => void, preRender?: () => void): void {
+  const oldRefreshTimeout = refreshTimeouts.get(component);
+  if (oldRefreshTimeout) {
+    clearTimeout(oldRefreshTimeout.timeout);
   }
   // console.log("queue render for %s", component.tagName);
-  refresh = refresh ? refresh : () => {
-    render(component, template, values, undefined, undefined, refresh);
-  };
-  const listeners = (refreshTimeout && refreshTimeout.listeners ? refreshTimeout.listeners : []);
-  const preRenders = (refreshTimeout && refreshTimeout.preRenders ? refreshTimeout.preRenders : []);
+  const currentListeners = (oldRefreshTimeout && oldRefreshTimeout.listeners ? oldRefreshTimeout.listeners : []);
+  const currentPreRenders = (oldRefreshTimeout && oldRefreshTimeout.preRenders ? oldRefreshTimeout.preRenders : []);
   refreshTimeouts.set(component, {
     timeout: setTimeout(() => {
       try {
@@ -29,7 +26,7 @@ export function render(component: IComponent, template?: string, values?: Templa
               console.error(e);
             }
           }
-          realRender(component, template, values, refresh);
+          realRender(component, template, values);
           for (const listener of listeners) {
             try {
               listener();
@@ -42,8 +39,8 @@ export function render(component: IComponent, template?: string, values?: Templa
         console.error(e);
       }
     }, 0),
-    listeners: listener ? listeners.concat(listener) : listeners,
-    preRenders: preRender ? preRenders.concat(preRender) : preRenders
+    listeners: listener ? currentListeners.concat(listener) : currentListeners,
+    preRenders: preRender ? currentPreRenders.concat(preRender) : currentPreRenders
   });
 
 }
