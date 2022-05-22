@@ -27,16 +27,14 @@ customElements.define("my-element", class extends Component {
 
 ```html
 <!--my-element.html-->
-<div>
-  <a href="#" data-on-click="{this.click}">click me</a>
-  <p>{this.dataset.text}</p>
-</div>
+<button data-on-click="{this.click}">click me</button>
+<p data-if="{this.state.clickCount}">clickCount: {this.state.clickCount}</p>
 ```
 
 ## Lifecycle
 
 the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent. The class
-implements the ```connectedCallback``` to render the template.
+implements the ```connectedCallback``` and ```disconnectedCallback``` to render the template and remove listeners attached to the element.
 
 - ```this.connectedCallback()``` ```->``` ```render template```
 - ```this.setState(partialState)``` ```->``` ```this.didUpdate(prevState)``` ```->``` ```render template```
@@ -82,86 +80,15 @@ customElements.define("custom-element", class extends Component {
 })
 ```
 
-## without templates
-
-if static attribute ```Component.template``` isn't defined and ```component.render``` returns undefined no template is
-rendered.
-
-for example
-
-```typescript
-customElements.define("my-custom", class extends Component {
-  constructor() {
-    super();
-    this.state = {
-      clickCount: 0
-    };
-    const containerDiv = new HTMLDivElement();
-    containerDiv.classList.add("container");
-    this.p = new HTMLParagraphElement();
-    const button = new HTMLButtonElement();
-    button.textContent = "click me";
-    button.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      this.setState({
-        clickCount: this.state.clickCount + 1
-      });
-    });
-    containerDiv.appendChild(p);
-    containerDiv.appendChild(button);
-  }
-
-  // render is used instead of connectedCallback to listen to state changes
-  render() {
-    this.p.textContent = "clicked " + this.state.clickCount;
-  }
-});
-```
-
 ## Template
 
-### Using external Template Engine
-
-to use an external template engine just return the html output of the template engine in the ```render()``` method.
-
-for example using pug
-
-```npm install pug --save```
-
-```typescript
-import {render as pugRender} from "pug";
-
-customElements.define("my-element", class extends Component {
-  render() {
-    return pugRender("p #{dataset.name}", this);
-  }
-})
-```
-
-this will pass the ```pug``` **html output** to the **built-in** template.
-
-to avoid using the **built-in** template return **undefined**, this will render the built-in template attributes
-like ```data-ref``` ineffective.
-
-```typescript
-import {render as pugRender} from "pug";
-
-const pugTemplate = "p #{dataset.name}";
-
-customElements.define("my-element", class extends Component {
-  render() {
-    pugRender(this);
-    return;
-  }
-})
-```
-
-### Built-in Template
+### Built-in Template Engine
 
 to use the build-in template system just return the html in the ```render()``` method.
 
 all renders are compared to the old render output and apply the difference similar to
-the [Reconciliation algorithm](https://reactjs.org/docs/reconciliation.html) from ReactJS to avoid re-creating the same HTMLElements.
+the [Reconciliation algorithm](https://reactjs.org/docs/reconciliation.html) from ReactJS to avoid re-creating the same
+HTMLElements.
 
 #### inline template example
 
@@ -327,6 +254,88 @@ will be included.
 setCache(require("./cache.json"));
 ```
 
+### Use Built-in Template engine without the Component Class
+
+example with ShadowRoot
+
+```typescript
+import {render} from "@miqro/web-components";
+
+const weakMapGet = WeakMap.prototype.get;
+const weakMapSet = WeakMap.prototype.set;
+const attachShadow = HTMLElement.prototype.attachShadow;
+
+const shadowMap = new WeakMap();
+
+customElements.define("my-root", class extends HTMLElement {
+  constructor() {
+    super();
+    const shadowRoot = attachShadow.call(this, {
+      mode: "closed"
+    });
+    weakMapSet.call(shadowMap, this, shadowRoot);
+    let count = 0;
+    let showButton = true;
+    const refresh = () => {
+      render(shadowRoot, '<p>hello</p><p>{text}</p><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>', {
+        count,
+        showButton,
+        text: 'wORLD',
+        click: () => {
+          count++;
+          if (count > 10) {
+            showButton = false;
+          }
+          refresh();
+        }
+      });
+    }
+    refresh();
+  }
+
+  disconnectedCallback() {
+    const shadowRoot = weakMapGet.prototype.call(shadowMap, this);
+    dispose(shadowRoot);
+  }
+});
+```
+
+### Using external Template Engine
+
+to use an external template engine just return the html output of the template engine in the ```render()``` method.
+
+for example using pug
+
+```npm install pug --save```
+
+```typescript
+import {render as pugRender} from "pug";
+
+customElements.define("my-element", class extends Component {
+  render() {
+    return pugRender("p #{dataset.name}", this);
+  }
+})
+```
+
+this will pass the ```pug``` **html output** to the **built-in** template.
+
+to avoid using the **built-in** template return **undefined**, this will render the built-in template attributes
+like ```data-ref``` ineffective.
+
+```typescript
+import {render as pugRender} from "pug";
+
+const pugTemplate = "p #{dataset.name}";
+
+customElements.define("my-element", class extends Component {
+  render() {
+    pugRender(this);
+    return;
+  }
+})
+```
+
 ## watching attribute changes
 
 to watch for attribute changes use the standard ```attributeChangedCallback``` from the HTMLElement class to watch for
@@ -346,6 +355,42 @@ customElements.define("my-app", class extends Component {
 
   render() {
     return "<p>{this.dataset.name}</p>"
+  }
+});
+```
+
+## Use Component class without templates
+
+if static attribute ```Component.template``` isn't defined and ```component.render``` returns undefined no template is
+rendered.
+
+for example
+
+```typescript
+customElements.define("my-custom", class extends Component {
+  constructor() {
+    super();
+    this.state = {
+      clickCount: 0
+    };
+    const containerDiv = new HTMLDivElement();
+    containerDiv.classList.add("container");
+    this.p = new HTMLParagraphElement();
+    const button = new HTMLButtonElement();
+    button.textContent = "click me";
+    button.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      this.setState({
+        clickCount: this.state.clickCount + 1
+      });
+    });
+    containerDiv.appendChild(p);
+    containerDiv.appendChild(button);
+  }
+
+  // render is used instead of connectedCallback to listen to state changes
+  render() {
+    this.p.textContent = "clicked " + this.state.clickCount;
   }
 });
 ```

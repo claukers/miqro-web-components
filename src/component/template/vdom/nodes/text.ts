@@ -1,5 +1,44 @@
-import {get, getTemplateTokenValue, re, TemplateValues} from "../utils";
-import {TemplateHTMLElementRefNode, TemplateNode, TemplateTextNode} from "../utils/template.js";
+import {get, getTemplateTokenValue, re, TemplateValues} from "../../utils";
+import {TemplateNode} from "./node.js";
+
+class TemplateTextNode extends TemplateNode<Text> {
+  constructor(public textContent: string) {
+    super("Text");
+  }
+
+  public create(parent: HTMLElement) {
+    if (this.ref) {
+      throw new Error("already created!");
+    }
+    this.parent = parent;
+    const ref = document.createTextNode("");
+    this.update(ref);
+    return ref;
+  }
+
+  public update(ref: Text): void {
+    super.update(ref);
+    if (ref.textContent !== this.textContent) {
+      ref.textContent = this.textContent;
+    }
+  }
+}
+
+class TemplateHTMLElementRefNode extends TemplateNode<HTMLElement> {
+  constructor(public ref: HTMLElement) {
+    super("HTMLElementRef");
+  }
+
+  public create(parent: HTMLElement) {
+    this.parent = parent;
+    this.update(this.ref);
+    return this.ref;
+  }
+
+  public compare(other: TemplateHTMLElementRefNode): boolean {
+    return super.compare(other) && other.ref === this.ref;
+  }
+}
 
 export function renderTextNode(node: Node, values: TemplateValues): Array<TemplateNode> {
   let ret: Array<TemplateNode> = [];

@@ -8,5 +8,10 @@ export {
   TemplateValues,
   textTemplateReplace,
   re,
-  ITemplateNode
+  ComponentState,
+  removeChildrenFrom,
+  removeChild,
+  removeChildren,
+  appendChildren,
+  RefreshCallback
 } from "./template.js";

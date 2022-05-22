@@ -1,6 +1,7 @@
-import {renderCommentNode, renderElementNode, renderTextNode} from "./nodes/index.js";
-import {TemplateValues} from "./utils/index.js";
-import {RefreshCallback, TemplateNode} from "./utils/template.js";
+import {renderCommentNode, renderElementNode, renderTextNode} from "./vdom/nodes";
+import {TemplateValues} from "./utils";
+import {RefreshCallback} from "./utils/template.js";
+import {TemplateNode} from "./vdom";
 
 export function renderChildNodes(childNodes: NodeListOf<ChildNode>, values: TemplateValues, refresh?: RefreshCallback): Array<TemplateNode> {
   let ret: Array<TemplateNode> = [];

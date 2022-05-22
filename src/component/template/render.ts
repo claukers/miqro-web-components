@@ -1,6 +1,6 @@
 import {renderChildNodes} from "./render-children.js";
-import {IComponent, ITemplateNode, RefreshCallback, TemplateNode, TemplateValues} from "./utils/template.js";
-import {renderTemplateNodeDiff} from "./render-diff.js";
+import {IComponent, RefreshCallback, TemplateValues} from "./utils/template.js";
+import {ITemplateNode, TemplateNode, renderTemplateNodeDiff} from "./vdom";
 
 export function renderTemplate(renderOutput: string | string[] | void, values: TemplateValues, refresh?: RefreshCallback): Array<TemplateNode> | undefined {
   //console.log("renderOnElement [%s] dataset [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset);

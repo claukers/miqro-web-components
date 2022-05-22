@@ -1,14 +1,13 @@
-import {getTemplateFromLocation, IComponent, renderTemplateOnElement} from "../template/index.js";
-import {TemplateValues} from "../template/utils/index.js";
-import {RefreshCallback} from "../template/utils/template.js";
+import {
+  RefreshCallback,
+  TemplateValues,
+  getTemplateFromLocation,
+  IComponent,
+  renderTemplateOnElement
+} from "./template/index.js";
 
 export function render(component: IComponent, optionalTemplate?: string | Promise<string>, values?: TemplateValues, refresh?: RefreshCallback): void {
-  if (!component.isConnected) {
-    return;
-  }
-
   // console.log("render %s", component.tagName);
-
   const template = optionalTemplate ? optionalTemplate : getComponentTemplate(component as IComponent);
   if (typeof template === "string") {
     renderTemplateOnElement(template, component, values, refresh);

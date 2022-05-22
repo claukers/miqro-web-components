@@ -20,7 +20,7 @@ describe("component.unit.test", () => {
       "./render-queue.js": {
         render
       },
-      "../template/utils/index.js": {
+      "./template/index.js": {
         nodeList2Array
       },
       "../store.js": {}
@@ -54,7 +54,7 @@ describe("component.unit.test", () => {
         "./render-queue.js": {
           render
         },
-        "../template/utils/index.js": {
+        "./template/index.js": {
           nodeList2Array,
           set
         },
@@ -135,7 +135,7 @@ describe("component.unit.test", () => {
       "./render-queue.js": {
         render
       },
-      "../template/utils/index.js": {},
+      "./template/index.js": {},
       "../store.js": {}
     }, distPath);
 
@@ -162,7 +162,7 @@ describe("component.unit.test", () => {
       "./render-queue.js": {
         render
       },
-      "../template/utils/index.js": {},
+      "../template/index.js": {},
       "../store.js": {}
     }, distPath);
 
@@ -191,7 +191,7 @@ describe("component.unit.test", () => {
       "./render-queue.js": {
         render
       },
-      "../template/utils/index.js": {},
+      "./template/index.js": {},
       "../store.js": {}
     }, distPath);
 

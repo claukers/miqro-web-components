@@ -1,6 +1,7 @@
-import {get, getTemplateTokenValue, TemplateValues} from "../utils/index.js";
+import {get, getTemplateTokenValue, TemplateValues} from "../../../utils";
 import {DATA_STATE} from "./constants.js";
-import {TemplateElementNode} from "../utils/template.js";
+import {TemplateElementNode} from "../element.js";
+
 
 export function dataState(node: Node, values: TemplateValues, childElement: TemplateElementNode): void {
   const dataStateValue = (node as Element).getAttribute(DATA_STATE);

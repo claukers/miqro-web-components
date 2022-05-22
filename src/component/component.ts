@@ -1,9 +1,6 @@
-import {dispose, IComponent, nodeList2Array} from "../template/index.js";
+import {set, ComponentState, dispose, IComponent, nodeList2Array} from "./template/index.js";
 import {Selector, Store, StoreListener} from "../store.js";
-import {set} from "../template/utils/index.js";
 import {render} from "./render-queue.js";
-
-export type ComponentState = { [p: string]: any };
 
 interface ComponentSubscriptionInfo {
   path: string;

@@ -1,7 +1,7 @@
 const {fake, requireMock, describe, it} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
-const {distPath} = require("../setup-test.js");
+const {distPath} = require("../../setup-test.js");
 
 const testFilePath = resolve(distPath, "cjs", "template", "cache.js");
 

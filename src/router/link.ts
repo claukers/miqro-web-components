@@ -1,4 +1,4 @@
-import {Component, ComponentState} from "../component/index.js";
+import {ComponentState, Component} from "../component/index.js";
 import {historyPushPath} from "./history.js";
 import {isPathLocation} from "./utils.js";
 

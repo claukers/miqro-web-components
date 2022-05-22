@@ -1,39 +1,7 @@
-import {ITemplateNode} from "./utils/template.js";
+export {ITemplateNode, TemplateNode} from "./nodes/node.js";
 
-function removeChild(c: ITemplateNode) {
-  if (c.ref) {
-    if (c.parent) {
-      removeChildren(c.parent, c.ref);
-    } else {
-      (c.ref as HTMLElement).remove();
-    }
-  }
-}
-
-function removeChildrenFrom(old: ITemplateNode[], from: number): void {
-  const splicedOld = old.splice(from);
-  splicedOld.forEach(removeChild);
-}
-
-function appendChildren(root: HTMLElement, children: Node | Node[]) {
-  if (children instanceof Array) {
-    for (const cR of children) {
-      root.appendChild(cR);
-    }
-  } else {
-    root.appendChild(children);
-  }
-}
-
-function removeChildren(root: HTMLElement, children: Node | Node[]) {
-  if (children instanceof Array) {
-    for (const cR of children) {
-      root.removeChild(cR);
-    }
-  } else {
-    root.removeChild(children);
-  }
-}
+import {ITemplateNode} from "./nodes/node.js";
+import {appendChildren, removeChildrenFrom} from "../utils/template.js";
 
 export function renderTemplateNodeDiff(root: HTMLElement, current?: ITemplateNode<Node>[], old?: ITemplateNode<Node>[]): void {
   // do some copying to not alter the original three
