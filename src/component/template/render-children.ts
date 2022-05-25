@@ -1,6 +1,6 @@
 import {renderCommentNode, renderElementNode, renderTextNode} from "./vdom/nodes/index.js";
-import {TemplateValues} from "./utils";
-import {TemplateNode} from "./vdom";
+import {TemplateValues} from "./utils/index.js";
+import {TemplateNode} from "./vdom/index.js";
 
 export async function renderChildNodes(childNodes: NodeListOf<ChildNode>, values: TemplateValues): Promise<Array<TemplateNode>> {
   let ret: Array<TemplateNode> = [];

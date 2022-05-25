@@ -1,8 +1,6 @@
 import {Component} from "./lib/index.js";
 
 customElements.define("node-element", class extends Component {
-  static template = "node.html";
-
   constructor() {
     super();
     this.state.position = {
@@ -42,5 +40,9 @@ customElements.define("node-element", class extends Component {
 
   mouseDown(ev) {
     ev.preventDefault();
+  }
+
+  render() {
+    return "<!--{node.html}-->"
   }
 });

@@ -41,10 +41,12 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
     return ref;
   }
 
-  public update(ref: HTMLElement, first = false): void {
+  public update(ref: HTMLElement, first = false): boolean {
     super.update(ref);
+    let ret = false;
     for (const attribute of this.attributes) {
       if (ref.getAttribute(attribute.attribute) !== attribute.value) {
+        ret = true;
         ref.setAttribute(attribute.attribute, attribute.value);
       }
     }
@@ -62,6 +64,7 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
     } else if (!first && asComponent.setState && typeof asComponent.setState === "function") {
       asComponent.setState(this.state);
     }
+    return ret;
   }
 
   public dispose(ref: HTMLElement) {

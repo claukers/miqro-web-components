@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<body>
+<style>
+  body {
+    background-color: black;
+    color: white;
+  }
+</style>
+<my-root></my-root>
+<script type="module">
+  import {Component} from "./lib/index.js";
+
+  customElements.define("my-root", class extends Component {
+    async render() {
+      return '<fallback-component><p><loading-component data-name="A"/></p><p><loading-component data-name="B"/></p></fallback-component>';
+    }
+  });
+
+  customElements.define("suspend-component", class extends Component {
+    render() {
+      /*clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        if(this.templateChildren.filter(c => isRenderQueue(c)).length > 0) {
+          this.templateChildren.forEach(c=>cancelRender(c));
+        }
+      }, 500);*/
+      return "{children}";
+    }
+  });
+
+  customElements.define("loading-component", class extends Component {
+    async render() {
+      const m = (Math.random() * 10000);
+      const t = (m + (Math.random() * m));
+      await new Promise(resolve => setTimeout(resolve, t));
+      return "{this.dataset.name} loaded " + t + "ms";
+    }
+  });
+</script>
+</body>
+</html>

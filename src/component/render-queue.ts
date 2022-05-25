@@ -1,46 +1,104 @@
 import {IComponent, TemplateValues} from "./template/index.js";
-import {render as realRender} from "./render.js";
+import {hasCache, render as realRender} from "./render.js";
 
-const refreshTimeouts = new WeakMap<IComponent, { timeout: any, preRenders: (() => void)[], listeners: (() => void)[] }>();
+export function isRenderQueued(component: IComponent) {
+  return refreshTimeouts.has(component);
+}
 
-export function render(component: IComponent, template?: string, values?: TemplateValues, listener?: () => void, preRender?: () => void): void {
+export function cancelRender(component: IComponent) {
   const oldRefreshTimeout = refreshTimeouts.get(component);
   if (oldRefreshTimeout) {
     clearTimeout(oldRefreshTimeout.timeout);
+    oldRefreshTimeout.abortController.abort();
   }
-  // console.log("queue render for %s", component.tagName);
-  const currentListeners = (oldRefreshTimeout && oldRefreshTimeout.listeners ? oldRefreshTimeout.listeners : []);
-  const currentPreRenders = (oldRefreshTimeout && oldRefreshTimeout.preRenders ? oldRefreshTimeout.preRenders : []);
-  refreshTimeouts.set(component, {
-    timeout: setTimeout(function queueRenderTrigger() {
-      try {
-        const refreshTimeout = refreshTimeouts.get(component);
-        if (refreshTimeout) {
-          refreshTimeouts.delete(component);
-          const listeners = refreshTimeout.listeners;
-          const preRenders = refreshTimeout.preRenders;
-          for (const preRender of preRenders) {
-            try {
-              preRender();
-            } catch (e) {
-              console.error(e);
-            }
-          }
-          realRender(component, template, values);
-          for (const listener of listeners) {
-            try {
-              listener();
-            } catch (e) {
-              console.error(e);
-            }
-          }
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }, 0),
-    listeners: listener ? currentListeners.concat(listener) : currentListeners,
-    preRenders: preRender ? currentPreRenders.concat(preRender) : currentPreRenders
-  });
+}
 
+export function addRenderListener(component: IComponent, listener: EventListener) {
+  const oldRefreshTimeout = refreshTimeouts.get(component);
+  if (oldRefreshTimeout) {
+    oldRefreshTimeout.eventTarget.addEventListener("render", listener)
+  }
+}
+
+export function render(component: IComponent, t: string | (() => Promise<string>) | undefined, v: TemplateValues | (() => Promise<TemplateValues>), listener?: EventListener): void {
+  cancelRender(component);
+  //const firstRun = !hasCache(component);
+  //console.log(`queue${firstRun ? " create " : " "}render %o`, component);
+
+  const oldRefreshTimeout = refreshTimeouts.get(component);
+  const abortController = new AbortController();
+  const eventTarget = oldRefreshTimeout ? oldRefreshTimeout.eventTarget : new EventTarget();
+  const timeout = setTimeout(async function queueRenderTrigger() {
+    try {
+
+      /*const firstRun = !hasCache(component);
+      const startMS = Date.now();*/
+      if (abortController.signal.aborted) {
+        //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+        return;
+      }
+
+      const template = t ? (typeof t === "string" ? t : await t()) : undefined;
+
+      if (abortController.signal.aborted) {
+        //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+        return;
+      }
+
+      const values = typeof v === "function" ? (await v()) as TemplateValues : v;
+
+      if (abortController.signal.aborted) {
+        //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+        return;
+      }
+
+      const renderAction = await realRender(abortController.signal, component, values, template);
+
+      if (abortController.signal.aborted) {
+        //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+        return;
+      }
+
+      const refreshTimeout = refreshTimeouts.get(component);
+      if (refreshTimeout) {
+        refreshTimeouts.delete(component);
+        refreshTimeout.eventTarget.dispatchEvent(new CustomEvent("render"));
+      }
+
+      if (renderAction) {
+        if (abortController.signal.aborted) {
+          //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+          return;
+        }
+        renderAction.apply();
+        //const changesRendered = renderAction.apply();
+        /*if (changesRendered) {
+          const tookMS = Date.now() - startMS;
+          console.log(`${firstRun ? "create " : "update "}render %o done in %sms`, component, tookMS);
+        }*/
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, 0);
+  refreshTimeouts.set(component, {
+    eventTarget,
+    abortController,
+    timeout
+  });
+  if (listener) {
+    addRenderListener(component, listener);
+  }
+}
+
+const refreshTimeouts = new WeakMap<IComponent, { eventTarget: EventTarget, abortController: AbortController; timeout: any; }>();
+const fallback = new WeakMap<IComponent>();
+
+function searchFallbackComponent(component: IComponent): IComponent | undefined {
+  if (component.parentElement?.tagName === "fallback-component" && hasCache(component.parentElement)) {
+    return component.parentElement as IComponent;
+  }
+  if (component.parentElement) {
+    return searchFallbackComponent(component.parentElement);
+  }
 }

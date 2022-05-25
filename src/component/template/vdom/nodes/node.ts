@@ -8,7 +8,7 @@ export interface ITemplateNode<S extends Node = Node> {
 
   create(parent: Node): S;
 
-  update(ref: S): void;
+  update(ref: S): boolean;
 
   dispose(ref: S): void;
 
@@ -28,13 +28,14 @@ export class TemplateNode<S extends Node = Node> implements ITemplateNode<S> {
     throw new Error("not implemented!");
   }
 
-  public update(ref: S): void {
+  public update(ref: S): boolean {
     if (this.ref && this.ref !== ref) {
       throw new Error("already created!");
     }
     if (!this.ref) {
       this.ref = ref;
     }
+    return false;
   }
 
   public dispose(element: S): void {

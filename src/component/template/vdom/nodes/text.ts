@@ -16,11 +16,13 @@ class TemplateTextNode extends TemplateNode<Text> {
     return ref;
   }
 
-  public update(ref: Text): void {
+  public update(ref: Text): boolean {
     super.update(ref);
     if (ref.textContent !== this.textContent) {
       ref.textContent = this.textContent;
+      return true;
     }
+    return false;
   }
 }
 

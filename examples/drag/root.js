@@ -1,8 +1,6 @@
 import {Component} from "./lib/index.js";
 
 customElements.define("my-root", class extends Component {
-  static template = "root.html";
-
   constructor() {
     super();
     this.state.offset = {
@@ -118,5 +116,9 @@ customElements.define("my-root", class extends Component {
       gestureOrigin: null,
       nodes: this.state.nodes
     });
+  }
+
+  render() {
+    return "<!--{root.html}-->"
   }
 });

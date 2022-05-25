@@ -1,14 +1,49 @@
 <html>
 <body>
+<style>
+  body {
+    background-color: black;
+    color: white;
+  }
+</style>
 <my-root></my-root>
 <script type="module">
-  import {render, dispose} from "./lib/index.js";
+  import {render as renderTemplate, dispose, set} from "./lib/index.js";
 
   const weakMapGet = WeakMap.prototype.get;
   const weakMapSet = WeakMap.prototype.set;
+  const weakMapDelete = WeakMap.prototype.delete;
   const attachShadow = HTMLElement.prototype.attachShadow;
 
   const shadowMap = new WeakMap();
+
+  const metaMap = new WeakMap();
+
+  class ComponentState {
+    constructor(defaultValue) {
+      this.state = defaultValue ? defaultValue : {};
+    }
+  }
+
+  function getState(component, defaultValue) {
+    const meta = weakMapGet.prototype.call(metaMap, component) ? weakMapGet.prototype.call(metaMap, component) : new ComponentState(defaultValue);
+    weakMapSet.prototype.call(metaMap, component, meta);
+    return meta.state;
+  }
+
+  function useState(component, path, defaultValue) {
+    const meta = weakMapGet.prototype.call(metaMap, component) ? weakMapGet.prototype.call(metaMap, component) : new ComponentState();
+    const value = get(meta.state, path, defaultValue);
+    set(meta.state, path, value);
+    weakMapSet.prototype.call(metaMap, component, meta);
+    return [value, (newValue) => {
+      set(meta.state, path, newValue);
+    }];
+  }
+
+  function disposeState(component) {
+    weakMapDelete.prototype.call(metaMap, component);
+  }
 
   customElements.define("my-root", class extends HTMLElement {
     constructor() {
@@ -16,29 +51,20 @@
       const shadowRoot = attachShadow.call(this, {
         mode: "closed"
       });
-      weakMapSet.call(shadowMap, this, shadowRoot);
-      let count = 0;
-      let showButton = true;
-      const refresh = () => {
-        render(shadowRoot, '<p>hello</p><p>{text}</p><!--{template.html}--><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>', {
-          count,
-          showButton,
-          text: "wORLD",
-          click: () => {
-            count++;
-            if(count > 10) {
-              showButton = false;
-            }
-            refresh();
-          }
-        });
-      }
-      refresh();
+      const render = () => renderTemplate(
+        shadowRoot,
+        '<p>hello</p><p>{text}</p><!--{template.html}--><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>',
+        getState(shadowRoot)
+      );
+      useState(this, "count", 0);
+      render();
+      weakMapSet.call(shadowMap, this, {shadowRoot});
     }
 
     disconnectedCallback() {
-      const shadowRoot = weakMapGet.prototype.call(shadowMap, this);
+      const {shadowRoot} = weakMapGet.prototype.call(shadowMap, this);
       dispose(shadowRoot);
+      disposeState(shadowRoot);
     }
   });
 </script>
