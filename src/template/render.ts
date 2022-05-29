@@ -1,6 +1,6 @@
 import {renderChildNodes} from "./render-children.js";
-import {TemplateNode} from "./vdom/index.js";
-import {TemplateValues} from "./utils/index.js";
+import {TemplateNode} from "./vdom";
+import {TemplateValues} from "./utils";
 
 export function renderTemplate(renderOutput: string | string[] | undefined, values: TemplateValues, xml?: XMLDocument): Promise<Array<TemplateNode>> | undefined {
   //console.log("renderOnElement [%s] dataset [%o]", (element instanceof HTMLElement ? element : element.host as HTMLElement).tagName, ((element instanceof HTMLElement ? element : element.host as HTMLElement)).dataset);

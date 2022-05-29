@@ -1,4 +1,4 @@
-import {getTemplateTokenValue, TemplateValues} from "../../utils/index.js";
+import {getTemplateTokenValue, TemplateValues} from "../../utils";
 import {getTemplateFromLocation} from "../../cache.js";
 import {renderTemplate} from "../../render.js";
 import {TemplateNode} from "./node.js";

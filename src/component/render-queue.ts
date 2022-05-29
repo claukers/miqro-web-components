@@ -1,4 +1,4 @@
-import {RenderFunction, RenderFunctionOutput, TemplateValues} from "./template/index.js";
+import {RenderFunction, RenderFunctionOutput, TemplateValues} from "../template/index.js";
 import {hasCache, render as realRender} from "./render.js";
 
 export function isRenderQueued(component: Node) {

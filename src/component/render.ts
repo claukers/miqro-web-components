@@ -1,5 +1,5 @@
-import {RenderFunction, RenderFunctionOutput, renderTemplate, TemplateValues} from "./template/index.js";
-import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "./template/vdom/index.js";
+import {RenderFunction, RenderFunctionOutput, renderTemplate, TemplateValues} from "../template/index.js";
+import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "../template/vdom/index.js";
 
 export type ApplyRenderCallback = () => boolean;
 

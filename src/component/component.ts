@@ -1,4 +1,4 @@
-import {set, ComponentState, IComponent, nodeList2Array} from "./template/index.js";
+import {set, ComponentState, IComponent, nodeList2Array} from "../template/index.js";
 import {Selector, Store, StoreListener} from "../store.js";
 import {render} from "./render-queue.js";
 import {dispose} from "./render.js";

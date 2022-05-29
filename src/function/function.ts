@@ -1,4 +1,4 @@
-import {ComponentState, RenderFunctionOutput, TemplateValues} from "../component/template/index.js";
+import {ComponentState, RenderFunctionOutput, TemplateValues} from "../template/index.js";
 import {render as queueRender} from "../component/render-queue.js";
 import {dispose, hasCache} from "../component/index.js";
 
@@ -6,6 +6,7 @@ export type useStateFunction<T = any> = (defaultValue?: T) => [value: T, setValu
 
 export interface FunctionComponentArgs<S extends ComponentState = ComponentState> {
   useState: <T = any>(defaultValue?: T) => T;
+  firstRun: boolean;
 }
 
 export type SetFunction<T = any> = (newVal: T) => void;
@@ -14,14 +15,16 @@ const weakMapGet = WeakMap.prototype.get;
 const weakMapSet = WeakMap.prototype.set;
 //const weakMapDelete = WeakMap.prototype.delete;
 const attachShadow = HTMLElement.prototype.attachShadow;
-const shadowMap = new WeakMap<HTMLElement, {
+
+interface ShadowMapValue {
   shadowRoot?: ShadowRoot,
-  firstRun: boolean,
   componentValues: [{
     value?: any;
     defaultValue?: any;
   }]
-}>();
+}
+
+const shadowMap = new WeakMap<HTMLElement, ShadowMapValue>();
 
 export type FunctionComponentOutput = { template: RenderFunctionOutput; values: TemplateValues; };
 
@@ -34,40 +37,35 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
     mode: "closed"
   } as ShadowRootInit;
 
-  function getRoot(element: HTMLElement) {
-    return noShadowRoot ? element : weakMapGet.call(shadowMap, element).shadowRoot;
-  }
-
-  function flipFirstRun(element: HTMLElement): boolean {
-    const currentState = weakMapGet.call(shadowMap, element);
-    const ret = currentState.firstRun;
-    currentState.firstRun = false;
-    return ret;
+  function getRoot(element: HTMLElement): HTMLElement | ShadowRoot {
+    return noShadowRoot ? element : (weakMapGet.call(shadowMap, element) as ShadowMapValue).shadowRoot as ShadowRoot;
   }
 
   function getComponentValue(element: HTMLElement, index: number): {
     value?: any;
     defaultValue?: any;
   } {
-    return weakMapGet.call(shadowMap, element).componentValues[index];
+    return (weakMapGet.call(shadowMap, element) as ShadowMapValue).componentValues[index];
   }
 
   function getComponentValueCount(element: HTMLElement): number {
-    return weakMapGet.call(shadowMap, element).componentValues.length;
+    return (weakMapGet.call(shadowMap, element) as ShadowMapValue).componentValues.length;
   }
 
   function setComponentValue(element: HTMLElement, index: number, value?: any, defaultValue?: any): void {
-    weakMapGet.call(shadowMap, element).componentValues[index] = {
+    (weakMapGet.call(shadowMap, element) as ShadowMapValue).componentValues[index] = {
       defaultValue,
       value
     };
   }
 
-  function getRenderArgs(element: HTMLElement, firstRun: boolean): { args: FunctionComponentArgs, validateUseAccess: () => boolean; } {
+  function getRenderArgs(element: HTMLElement): { args: FunctionComponentArgs, validateUseAccess: () => boolean; } {
     let valueKeyAccess = 0;
-    //console.log("firstRun " + firstRun);
+    const firstRun = !hasCache(getRoot(element));
+    console.log("firstRun " + firstRun);
     return {
       args: {
+        firstRun,
         useState: function <T>(defaultValue?: T): [T | undefined, SetFunction<T>] {
           const currentValueKey = valueKeyAccess;
           if (!firstRun && currentValueKey >= getComponentValueCount(element)) {
@@ -102,9 +100,9 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
     };
   }
 
-  function callRender(element: HTMLElement, firstRun: boolean = false) {
+  function callRender(element: HTMLElement) {
     queueRender(getRoot(element), async () => {
-      const renderArgs = getRenderArgs(element, firstRun);
+      const renderArgs = getRenderArgs(element);
       const renderBind = render.bind(renderArgs.args);
       const output = await renderBind(renderArgs.args);
       if (!renderArgs.validateUseAccess()) {
@@ -125,7 +123,7 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
     }
 
     connectedCallback() {
-      callRender(this, true);
+      callRender(this);
     }
 
     disconnectedCallback() {

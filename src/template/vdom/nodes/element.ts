@@ -1,6 +1,6 @@
-import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef, dataState} from "./attributes/index.js";
+import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef, dataState} from "./attributes";
 import {renderChildNodes} from "../../render-children.js";
-import {IComponent, TemplateValues} from "../../utils/index.js";
+import {IComponent, TemplateValues} from "../../utils";
 import {TemplateNode} from "./node.js";
 
 export class TemplateElementNode extends TemplateNode<HTMLElement> {
