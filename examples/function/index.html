@@ -11,10 +11,10 @@
 <script type="module">
   import {defineFunction, Component} from "./lib/index.js";
 
-  defineFunction("label-fn", async (self) => {
-    const [count, setCount] = self.useState(0);
+  defineFunction("label-fn", async function () {
+    const [count, setCount] = this.useState(0);
     return {
-      template: '<p data-on-click="{click}">click count {count}</p>',
+      template: '<p data-on-click="{click}">click count {count}</p>{children}<p>end</p>',
       values: {
         count,
         click: () => {

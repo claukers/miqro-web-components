@@ -1,1 +1,1 @@
-export {defineFunction} from "./function.js";
+export {defineFunction, FunctionComponent} from "./function.js";

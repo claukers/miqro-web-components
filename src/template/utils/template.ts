@@ -7,7 +7,11 @@ export type ComponentState = { [p: string]: any };
 
 export type RenderFunctionOutput = Promise<string> | string | void;
 
-export type RenderFunction = () => { template: RenderFunctionOutput; values: TemplateValues; } | Promise<{ template: RenderFunctionOutput; values: TemplateValues; }>;
+export type RenderFunction = () =>
+  { template: RenderFunctionOutput; values: TemplateValues; } |
+  Promise<{ template: RenderFunctionOutput; values: TemplateValues; } | undefined | string> |
+  undefined |
+  string;
 
 export interface IComponent<S extends ComponentState = ComponentState> extends Node {
   state?: S;

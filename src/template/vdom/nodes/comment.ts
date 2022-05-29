@@ -1,7 +1,7 @@
 import {getTemplateTokenValue, TemplateValues} from "../../utils";
 import {getTemplateFromLocation} from "../../cache.js";
-import {renderTemplate} from "../../render.js";
 import {TemplateNode} from "./node.js";
+import {renderTemplate} from "../../render-template.js";
 
 class TemplateCommentNode extends TemplateNode<Comment> {
   constructor(public textContent: string) {
