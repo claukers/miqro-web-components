@@ -71,16 +71,8 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
       ...this.state,
       ...args
     };
-    const asIComponent = this as IComponent;
     if (this.didUpdate(oldState) && this.isConnected) {
       this.refresh(callback);
-    }
-    if (asIComponent.stateChangedCallback) {
-      try {
-        asIComponent.stateChangedCallback(oldState);
-      } catch (e) {
-        console.error(e);
-      }
     }
     return;
   }
@@ -89,7 +81,7 @@ export class Component<S extends ComponentState = ComponentState> extends HTMLEl
     if (!this.isConnected) {
       return;
     }
-    return render(this, undefined, {
+    return render(this, this.render(), {
       this: this,
       children: this.templateChildren ? this.templateChildren : []
     }, callback);

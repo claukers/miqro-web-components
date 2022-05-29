@@ -1,5 +1,5 @@
 export function get(obj: any, attrPath: string | string[], defaultValue?: any): any | undefined {
-  defaultValue = defaultValue ? defaultValue : undefined;
+  defaultValue = defaultValue !== undefined ? defaultValue : undefined;
   if (!obj || typeof obj !== "object") {
     return defaultValue !== undefined ? defaultValue : undefined
   }

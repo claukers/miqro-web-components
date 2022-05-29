@@ -34,7 +34,8 @@ customElements.define("my-element", class extends Component {
 ## Lifecycle
 
 the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent. The class
-implements the ```connectedCallback``` and ```disconnectedCallback``` to render the template and remove listeners attached to the element.
+implements the ```connectedCallback``` and ```disconnectedCallback``` to render the template and remove listeners
+attached to the element.
 
 - ```this.connectedCallback()``` ```->``` ```render template```
 - ```this.setState(partialState)``` ```->``` ```this.didUpdate(prevState)``` ```->``` ```render template```
@@ -276,8 +277,9 @@ customElements.define("my-root", class extends HTMLElement {
     weakMapSet.call(shadowMap, this, shadowRoot);
     let count = 0;
     let showButton = true;
-    const refresh = () => {
-      render(shadowRoot, '<p>hello</p><p>{text}</p><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>', {
+    const refresh = () => render(shadowRoot,
+      '<p>hello</p><p>{text}</p><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>',
+      {
         count,
         showButton,
         text: 'wORLD',
@@ -289,7 +291,6 @@ customElements.define("my-root", class extends HTMLElement {
           refresh();
         }
       });
-    }
     refresh();
   }
 

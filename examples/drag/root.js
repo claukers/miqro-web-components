@@ -1,4 +1,18 @@
-import {Component} from "./lib/index.js";
+import {Component, defineFunction} from "./lib/index.js";
+
+defineFunction("click-count-label", function () {
+  const [count, setCount] = this.useState(0);
+  console.log("count " + count);
+  return {
+    template: `<!--{style.html}--><p data-on-click="{click}">click {count}</p>`,
+    values: {
+      count,
+      click: () => {
+        setCount(count + 1);
+      }
+    }
+  }
+})
 
 customElements.define("my-root", class extends Component {
   constructor() {

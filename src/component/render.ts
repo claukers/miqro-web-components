@@ -1,9 +1,9 @@
-import {getTemplateFromLocation, IComponent, renderTemplate, TemplateValues} from "./template/index.js";
+import {RenderFunction, RenderFunctionOutput, renderTemplate, TemplateValues} from "./template/index.js";
 import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "./template/vdom/index.js";
 
 export type ApplyRenderCallback = () => boolean;
 
-export function dispose(component: IComponent) {
+export function dispose(component: Node) {
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, component);
   if (oldTemplate) {
     disposeAll(oldTemplate.output);
@@ -11,40 +11,41 @@ export function dispose(component: IComponent) {
   }
 }
 
-export function hasCache(component: IComponent): boolean {
+export function hasCache(component: Node): boolean {
   return weakMapHas.call(lastTemplateMap, component);
 }
 
-export async function render(abortSignal: AbortSignal, component: IComponent, values: TemplateValues, optionalTemplate?: string | Promise<string>): Promise<{ apply: ApplyRenderCallback } | undefined> {
+export async function render(abortSignal: AbortSignal, element: Node, template: RenderFunction | RenderFunctionOutput, values?: TemplateValues): Promise<{ apply: ApplyRenderCallback } | undefined> {
   // console.log("render %s", component.tagName);
-  const template = optionalTemplate ? optionalTemplate : getComponentTemplate(component as IComponent);
-  const t = typeof template === "string" ? template : await template;
-  if (abortSignal.aborted) {
-    throw new Error(`aborted render for ${(component as HTMLElement).tagName} ${(component as HTMLElement).dataset.name}`);
+  if (values !== undefined && typeof template === "function") {
+    throw new Error("cannot provide a RenderFunction with values");
   }
-  if (typeof t === "string") {
-    const {output, xmlDocument} = await renderTemplateOnElement(t, component, values);
+  const t = typeof template === "string" ? template : typeof template === "function" ? await template() : template ? await template : undefined;
+  const v = typeof t === "object" ? t.values : values;
+  const stringTemplate: string | void = typeof t === "object" ? await t.template : await t;
+
+  if (abortSignal.aborted) {
+    throw new Error(`aborted render for ${(element as HTMLElement).tagName} ${(element as HTMLElement).dataset.name}`);
+  }
+  if (stringTemplate) {
+    const {output, xmlDocument} = await renderTemplateOnElement(stringTemplate, element, v ? v : Object.create(null));
     if (abortSignal.aborted) {
-      throw new Error(`aborted render for ${(component as HTMLElement).tagName} ${(component as HTMLElement).dataset.name}`);
+      throw new Error(`aborted render for ${(element as HTMLElement).tagName} ${(element as HTMLElement).dataset.name}`);
     }
 
     return {
       apply: () => {
-        return applyRender(xmlDocument, t, component, output);
+        if (abortSignal.aborted) {
+          throw new Error(`aborted render for ${(element as HTMLElement).tagName} ${(element as HTMLElement).dataset.name}`);
+        }
+        return applyRender(xmlDocument, stringTemplate, element, output);
       }
     };
   }
 }
 
-function getComponentTemplate(component: IComponent): string[] | string | void | Promise<string | string[]  | undefined> {
-  return component.constructor && component.constructor.hasOwnProperty("template") ?
-    getTemplateFromLocation((component.constructor as any).template) :
-    (component.render ? component.render() : undefined)
-}
-
 async function renderTemplateOnElement(template: string, element: Node, values: TemplateValues): Promise<{ output: TemplateNode<Node>[] | undefined; xmlDocument: XMLDocument; }> {
-  const component = element as IComponent;
-  const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, component);
+  const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, element);
 
   const xmlDocument = oldTemplate && oldTemplate.template === template ?
     oldTemplate.xmlDocument :
@@ -56,10 +57,9 @@ async function renderTemplateOnElement(template: string, element: Node, values: 
 }
 
 function applyRender(xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
-  const component = element as IComponent;
-  const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, component);
+  const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, element);
   if (output) {
-    weakMapSet.call(lastTemplateMap, component, {output, template, xmlDocument} as TemplateMapValue);
+    weakMapSet.call(lastTemplateMap, element, {output, template, xmlDocument} as TemplateMapValue);
     const ret = renderTemplateNodeDiff(element, output, oldTemplate?.output);
     if (oldTemplate) {
       disposeAll(oldTemplate.output);
@@ -75,8 +75,7 @@ interface TemplateMapValue {
   template: string;
 }
 
-const lastTemplateMap = new WeakMap<IComponent, TemplateMapValue>();
-const lastTemplateMap2 = new WeakMap<IComponent, {template: string}>();
+const lastTemplateMap = new WeakMap<Node, TemplateMapValue>();
 const weakMapGet = WeakMap.prototype.get;
 const weakMapHas = WeakMap.prototype.has;
 const weakMapSet = WeakMap.prototype.set;

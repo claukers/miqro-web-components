@@ -5,12 +5,15 @@ export type RefreshCallback = () => void;
 
 export type ComponentState = { [p: string]: any };
 
-export interface IComponent<S extends ComponentState = ComponentState> extends Node {
-  stateChangedCallback?(oldState: S): boolean;
+export type RenderFunctionOutput = Promise<string> | string | void;
 
+export type RenderFunction = () => { template: RenderFunctionOutput; values: TemplateValues; } | Promise<{ template: RenderFunctionOutput; values: TemplateValues; }>;
+
+export interface IComponent<S extends ComponentState = ComponentState> extends Node {
   state?: S;
+  template?: string;
   templateChildren?: Array<Node | HTMLElement>;
-  render?: () => Promise<string> | string | void;
+  render?: () => RenderFunctionOutput;
   setState?: (args: any, callback?: () => void) => void;
   refresh?: () => void;
 }

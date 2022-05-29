@@ -8,7 +8,21 @@
 </style>
 <my-root></my-root>
 <script type="module">
-  import {render as renderTemplate, dispose, set} from "./lib/index.js";
+  import {defineFunction, render as renderTemplate, dispose, set, get} from "./lib/index.js";
+
+  defineFunction("label-fn", function (component) {
+    const [count, setCount] = component.useState(0);
+
+    return {
+      template: `<p data-on-click="{click}">{count}</p>`,
+      values: {
+        count,
+        click: () => {
+          setCount(count + 1);
+        }
+      }
+    }
+  })
 
   const weakMapGet = WeakMap.prototype.get;
   const weakMapSet = WeakMap.prototype.set;
@@ -22,27 +36,25 @@
   class ComponentState {
     constructor(defaultValue) {
       this.state = defaultValue ? defaultValue : {};
+      this.stateAutoInc = 0;
     }
   }
 
-  function getState(component, defaultValue) {
-    const meta = weakMapGet.prototype.call(metaMap, component) ? weakMapGet.prototype.call(metaMap, component) : new ComponentState(defaultValue);
-    weakMapSet.prototype.call(metaMap, component, meta);
-    return meta.state;
-  }
-
-  function useState(component, path, defaultValue) {
-    const meta = weakMapGet.prototype.call(metaMap, component) ? weakMapGet.prototype.call(metaMap, component) : new ComponentState();
-    const value = get(meta.state, path, defaultValue);
-    set(meta.state, path, value);
-    weakMapSet.prototype.call(metaMap, component, meta);
-    return [value, (newValue) => {
+  function useState(component, defaultValue) {
+    const meta = weakMapGet.call(metaMap, component) ? weakMapGet.call(metaMap, component) : new ComponentState();
+    const path = `STATE-${meta.stateAutoInc++}`;
+    set(meta.state, path, get(meta.state, path, defaultValue));
+    weakMapSet.call(metaMap, component, meta);
+    return [{
+      toString: () => get(meta.state, path, defaultValue),
+      value: () => get(meta.state, path, defaultValue)
+    }, (newValue) => {
       set(meta.state, path, newValue);
     }];
   }
 
   function disposeState(component) {
-    weakMapDelete.prototype.call(metaMap, component);
+    weakMapDelete.call(metaMap, component);
   }
 
   customElements.define("my-root", class extends HTMLElement {
@@ -51,18 +63,35 @@
       const shadowRoot = attachShadow.call(this, {
         mode: "closed"
       });
-      const render = () => renderTemplate(
-        shadowRoot,
-        '<p>hello</p><p>{text}</p><!--{template.html}--><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>',
-        getState(shadowRoot)
-      );
-      useState(this, "count", 0);
-      render();
       weakMapSet.call(shadowMap, this, {shadowRoot});
+
+      const [text] = useState(shadowRoot, "text");
+      const [count, setCount] = useState(shadowRoot, 0);
+      const [showButton, setShowButton] = useState(shadowRoot, true);
+
+      const render = () => {
+        renderTemplate(
+          shadowRoot,
+          '<label-fn/><p>hello</p><p>{text}</p><!--{template.html}--><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>',
+          {
+            text: count.value(),
+            count: count.value(),
+            showButton: showButton.value(),
+            click: () => {
+              setCount(count + 1);
+              if (count.value() === 10) {
+                setShowButton(false);
+              }
+              render();
+            }
+          }
+        );
+      }
+      render();
     }
 
     disconnectedCallback() {
-      const {shadowRoot} = weakMapGet.prototype.call(shadowMap, this);
+      const {shadowRoot} = weakMapGet.call(shadowMap, this);
       dispose(shadowRoot);
       disposeState(shadowRoot);
     }

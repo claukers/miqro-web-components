@@ -13,5 +13,7 @@ export {
   removeChild,
   removeChildren,
   appendChildren,
-  RefreshCallback
+  RefreshCallback,
+  RenderFunctionOutput,
+  RenderFunction
 } from "./template.js";
