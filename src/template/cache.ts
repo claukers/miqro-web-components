@@ -1,4 +1,12 @@
-let _templateCache: { [key: string]: string } | null = null;
+interface TemplateCacheItem {
+  template: string;
+  xmlDocument: XMLDocument
+}
+
+let _templateCache: Map<string, TemplateCacheItem> | null = null;
+
+const mapGet = Map.prototype.get;
+const mapSet = Map.prototype.set;
 
 export interface TemplateLocation {
   url: string;
@@ -14,18 +22,23 @@ export function setCache(cache: { [key: string]: string }) {
     throw new Error("invalid cache!");
   }
   if (_templateCache === null) {
-    _templateCache = cache;
+    _templateCache = new Map();
+    const keys = Object.keys(cache);
+    for (const k of keys) {
+      const template = cache[k];
+      putTemplate(k, template);
+    }
   } else {
     throw new Error("cannot reset cache");
   }
 }
 
-export function getTemplateFromLocation(location: TemplateLocation | string): Promise<string> | string {
+export function getTemplateFromLocation(location: TemplateLocation | string): Promise<TemplateCacheItem> | TemplateCacheItem {
   location = typeof location === "string" ? {
     url: location
   } : location;
   const template = getTemplate(location);
-  if (typeof template === "string") {
+  if (template !== undefined) {
     return template;
   } else {
     return new Promise((resolve, reject) => {
@@ -48,20 +61,27 @@ function getTemplateKey(location: TemplateLocation | string): string {
   return typeof location === "string" ? location : `${location.url}`;
 }
 
-function getTemplate(location: string | TemplateLocation): string | undefined {
+function getTemplate(location: string | TemplateLocation): TemplateCacheItem | undefined {
   const key = getTemplateKey(location);
   if (_templateCache) {
-    return _templateCache[key];
+    //return _templateCache[key];
+    return mapGet.call(_templateCache, key);
   }
 }
 
-function putTemplate(location: TemplateLocation | string, template: string): void {
-  _templateCache = _templateCache !== null ? _templateCache : {};
+function putTemplate(location: TemplateLocation | string, template: string): TemplateCacheItem {
+  _templateCache = _templateCache !== null ? _templateCache : new Map<string, { template: string; xmlDocument: XMLDocument }>();
   const key = getTemplateKey(location);
-  _templateCache[key] = template;
+  const xmlDocument: XMLDocument = ((new DOMParser()).parseFromString(`<root>${template}</root>`, "text/xml") as XMLDocument);
+  const item = {
+    template,
+    xmlDocument
+  };
+  mapSet.call(_templateCache, key, item);
+  return item;
 }
 
-async function preLoad(location: string | TemplateLocation): Promise<string> {
+async function preLoad(location: string | TemplateLocation): Promise<TemplateCacheItem> {
   const isLocationString = typeof location === "string";
   const url = isLocationString ? location : location.url;
   const response = await fetch(url, isLocationString ? {} : {
@@ -71,6 +91,5 @@ async function preLoad(location: string | TemplateLocation): Promise<string> {
     throw new Error(`bad response status [${response.status}] from [${url}]`);
   }
   const template = await response.text();
-  putTemplate(location, template);
-  return template;
+  return putTemplate(location, template);
 }

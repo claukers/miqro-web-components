@@ -31,8 +31,8 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
   const timeout = setTimeout(async function queueRenderTrigger() {
     try {
 
-      const firstRun = !hasCache(component);
-      const startMS = Date.now();
+      /*const firstRun = !hasCache(component);
+      const startMS = Date.now();*/
       if (abortController.signal.aborted) {
         //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
         return;
@@ -63,12 +63,12 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
           //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
           return;
         }
-        //renderAction.apply();
-        const changesRendered = renderAction.apply();
+        renderAction.apply();
+        /*const changesRendered = renderAction.apply();
         if (changesRendered) {
           const tookMS = Date.now() - startMS;
           console.log(`${firstRun ? "create " : "update "}render %o done in %sms`, component, tookMS);
-        }
+        }*/
       }
     } catch (e) {
       console.error(e);

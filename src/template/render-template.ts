@@ -8,6 +8,7 @@ export function renderTemplate(renderOutput: string | string[] | undefined, valu
     renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
   }
   if (typeof renderOutput === "string") {
+    //console.log(xml ? "using cache" : "not using cache");
     const xmlDocument: XMLDocument = xml ? xml : ((new DOMParser()).parseFromString(`<root>${renderOutput}</root>`, "text/xml") as XMLDocument);
 
     const root = xmlDocument.children[0];

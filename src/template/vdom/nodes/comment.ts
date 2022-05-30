@@ -34,12 +34,12 @@ export async function renderCommentNode(node: Node, values: TemplateValues): Pro
     return node.textContent ? [new TemplateCommentNode(node.textContent)] : [];
   } else {
     const templateLocation = getTemplateFromLocation(path);
-    if (typeof templateLocation === "string") {
-      const ret = renderTemplate(templateLocation, values);
+    if (!(templateLocation instanceof Promise)) {
+      const ret = renderTemplate(templateLocation.template, values, templateLocation.xmlDocument);
       return ret ? ret : [];
     } else {
-      const template = await templateLocation;
-      const ret = renderTemplate(template, values);
+      const templateCache = await templateLocation;
+      const ret = renderTemplate(templateCache.template, values, templateCache.xmlDocument);
       return ret ? ret : [];
     }
   }
