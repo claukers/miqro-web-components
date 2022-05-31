@@ -26,8 +26,8 @@ const RENDER_MS_WARNING = 50;
 
 export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: EventListener): void {
   cancelRender(component);
-  const firstRun = !hasCache(component);
-  console.log(`queue${firstRun ? " create " : " update "}render %o`, component);
+  /*const firstRun = !hasCache(component);
+  console.log(`queue${firstRun ? " create " : " update "}render %o`, component);*/
 
   const oldRefreshTimeout = refreshTimeouts.get(component);
   const abortController = new AbortController();
@@ -38,12 +38,12 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
     }, RENDER_TIMEOUT);
     try {
       const firstRun = !hasCache(component);
+      console.log(`${firstRun ? "create " : "update "}render %o`, component);
       const startMS = Date.now();
       if (!abortController.signal.aborted) {
         const renderAction = await realRender(abortController.signal, component, t, values);
         if (!abortController.signal.aborted) {
           if (renderAction) {
-            //renderAction.apply();
             const changesRendered = renderAction.apply();
             if (changesRendered) {
               const tookMS = Date.now() - startMS;

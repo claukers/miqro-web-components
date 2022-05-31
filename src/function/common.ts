@@ -18,6 +18,10 @@ export type SetFunction<T = any> = (newValue: T) => void;
 
 export interface ComponentMeta {
   shadowRoot?: ShadowRoot;
+  attributeMap: {
+    [name: string]: string | undefined;
+  },
+  observer: MutationObserver;
   refresh: (firstRun?: boolean) => void;
   effects: {
     connected?: () => void;
@@ -56,8 +60,10 @@ export function callRender(context: RenderContext, meta: ComponentMeta, root: HT
         template: output.template,
         values: output.values ? {
           children: meta.templateChildren,
+          attributes: meta.attributeMap,
           ...output.values
         } : {
+          attributes: meta.attributeMap,
           children: meta.templateChildren
         }
       };

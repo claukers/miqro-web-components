@@ -12,6 +12,9 @@
       setTimeout(() => {
         app.setAttribute("id", "MyApp");
         app.setAttribute("data-name", "nonameasd");
+        setTimeout(() => {
+          app.setAttribute("data-name", "nonameasd2");
+        }, 1000);
       }, 1000);
     }
   }
@@ -22,15 +25,20 @@
 
   class App extends Component {
 
-    static get template() { return "blabla"; };
-
-    static get observedAttributes() { return ['data-name']; }
+    static get observedAttributes() {
+      console.log("observedAttributes");
+      return ['data-name'];
+    }
 
     attributeChangedCallback(name, oldValue, newValue) {
       console.log(name);
       console.log(oldValue);
       console.log(newValue);
       this.refresh();
+    }
+
+    render() {
+      return "<!--{blabla}-->";
     }
   }
 

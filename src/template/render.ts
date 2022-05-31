@@ -83,7 +83,7 @@ const lastTemplateMap = new WeakMap<Node, TemplateMapValue>();
 const weakMapGet = WeakMap.prototype.get;
 const weakMapHas = WeakMap.prototype.has;
 const weakMapSet = WeakMap.prototype.set;
-const weakMapDelete = WeakMap.prototype.delete;
+//const weakMapDelete = WeakMap.prototype.delete;
 
 function disconnectAll(nodes: ITemplateNode[]): void {
   for (const n of nodes) {

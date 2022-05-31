@@ -2,37 +2,33 @@
 <html>
 <body>
 <root-component>
-  <label-fn></label-fn>
 </root-component>
 <script type="module">
-  import {defineFunction, Component} from "./lib/index.js";
-
-  /*customElements.define("label-fn", class extends Component {
-    click() {
-      console.log("click")
-    }
-    render() {
-      return '<p data-on-click="{this.click}">p</p>';
-    }
-  })*/
+  import {defineFunction} from "./lib/index.js";
 
   defineFunction("root-component", function () {
     const [showChildren, setShowChildren] = this.useState(true);
-    console.log("showChildren %s", showChildren);
+    const [initialCount, setInitialCount] = this.useState(0);
+    //console.log("showChildren %s", showChildren);
     return {
-      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}">{children}</div><p>children end</p>`,
+      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end</p>`,
       values: {
         showChildren,
+        initialCount,
+        resetCount: () => {
+          setInitialCount(initialCount + 1);
+        },
         toggleShow: (ev) => {
           ev.preventDefault();
-          console.log("set showChildren %s", !showChildren);
           setShowChildren(!showChildren);
         }
       }
     }
-  }, false)
+  })
 
   defineFunction("label-fn", async function () {
+    const [initialCount, setInitialCount] = this.useState(0);
+
     const [count, setCount] = this.useState(0);
     console.log("render " + count);
     this.useEffect(() => {
@@ -41,19 +37,28 @@
         console.log("effect off");
       }
     });
+
+    const initialCountAttribute = this.useAttribute("data-count", "0");
+
+    if (initialCount != initialCountAttribute) {
+      const newInitialCount = parseInt(initialCountAttribute, 10);
+      setCount(newInitialCount);
+      setInitialCount(newInitialCount);
+    }
+
     return {
-      template: '<p data-on-click="{click}">click count {count}</p>',
+      template: '<p data-on-click="{click}">click count {count}</p><p>initial Count {initialCount}</p>',
       values: {
+        initialCount,
         count,
         click: function (ev) {
           //console.dir(ev);
           ev.preventDefault();
-          console.log("calling setCount with " + (count + 1));
           setCount(count + 1);
         }
       }
     }
-  }, false);
+  });
 
 </script>
 </body>
