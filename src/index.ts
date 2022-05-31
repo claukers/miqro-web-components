@@ -7,7 +7,7 @@ export {
   UseEffectFunction,
   UseStateFunction,
   FunctionComponentOutput,
-  RenderFunctionArgs
+  FunctionContext
 } from "./function/index.js";
 export {Component} from "./component/index.js";
 export {ComponentState, IComponent, setCache, set, get, render, disconnect} from "./template/index.js";

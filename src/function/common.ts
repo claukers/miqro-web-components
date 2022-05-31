@@ -4,14 +4,12 @@ export type FunctionComponentOutput = { template: RenderFunctionOutput; values?:
 
 export type FunctionComponent = () => Promise<FunctionComponentOutput> | FunctionComponentOutput | RenderFunctionOutput;
 
-export interface AttributeMap {
-  [name: string]: string | undefined;
-};
-
 export interface FunctionMeta {
   shadowRoot?: ShadowRoot;
-  attributeMap: AttributeMap;
   observer: MutationObserver;
+  attributeFilter: string[];
+  queryFilter: string[];
+  popStateListener: () => void;
   refresh: (firstRun?: boolean) => void;
   effects: {
     disconnected?: () => void;
@@ -27,17 +25,18 @@ export type SetFunction<T = any> = (newValue: T) => void;
 
 export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, SetFunction<T>];
 
-//export type UseAttributeFunction = (name: string, defaultValue?: string) => string | null;
+export type UseAttributeFunction = (name: string, defaultValue?: string) => string | null;
+export type UseQueryFunction = (name: string, defaultValue?: string | string[]) => [string[] | string | null, SetFunction<string[] | string | null>];
 export type UseEffectFunction = (effect: () => undefined | (() => void)) => void;
 
-export interface RenderFunctionArgs {
+export interface FunctionContext {
   useState: UseStateFunction;
-  children?: Node[];
-  attributes: AttributeMap;
+  useAttribute: UseAttributeFunction;
+  useQuery: UseQueryFunction;
   useEffect: UseEffectFunction;
 }
 
 export interface RenderContext {
-  args: RenderFunctionArgs,
+  this: FunctionContext,
   validate: () => boolean;
 }

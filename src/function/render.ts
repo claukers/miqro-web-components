@@ -1,10 +1,11 @@
 import {render as queueRender} from "../template/index.js";
 import {FunctionComponent, FunctionMeta, RenderContext} from "./common.js";
 
-export function renderFunction(context: RenderContext, meta: FunctionMeta, root: HTMLElement | ShadowRoot, render: FunctionComponent) {
+export function renderFunction(element: HTMLElement, context: RenderContext, meta: FunctionMeta, root: HTMLElement | ShadowRoot, render: FunctionComponent) {
   queueRender(root, async () => {
     try {
-      const renderBind = render.bind({...context.args});
+      const children = meta.templateChildren;
+      const renderBind = render.bind({...context.this});
       const output = await renderBind();
       if (!context.validate()) {
         throw new Error("conditional useState detected!");
@@ -14,7 +15,6 @@ export function renderFunction(context: RenderContext, meta: FunctionMeta, root:
           return {
             template: output,
             values: {
-              attributes: meta.attributeMap,
               children: meta.templateChildren
             }
           };
@@ -22,12 +22,10 @@ export function renderFunction(context: RenderContext, meta: FunctionMeta, root:
           return {
             template: output.template,
             values: output.values ? {
-              children: meta.templateChildren,
-              attributes: meta.attributeMap,
+              children,
               ...output.values
             } : {
-              attributes: meta.attributeMap,
-              children: meta.templateChildren
+              children
             }
           };
         }

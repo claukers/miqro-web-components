@@ -1,7 +1,7 @@
 export {defineFunction} from "./function.js";
 export {
   FunctionComponent,
-  RenderFunctionArgs,
+  FunctionContext,
   FunctionComponentOutput,
   SetFunction,
   UseStateFunction,

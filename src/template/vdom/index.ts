@@ -43,7 +43,7 @@ export function renderTemplateNodeDiff(root: Node, current?: ITemplateNode<Node>
           appendChildren(root, createdRef);
         } else {
           const currentRef = oldTemplateNode.ref as HTMLElement;
-          if(!currentRef) {
+          if (!currentRef) {
             debugger;
           }
           const oldChildren = oldTemplateNode.children;

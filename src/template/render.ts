@@ -42,7 +42,7 @@ export async function render(abortSignal: AbortSignal, element: Node, template: 
           //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
           return false;
         }
-        return applyRender(xmlDocument, stringTemplate, element, output);
+        return applyRender(abortSignal, xmlDocument, stringTemplate, element, output);
       }
     };
   }
@@ -60,7 +60,11 @@ async function renderTemplateOnElement(template: string, element: Node, values: 
   return {output, xmlDocument};
 }
 
-function applyRender(xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
+function applyRender(abortSignal: AbortSignal, xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
+  if (abortSignal.aborted) {
+    //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+    return false;
+  }
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, element);
   if (output) {
     const ret = renderTemplateNodeDiff(element, output, oldTemplate?.output);

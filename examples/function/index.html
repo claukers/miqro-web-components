@@ -6,13 +6,16 @@
 <script type="module">
   import {defineFunction} from "./lib/index.js";
 
-  defineFunction("root-component", function () {
+  defineFunction("root-component", async function () {
+    console.log("root-component");
     const [showChildren, setShowChildren] = this.useState(true);
     const [initialCount, setInitialCount] = this.useState(0);
+    const [limit] = this.useQuery("limit", 0);
     //console.log("showChildren %s", showChildren);
     return {
-      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end</p>`,
+      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end {limit}</p>`,
       values: {
+        limit,
         showChildren,
         initialCount,
         resetCount: () => {
@@ -27,18 +30,19 @@
   })
 
   defineFunction("label-fn", async function () {
+    console.log("label-fn");
     const [initialCount, setInitialCount] = this.useState(0);
 
     const [count, setCount] = this.useState(0);
-    console.log("render " + count);
+    console.log("label-fn count " + count);
     this.useEffect(() => {
-      console.log("effect on");
+      console.log("label-fn effect on");
       return () => {
-        console.log("effect off");
+        console.log("label-fn effect off");
       }
     });
 
-    const initialCountAttribute = this.attributes["data-count"];
+    const initialCountAttribute = this.useAttribute("data-count", "0");// this.attributes["data-count"].value;
 
     if (initialCount != initialCountAttribute) {
       const newInitialCount = parseInt(initialCountAttribute, 10);
@@ -46,15 +50,19 @@
       setInitialCount(newInitialCount);
     }
 
+    const [limit, setLimit] = this.useQuery("limit", 0);
+
     return {
-      template: '<p data-on-click="{click}">click count {count}</p><p>initial Count {initialCount}</p><p>data-count {attributes.data-count}</p>',
+      template: '<p data-on-click="{click}">click count {count}</p><p>initial Count {initialCount}</p><p>limit {limit}</p>',
       values: {
+        limit,
         initialCount,
         count,
         click: function (ev) {
-          //console.dir(ev);
           ev.preventDefault();
           setCount(count + 1);
+          setLimit(count + 1);
+
         }
       }
     }

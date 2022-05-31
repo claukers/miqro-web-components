@@ -1,6 +1,6 @@
 import {disconnect, nodeList2Array} from "../template/index.js";
 import {renderFunction} from "./render.js";
-import {getRenderContext} from "./context.js";
+import {getRenderContext, setupObserver} from "./context.js";
 import {FunctionComponent, FunctionMeta} from "./common.js";
 
 export function defineFunction(tag: string, render: FunctionComponent, shadowRootInit?: ShadowRootInit | false): void {
@@ -8,40 +8,26 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
     constructor() {
       super();
       const meta: FunctionMeta = {
+        popStateListener: () => {
+          meta.refresh();
+        },
         shadowRoot: shadowRootInit === false ? undefined : attachShadow.call(this, typeof shadowRootInit === "object" ? shadowRootInit : {
           mode: "closed"
         }),
-        attributeMap: Object.create(null),
         componentValues: [],
         effects: [],
+        queryFilter: [],
         refresh: (firstRun: boolean = false) => {
-          if (firstRun) {
-            const attrNames = this.getAttributeNames();
-            for (const attribute of attrNames) {
-              meta.attributeMap[attribute] = this.getAttribute(attribute) as string;
-            }
-          }
-          const context = getRenderContext(meta, firstRun, () => {
+          const context = getRenderContext(this, meta, firstRun, () => {
             meta.refresh();
           });
-          renderFunction(context, meta, meta.shadowRoot ? meta.shadowRoot : this, render);
+          renderFunction(this, context, meta, getRoot(this, meta), render);
         },
-        observer: new MutationObserver((records) => {
-          for (const record of records) {
-            if (record.attributeName !== null) {
-              const attrName = record.attributeName;
-              const attrValue = (record.target as Element).getAttribute(attrName);
-              if (attrValue !== null) {
-                meta.attributeMap[attrName] = attrValue;
-              } else {
-                delete meta.attributeMap[attrName];
-              }
-            }
-          }
+        observer: new MutationObserver(() => {
           meta.refresh();
-        })
+        }),
+        attributeFilter: []
       };
-
       setMeta(this, meta);
     }
 
@@ -51,9 +37,10 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
         throw new Error("no meta!");
       }
       meta.templateChildren = meta.templateChildren ? meta.templateChildren : nodeList2Array(this.childNodes);
-      meta.observer.observe(this, {
-        attributes: true
-      });
+      setupObserver(this, meta);
+      if (meta.queryFilter.length > 0) {
+        window.addEventListener("popstate", meta.popStateListener);
+      }
       return meta.refresh(true);
     }
 
@@ -61,6 +48,9 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
       const meta = getMeta(this) as FunctionMeta;
       const root = getRoot(this, meta);
       meta.observer.disconnect();
+      if (meta.queryFilter.length > 0) {
+        window.removeEventListener("popstate", meta.popStateListener);
+      }
       for (const effect of meta.effects) {
         if (effect.disconnected) {
           try {
