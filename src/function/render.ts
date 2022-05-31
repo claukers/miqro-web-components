@@ -36,5 +36,5 @@ export function renderFunction(context: RenderContext, meta: FunctionMeta, root:
       console.error(e);
       return undefined;
     }
-  }, undefined);
+  });
 }
