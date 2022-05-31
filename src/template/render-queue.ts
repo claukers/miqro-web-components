@@ -10,7 +10,7 @@ export function cancelRender(component: Node) {
   if (oldRefreshTimeout) {
     clearTimeout(oldRefreshTimeout.timeout);
     oldRefreshTimeout.abortController.abort();
-    console.log("canceling render on %o", component);
+    // console.log("canceling render on %o", component);
   }
 }
 
@@ -38,7 +38,7 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
     }, RENDER_TIMEOUT);
     try {
       const firstRun = !hasCache(component);
-      console.log(`${firstRun ? "create " : "update "}render %o`, component);
+      // console.log(`${firstRun ? "create " : "update "}render %o`, component);
       const startMS = Date.now();
       if (!abortController.signal.aborted) {
         const renderAction = await realRender(abortController.signal, component, t, values);

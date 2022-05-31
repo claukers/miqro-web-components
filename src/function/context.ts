@@ -1,4 +1,4 @@
-import {RenderFunctionArgs, FunctionMeta, RenderContext, SetFunction} from "./common.js";
+import {FunctionMeta, RenderContext, SetFunction} from "./common.js";
 
 export function getRenderContext(meta: FunctionMeta, firstRun: boolean, refresh: () => void): RenderContext {
   let valueKeyAccess = 0;
