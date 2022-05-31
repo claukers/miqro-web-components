@@ -17,18 +17,18 @@ function setMeta(element: HTMLElement, meta: FunctionMeta) {
   weakMapSet.call(shadowMap, element, meta);
 }
 
+function getRoot(element: HTMLElement, meta: FunctionMeta) {
+  return meta.shadowRoot ? meta.shadowRoot as ShadowRoot : element;
+}
+
 export function defineFunction(tag: string, render: FunctionComponent, shadowRootInit?: ShadowRootInit | false): void {
-  const noShadowRoot = shadowRootInit === false;
-  const attachShadowArgs = shadowRootInit ? shadowRootInit : {
-    mode: "closed"
-  } as ShadowRootInit;
-
   return customElements.define(tag, class extends HTMLElement {
-
     constructor() {
       super();
-      const meta = {
-        shadowRoot: noShadowRoot ? undefined : attachShadow.call(this, attachShadowArgs),
+      const meta: FunctionMeta = {
+        shadowRoot: shadowRootInit === false ? undefined : attachShadow.call(this, typeof shadowRootInit === "object" ? shadowRootInit : {
+          mode: "closed"
+        }),
         attributeMap: Object.create(null),
         componentValues: [],
         effects: [],
@@ -58,13 +58,12 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
           }
           meta.refresh();
         })
-      } as FunctionMeta;
+      };
 
       setMeta(this, meta);
     }
 
     connectedCallback() {
-      //console.log("connected");
       const meta = getMeta(this);
       if (!meta) {
         throw new Error("no meta!");
@@ -78,7 +77,7 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
 
     disconnectedCallback() {
       const meta = getMeta(this) as FunctionMeta;
-      const root = noShadowRoot ? this : meta.shadowRoot as ShadowRoot;
+      const root = getRoot(this, meta);
       meta.observer.disconnect();
       for (const effect of meta.effects) {
         if (effect.disconnected) {
