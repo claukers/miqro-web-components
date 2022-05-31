@@ -38,7 +38,7 @@
       }
     });
 
-    const initialCountAttribute = this.useAttribute("data-count", "0");
+    const initialCountAttribute = this.attributes["data-count"];
 
     if (initialCount != initialCountAttribute) {
       const newInitialCount = parseInt(initialCountAttribute, 10);
@@ -47,7 +47,7 @@
     }
 
     return {
-      template: '<p data-on-click="{click}">click count {count}</p><p>initial Count {initialCount}</p>',
+      template: '<p data-on-click="{click}">click count {count}</p><p>initial Count {initialCount}</p><p>data-count {attributes.data-count}</p>',
       values: {
         initialCount,
         count,

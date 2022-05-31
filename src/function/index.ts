@@ -1,4 +1,11 @@
 export {defineFunction} from "./function.js";
 export {
-  FunctionComponent, FunctionComponentArgs, FunctionComponentOutput, SetFunction, UseStateFunction
+  FunctionComponent,
+  RenderFunctionArgs,
+  FunctionComponentOutput,
+  SetFunction,
+  UseStateFunction,
+  UseEffectFunction,
+  FunctionMeta,
+  RenderContext
 } from "./common.js";
