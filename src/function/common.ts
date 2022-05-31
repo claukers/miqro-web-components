@@ -2,11 +2,12 @@ import {render as queueRender, RenderFunctionOutput, TemplateValues} from "../te
 
 export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, SetFunction<T>];
 
-//export type UseAttributeFunction = (defaultValue?: string) => string | undefined;
+export type UseAttributeFunction = (name: string, defaultValue?: string) => string | null;
 export type UseEffectFunction = (effect: () => undefined | (() => void)) => void;
 
 export interface FunctionComponentArgs {
   useState: UseStateFunction;
+  useAttribute: UseAttributeFunction;
   useEffect: UseEffectFunction;
 }
 
@@ -16,7 +17,7 @@ export type FunctionComponent = () => Promise<FunctionComponentOutput> | Functio
 
 export type SetFunction<T = any> = (newValue: T) => void;
 
-export interface ComponentMeta {
+export interface FunctionMeta {
   shadowRoot?: ShadowRoot;
   attributeMap: {
     [name: string]: string | undefined;
@@ -24,7 +25,6 @@ export interface ComponentMeta {
   observer: MutationObserver;
   refresh: (firstRun?: boolean) => void;
   effects: {
-    connected?: () => void;
     disconnected?: () => void;
   }[];
   templateChildren?: Node[];
@@ -40,7 +40,7 @@ export interface RenderContext {
   //after: () => void;
 }
 
-export function callRender(context: RenderContext, meta: ComponentMeta, root: HTMLElement | ShadowRoot, render: FunctionComponent) {
+export function callRender(context: RenderContext, meta: FunctionMeta, root: HTMLElement | ShadowRoot, render: FunctionComponent) {
   //let context: { args: FunctionComponentArgs, validate: () => boolean; after: () => void; } | undefined;
   queueRender(root, async () => {
     try {

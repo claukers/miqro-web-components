@@ -1,7 +1,7 @@
 import {disconnect, nodeList2Array} from "../template/index.js";
 import {
   callRender,
-  ComponentMeta,
+  FunctionMeta,
   FunctionComponent,
   FunctionComponentArgs,
   RenderContext,
@@ -12,17 +12,17 @@ const weakMapGet = WeakMap.prototype.get;
 const weakMapSet = WeakMap.prototype.set;
 const attachShadow = HTMLElement.prototype.attachShadow;
 
-const shadowMap = new WeakMap<HTMLElement, ComponentMeta>();
+const shadowMap = new WeakMap<HTMLElement, FunctionMeta>();
 
-function getMeta(element: HTMLElement): ComponentMeta | undefined {
+function getMeta(element: HTMLElement): FunctionMeta | undefined {
   return weakMapGet.call(shadowMap, element);
 }
 
-function setMeta(element: HTMLElement, meta: ComponentMeta) {
+function setMeta(element: HTMLElement, meta: FunctionMeta) {
   weakMapSet.call(shadowMap, element, meta);
 }
 
-function getRenderContext(meta: ComponentMeta, firstRun: boolean, refresh: () => void): RenderContext {
+function getRenderContext(meta: FunctionMeta, firstRun: boolean, refresh: () => void): RenderContext {
   let valueKeyAccess = 0;
   let lockUseState = false;
   let lock = false;
@@ -145,7 +145,7 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
           }
           meta.refresh();
         })
-      } as ComponentMeta;
+      } as FunctionMeta;
 
       setMeta(this, meta);
     }
@@ -164,7 +164,7 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
     }
 
     disconnectedCallback() {
-      const meta = getMeta(this) as ComponentMeta;
+      const meta = getMeta(this) as FunctionMeta;
       const root = noShadowRoot ? this : meta.shadowRoot as ShadowRoot;
       meta.observer.disconnect();
       for (const effect of meta.effects) {
