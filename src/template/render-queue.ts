@@ -10,6 +10,7 @@ export function cancelRender(component: Node) {
   if (oldRefreshTimeout) {
     clearTimeout(oldRefreshTimeout.timeout);
     oldRefreshTimeout.abortController.abort();
+    console.log("canceling render on %o", component);
   }
 }
 
@@ -20,58 +21,47 @@ export function addRenderListener(component: Node, listener: EventListener) {
   }
 }
 
+const RENDER_TIMEOUT = 1000;
+const RENDER_MS_WARNING = 50;
+
 export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: EventListener): void {
   cancelRender(component);
-  //const firstRun = !hasCache(component);
-  //console.log(`queue${firstRun ? " create " : " "}render %o`, component);
+  const firstRun = !hasCache(component);
+  console.log(`queue${firstRun ? " create " : " update "}render %o`, component);
 
   const oldRefreshTimeout = refreshTimeouts.get(component);
   const abortController = new AbortController();
   const eventTarget = oldRefreshTimeout ? oldRefreshTimeout.eventTarget : new EventTarget();
   const timeout = setTimeout(async function queueRenderTrigger() {
+    const renderTimeout = setTimeout(function queueRenderTriggerTimeout() {
+      abortController.abort();
+    }, RENDER_TIMEOUT);
     try {
-
-      /*const firstRun = !hasCache(component);
-      const startMS = Date.now();*/
-      if (abortController.signal.aborted) {
-        //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
-        return;
-      }
-
-      /*const template = t && typeof t === "string" ? t : t ? await t : undefined;
-
-      if (abortController.signal.aborted) {
-        //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
-        return;
-      }*/
-
-      const renderAction = await realRender(abortController.signal, component, t, values);
-
-      if (abortController.signal.aborted) {
-        //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
-        return;
-      }
-
-      const refreshTimeout = refreshTimeouts.get(component);
-      if (refreshTimeout) {
-        refreshTimeouts.delete(component);
-        refreshTimeout.eventTarget.dispatchEvent(new CustomEvent("render"));
-      }
-
-      if (renderAction) {
-        if (abortController.signal.aborted) {
-          //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
-          return;
+      const firstRun = !hasCache(component);
+      const startMS = Date.now();
+      if (!abortController.signal.aborted) {
+        const renderAction = await realRender(abortController.signal, component, t, values);
+        if (!abortController.signal.aborted) {
+          if (renderAction) {
+            //renderAction.apply();
+            const changesRendered = renderAction.apply();
+            if (changesRendered) {
+              const tookMS = Date.now() - startMS;
+              if (tookMS > RENDER_MS_WARNING) {
+                console.warn(`${firstRun ? "create " : "update "}render %o done in %sms`, component, tookMS);
+              }
+            }
+          }
+          eventTarget.dispatchEvent(new CustomEvent("render"));
         }
-        renderAction.apply();
-        /*const changesRendered = renderAction.apply();
-        if (changesRendered) {
-          const tookMS = Date.now() - startMS;
-          console.log(`${firstRun ? "create " : "update "}render %o done in %sms`, component, tookMS);
-        }*/
       }
     } catch (e) {
       console.error(e);
+    }
+    clearTimeout(renderTimeout);
+    const refreshTimeout = refreshTimeouts.get(component);
+    if (refreshTimeout) {
+      refreshTimeouts.delete(component);
     }
   }, 0);
   refreshTimeouts.set(component, {

@@ -1,40 +1,59 @@
 <!DOCTYPE html>
 <html>
 <body>
-<my-root></my-root>
+<root-component>
+  <label-fn></label-fn>
+</root-component>
 <script type="module">
   import {defineFunction, Component} from "./lib/index.js";
 
+  /*customElements.define("label-fn", class extends Component {
+    click() {
+      console.log("click")
+    }
+    render() {
+      return '<p data-on-click="{this.click}">p</p>';
+    }
+  })*/
+
+  defineFunction("root-component", function () {
+    const [showChildren, setShowChildren] = this.useState(true);
+    console.log("showChildren %s", showChildren);
+    return {
+      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}">{children}</div><p>children end</p>`,
+      values: {
+        showChildren,
+        toggleShow: (ev) => {
+          ev.preventDefault();
+          console.log("set showChildren %s", !showChildren);
+          setShowChildren(!showChildren);
+        }
+      }
+    }
+  }, false)
+
   defineFunction("label-fn", async function () {
     const [count, setCount] = this.useState(0);
-    console.log("here");
+    console.log("render " + count);
+    this.useEffect(() => {
+      console.log("effect on");
+      return () => {
+        console.log("effect off");
+      }
+    });
     return {
-      template: '<p data-on-click="{click}">click count {count}</p>{children}<p>end</p>',
+      template: '<p data-on-click="{click}">click count {count}</p>',
       values: {
         count,
-        click: () => {
+        click: function (ev) {
+          //console.dir(ev);
+          ev.preventDefault();
+          console.log("calling setCount with " + (count + 1));
           setCount(count + 1);
         }
       }
     }
-  });
-
-  customElements.define("my-root", class extends Component {
-    constructor() {
-      super();
-      this.state.text = "text";
-      setInterval(()=>{
-        const random = Math.random() * 1000 * 100;
-        this.setState({
-          text: "asdklsja " + random
-        });
-      }, 1000);
-    }
-
-    render() {
-      return "<!--{root.html}-->"
-    }
-  })
+  }, false);
 
 </script>
 </body>

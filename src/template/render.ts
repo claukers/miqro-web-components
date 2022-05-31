@@ -4,11 +4,11 @@ import {renderTemplate} from "./render-template.js";
 
 export type ApplyRenderCallback = () => boolean;
 
-export function dispose(component: Node) {
+export function disconnect(component: Node) {
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, component);
   if (oldTemplate) {
-    disposeAll(oldTemplate.output);
-    weakMapDelete.call(lastTemplateMap, component);
+    disconnectAll(oldTemplate.output);
+    //weakMapDelete.call(lastTemplateMap, component);
   }
 }
 
@@ -26,18 +26,21 @@ export async function render(abortSignal: AbortSignal, element: Node, template: 
   const stringTemplate: string | void = typeof t === "object" ? await t.template : await t;
 
   if (abortSignal.aborted) {
-    throw new Error(`aborted render for ${(element as HTMLElement).tagName} ${(element as HTMLElement).dataset.name}`);
+    //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+    return;
   }
   if (stringTemplate) {
     const {output, xmlDocument} = await renderTemplateOnElement(stringTemplate, element, v ? v : Object.create(null));
     if (abortSignal.aborted) {
-      throw new Error(`aborted render for ${(element as HTMLElement).tagName} ${(element as HTMLElement).dataset.name}`);
+      //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+      return;
     }
 
     return {
       apply: () => {
         if (abortSignal.aborted) {
-          throw new Error(`aborted render for ${(element as HTMLElement).tagName} ${(element as HTMLElement).dataset.name}`);
+          //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+          return false;
         }
         return applyRender(xmlDocument, stringTemplate, element, output);
       }
@@ -60,10 +63,10 @@ async function renderTemplateOnElement(template: string, element: Node, values: 
 function applyRender(xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, element);
   if (output) {
-    weakMapSet.call(lastTemplateMap, element, {output, template, xmlDocument} as TemplateMapValue);
     const ret = renderTemplateNodeDiff(element, output, oldTemplate?.output);
+    weakMapSet.call(lastTemplateMap, element, {output, template, xmlDocument} as TemplateMapValue);
     if (oldTemplate) {
-      disposeAll(oldTemplate.output);
+      disconnectAll(oldTemplate.output);
     }
     return ret;
   }
@@ -82,12 +85,12 @@ const weakMapHas = WeakMap.prototype.has;
 const weakMapSet = WeakMap.prototype.set;
 const weakMapDelete = WeakMap.prototype.delete;
 
-function disposeAll(nodes: ITemplateNode[]): void {
+function disconnectAll(nodes: ITemplateNode[]): void {
   for (const n of nodes) {
     const children = n.children;
-    n.dispose(n.ref as Node);
+    n.disconnect(n.ref as Node);
     if (children) {
-      disposeAll(children);
+      disconnectAll(children);
     }
   }
 }

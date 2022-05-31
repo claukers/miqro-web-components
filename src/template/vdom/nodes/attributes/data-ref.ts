@@ -1,4 +1,4 @@
-import {get, getTemplateTokenValue, TemplateValues} from "../../../utils";
+import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_REF} from "./constants.js";
 import {TemplateElementNode} from "../element.js";
 

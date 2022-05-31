@@ -10,7 +10,7 @@ export interface ITemplateNode<S extends Node = Node> {
 
   update(ref: S): boolean;
 
-  dispose(ref: S): void;
+  disconnect(ref: S): void;
 
   compare(other: ITemplateNode<S>): boolean;
 }
@@ -29,6 +29,9 @@ export class TemplateNode<S extends Node = Node> implements ITemplateNode<S> {
   }
 
   public update(ref: S): boolean {
+    if(!ref) {
+      throw new Error("bad ref!");
+    }
     if (this.ref && this.ref !== ref) {
       throw new Error("already created!");
     }
@@ -38,10 +41,8 @@ export class TemplateNode<S extends Node = Node> implements ITemplateNode<S> {
     return false;
   }
 
-  public dispose(element: S): void {
-    this.ref = undefined;
-    this.children = undefined;
-    this.parent = undefined;
+  public disconnect(element: S): void {
+
   }
 
   public compare(other: TemplateNode<S>): boolean {

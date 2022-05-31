@@ -4,6 +4,28 @@ very basic and ***experimental*** ```HTMLElements``` for creating dynamic compon
 a **very basic template**
 language included.
 
+## [EXPERIMENTAL] Component Function
+
+```typescript
+import {defineFunction} from "@miqro/web-components";
+
+defineFunction("my-element", function () {
+  const [count, setCount] = this.useState(0);
+  return {
+    template: `<p data-on-click="{click}">clicked {count}</p>`,
+    values: {
+      count,
+      click: (ev) => {
+        ev.preventDefault();
+        setCount(count + 1);
+      }
+    }
+  }
+});
+```
+
+using ```async functions``` is supported but has some restrains in the use of ```state```.
+
 ## Component class
 
 the ```Component``` class extends from ```HTMLElement``` so behaves as a standard web component.
@@ -31,7 +53,7 @@ customElements.define("my-element", class extends Component {
 <p data-if="{this.state.clickCount}">clickCount: {this.state.clickCount}</p>
 ```
 
-## Lifecycle
+### Lifecycle
 
 the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent. The class
 implements the ```connectedCallback``` and ```disconnectedCallback``` to render the template and remove listeners

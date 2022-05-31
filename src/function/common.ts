@@ -1,20 +1,28 @@
-import {nodeList2Array, RenderFunctionOutput, TemplateValues, render as queueRender} from "../template/index.js";
+import {render as queueRender, RenderFunctionOutput, TemplateValues} from "../template/index.js";
 
 export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, SetFunction<T>];
 
+//export type UseAttributeFunction = (defaultValue?: string) => string | undefined;
+export type UseEffectFunction = (effect: () => undefined | (() => void)) => void;
+
 export interface FunctionComponentArgs {
   useState: UseStateFunction;
-  firstRun: boolean;
+  useEffect: UseEffectFunction;
 }
 
 export type FunctionComponentOutput = { template: RenderFunctionOutput; values: TemplateValues; };
 
-export type FunctionComponent = (args: FunctionComponentArgs) => Promise<FunctionComponentOutput> | FunctionComponentOutput;
+export type FunctionComponent = () => Promise<FunctionComponentOutput> | FunctionComponentOutput;
 
 export type SetFunction<T = any> = (newValue: T) => void;
 
 export interface ComponentMeta {
   shadowRoot?: ShadowRoot;
+  refresh: (firstRun?: boolean) => void;
+  effects: {
+    connected?: () => void;
+    disconnected?: () => void;
+  }[];
   templateChildren?: Node[];
   componentValues: {
     value?: any;
@@ -22,61 +30,28 @@ export interface ComponentMeta {
   }[];
 }
 
-function getRenderArgs(meta: ComponentMeta, firstRun: boolean, refresh: () => void): { args: FunctionComponentArgs, validate: () => boolean; } {
-  let valueKeyAccess = 0;
-  const count = meta.componentValues.length;
-  //console.log("firstRun " + firstRun);
-  return {
-    args: {
-      firstRun,
-      useState: function <T>(defaultValue?: T): [T | undefined, SetFunction<T>] {
-        const currentValueKey = valueKeyAccess;
-        if (!firstRun && currentValueKey >= count) {
-          throw new Error("conditional useState detected!");
-        }
-        valueKeyAccess++;
-
-        if (firstRun) {
-          meta.componentValues[currentValueKey] = {
-            defaultValue,
-            value: undefined
-          };
-        }
-
-        const currentValue = meta.componentValues[currentValueKey];
-
-        if (currentValue.defaultValue !== defaultValue) {
-          throw new Error("conditional useState detected different defaultValues!");
-        }
-
-        const value = currentValue.value ? currentValue.value : currentValue.defaultValue;
-
-        return [
-          value,
-          function setValue(newValue) {
-            currentValue.value = newValue;
-            refresh();
-          }
-        ]
-      }
-    } as FunctionComponentArgs,
-    validate: () => {
-      return valueKeyAccess === meta.componentValues.length;
-    }
-  };
+export interface RenderContext {
+  args: FunctionComponentArgs,
+  validate: () => boolean;
+  //after: () => void;
 }
 
-export function callRender(meta: ComponentMeta, root: HTMLElement | ShadowRoot, render: FunctionComponent, firstRun: boolean) {
+export function callRender(context: RenderContext, meta: ComponentMeta, root: HTMLElement | ShadowRoot, render: FunctionComponent) {
+  //let context: { args: FunctionComponentArgs, validate: () => boolean; after: () => void; } | undefined;
   queueRender(root, async () => {
     try {
       //const firstRun = !hasCache(root);
+      /*if (firstRun) {
+        console.log("%o firstRun", root);
+      }*/
 
-      const renderArgs = getRenderArgs(meta, firstRun, () => callRender(meta, root, render, false));
-      const renderBind = render.bind(renderArgs.args);
-      const output = await renderBind(renderArgs.args);
-      if (!renderArgs.validate()) {
+      //context = context ? context : getRenderContext(meta, firstRun, () => callRender(meta, root, render, false));
+      const renderBind = render.bind({...context.args});
+      const output = await renderBind();
+      if (!context.validate()) {
         throw new Error("conditional useState detected!");
       }
+      //console.log("template children %o", meta.templateChildren);
       return {
         template: output.template,
         values: output.values ? {
@@ -90,5 +65,5 @@ export function callRender(meta: ComponentMeta, root: HTMLElement | ShadowRoot, 
       console.error(e);
       return undefined;
     }
-  });
+  }, undefined);
 }

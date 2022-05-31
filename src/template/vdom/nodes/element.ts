@@ -1,11 +1,9 @@
-import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef, dataState} from "./attributes";
+import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef} from "./attributes/index.js";
 import {renderChildNodes} from "../../render-children.js";
-import {IComponent, TemplateValues} from "../../utils";
+import {TemplateValues} from "../../utils/index.js";
 import {TemplateNode} from "./node.js";
 
 export class TemplateElementNode extends TemplateNode<HTMLElement> {
-
-  public state: any;
 
   public attributes: { attribute: string; value: string; }[];
 
@@ -16,7 +14,6 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
   constructor(public tagName: string) {
     super("Element");
     this.children = [];
-    this.state = {};
     this.attributes = [];
     this.listeners = [];
     this.refListeners = [];
@@ -34,8 +31,12 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
     }
     if (this.children) {
       for (const child of this.children) {
-        const element = child.create(ref);
-        ref.appendChild(element);
+        try {
+          const element = child.create(ref);
+          ref.appendChild(element);
+        } catch(e) {
+          throw e;
+        }
       }
     }
     return ref;
@@ -50,28 +51,17 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
         ref.setAttribute(attribute.attribute, attribute.value);
       }
     }
-
     for (const listener of this.listeners) {
       ref.addEventListener(listener.eventName, listener.callback);
-    }
-
-    const asComponent = ref as IComponent;
-    if (first && asComponent.state) {
-      asComponent.state = {
-        ...asComponent.state,
-        ...this.state
-      };
-    } else if (!first && asComponent.setState && typeof asComponent.setState === "function") {
-      asComponent.setState(this.state);
     }
     return ret;
   }
 
-  public dispose(ref: HTMLElement) {
+  public disconnect(ref: HTMLElement) {
     for (const listener of this.listeners) {
       ref.removeEventListener(listener.eventName, listener.callback);
     }
-    super.dispose(ref);
+    super.disconnect(ref);
   }
 
   public compare(other: TemplateElementNode): boolean {
@@ -88,7 +78,7 @@ export async function renderElementNode(node: Node, values: TemplateValues): Pro
     if (dataIf(node as Element, values) && dataIfn(node as Element, values)) {
       const tagName = (node as Element).tagName;
       const childElement = new TemplateElementNode(tagName);
-      dataState(node, values, childElement);
+      //dataState(node, values, childElement);
       dataRef(node, values, childElement);
       dataOnAndOtherAttributes(node, values, childElement);
       childElement.children = await renderChildNodes(node.childNodes, values);

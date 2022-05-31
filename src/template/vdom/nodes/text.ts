@@ -1,4 +1,4 @@
-import {get, getTemplateTokenValue, re, TemplateValues} from "../../utils";
+import {get, getTemplateTokenValue, re, TemplateValues} from "../../utils/index.js";
 import {TemplateNode} from "./node.js";
 
 class TemplateTextNode extends TemplateNode<Text> {
@@ -58,7 +58,8 @@ export function renderTextNode(node: Node, values: TemplateValues): Array<Templa
         const isNodeArray = value instanceof Array && value.filter(v => !(v instanceof Node)).length === 0;
         if (isNodeArray || value instanceof HTMLElement) {
           ret.push(currentTextNode);
-          ret = ret.concat(new TemplateHTMLElementRefNode(value as HTMLElement));
+          const refs = isNodeArray ? value as Node[] : [value] as Node[];
+          ret = ret.concat(refs.map(ref => new TemplateHTMLElementRefNode(ref as HTMLElement)));
           currentTextNode = new TemplateTextNode("");
           return "";
         } else {
