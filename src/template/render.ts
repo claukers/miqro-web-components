@@ -1,6 +1,7 @@
 import {RenderFunction, RenderFunctionOutput, TemplateValues} from "./utils/index.js";
 import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "./vdom/index.js";
 import {renderTemplate} from "./render-template.js";
+import {log, LOG_LEVEL} from "../log.js";
 
 export type ApplyRenderCallback = () => boolean;
 
@@ -17,7 +18,7 @@ export function hasCache(component: Node): boolean {
 }
 
 export async function render(abortSignal: AbortSignal, element: Node, template: RenderFunction | RenderFunctionOutput, values?: TemplateValues): Promise<{ apply: ApplyRenderCallback } | undefined> {
-  // console.log("render %s", component.tagName);
+  log(LOG_LEVEL.trace, "render %o", element);
   if (values !== undefined && typeof template === "function") {
     throw new Error("cannot provide a RenderFunction with values");
   }
@@ -26,20 +27,20 @@ export async function render(abortSignal: AbortSignal, element: Node, template: 
   const stringTemplate: string | void = typeof t === "object" ? await t.template : await t;
 
   if (abortSignal.aborted) {
-    //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+    log(LOG_LEVEL.trace, "render aborted %o", element);
     return;
   }
   if (stringTemplate) {
     const {output, xmlDocument} = await renderTemplateOnElement(stringTemplate, element, v ? v : Object.create(null));
     if (abortSignal.aborted) {
-      //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+      log(LOG_LEVEL.trace, "render aborted %o", element);
       return;
     }
 
     return {
       apply: () => {
         if (abortSignal.aborted) {
-          //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+          log(LOG_LEVEL.trace, "render aborted %o", element);
           return false;
         }
         return applyRender(abortSignal, xmlDocument, stringTemplate, element, output);
@@ -62,7 +63,7 @@ async function renderTemplateOnElement(template: string, element: Node, values: 
 
 function applyRender(abortSignal: AbortSignal, xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
   if (abortSignal.aborted) {
-    //console.log(`${firstRun ? "create " : ""}render aborted %o`, component);
+    log(LOG_LEVEL.trace, "render aborted %o", element);
     return false;
   }
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, element);
@@ -87,6 +88,7 @@ const lastTemplateMap = new WeakMap<Node, TemplateMapValue>();
 const weakMapGet = WeakMap.prototype.get;
 const weakMapHas = WeakMap.prototype.has;
 const weakMapSet = WeakMap.prototype.set;
+
 //const weakMapDelete = WeakMap.prototype.delete;
 
 function disconnectAll(nodes: ITemplateNode[]): void {

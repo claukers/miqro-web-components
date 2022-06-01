@@ -9,33 +9,34 @@
 </style>
 <my-root></my-root>
 <script type="module">
-  import {Component} from "./lib/index.js";
+  import {defineFunction} from "./lib/index.js";
 
-  customElements.define("my-root", class extends Component {
-    async render() {
-      return '<fallback-component><p><loading-component data-name="A"/></p><p><loading-component data-name="B"/></p></fallback-component>';
-    }
+  defineFunction("my-loading", function () {
+    return "<p>loading</p>";
   });
 
-  customElements.define("suspend-component", class extends Component {
-    render() {
-      /*clearTimeout(this.timeout);
-      this.timeout = setTimeout(() => {
-        if(this.templateChildren.filter(c => isRenderQueue(c)).length > 0) {
-          this.templateChildren.forEach(c=>cancelRender(c));
-        }
-      }, 500);*/
-      return "{children}";
-    }
+  const SUSPEND_DEFAULT_FALLBACK_MS = 10;
+
+  defineFunction("my-suspend", function () {
+    this.useEffect(() => {
+      setTimeout(function () {
+
+      }, SUSPEND_DEFAULT_FALLBACK_MS);
+    });
+    return "{children}";
   });
 
-  customElements.define("loading-component", class extends Component {
-    async render() {
-      const m = (Math.random() * 10000);
-      const t = (m + (Math.random() * m));
-      await new Promise(resolve => setTimeout(resolve, t));
-      return "{this.dataset.name} loaded " + t + "ms";
-    }
+  defineFunction("my-element", async function () {
+    await new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+    return "<p>out</p>";
+  });
+
+  defineFunction("my-root", async function () {
+    return "<my-suspend><my-element/></my-suspend>";
   });
 </script>
 </body>

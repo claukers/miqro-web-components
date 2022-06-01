@@ -1,6 +1,7 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_REF} from "./constants.js";
 import {TemplateElementNode} from "../element.js";
+import {log, LOG_LEVEL} from "../../../../log.js";
 
 export function dataRef(node: Node, values: TemplateValues, childElement: TemplateElementNode): void {
   const dataRefValue = (node as Element).getAttribute(DATA_REF);
@@ -12,7 +13,7 @@ export function dataRef(node: Node, values: TemplateValues, childElement: Templa
       // callback(childElement);
       childElement.refListeners.push({listener: callback});
     } else {
-      console.error("invalid value for %s [%s]=[%o] for [%o]", DATA_REF, dataRefValue, value, values.this);
+      log(LOG_LEVEL.error, "invalid value for %s [%s]=[%o] for [%o]", DATA_REF, dataRefValue, value, values.this);
       throw new Error(`invalid value for ${DATA_REF}`);
     }
   }

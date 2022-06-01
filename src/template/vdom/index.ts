@@ -14,32 +14,26 @@ export function renderTemplateNodeDiff(root: Node, current?: ITemplateNode<Node>
     const oldTemplateNode = old[i];
 
     if (oldTemplateNode === undefined) {
-      //console.log("render node create on %s", currentTemplateNode.toString());
       ret = true;
       const createdRef = currentTemplateNode.create(root);
-      //console.log("%o.ref %o", createdRef, currentTemplateNode.ref);
       appendChildren(root, createdRef);
     } else {
       // current child exists
       if (oldTemplateNode.type !== currentTemplateNode.type) {
-        //console.log("render node create on %s", currentTemplateNode.toString());
         ret = true;
         // splice current childs
         removeChildrenFrom(old, i);
         // append new element
         const createdRef = currentTemplateNode.create(root);
-        //console.log("%o.ref %o", createdRef, currentTemplateNode.ref);
         appendChildren(root, createdRef);
       } else {
         const compareRet = currentTemplateNode.compare(oldTemplateNode);
         if (!compareRet) {
-          //console.log("render node create on %s", currentTemplateNode.toString());
           ret = true;
           // splice current childs and remove them from the dom
           removeChildrenFrom(old, i);
           // append new element
           const createdRef = currentTemplateNode.create(root);
-          //console.log("%o.ref %o", createdRef, currentTemplateNode.ref);
           appendChildren(root, createdRef);
         } else {
           const currentRef = oldTemplateNode.ref as HTMLElement;
@@ -47,7 +41,6 @@ export function renderTemplateNodeDiff(root: Node, current?: ITemplateNode<Node>
             debugger;
           }
           const oldChildren = oldTemplateNode.children;
-          //console.log("render node update on %s", currentTemplateNode.toString());
           const r = currentTemplateNode.update(currentRef);
           if (r) {
             ret = true;

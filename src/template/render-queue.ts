@@ -1,5 +1,6 @@
 import {RenderFunction, RenderFunctionOutput, TemplateValues} from "./utils/index.js";
 import {hasCache, render as realRender} from "./render.js";
+import {log, LOG_LEVEL} from "../log.js";
 
 export function isRenderQueued(component: Node) {
   return refreshTimeouts.has(component);
@@ -7,10 +8,11 @@ export function isRenderQueued(component: Node) {
 
 export function cancelRender(component: Node) {
   const oldRefreshTimeout = refreshTimeouts.get(component);
-  if (oldRefreshTimeout) {
+  if (oldRefreshTimeout && oldRefreshTimeout.timeout) {
     clearTimeout(oldRefreshTimeout.timeout);
     oldRefreshTimeout.abortController.abort();
-    // console.log("canceling render on %o", component);
+    oldRefreshTimeout.timeout = null;
+    log(LOG_LEVEL.debug, "canceling render on %o", component);
   }
 }
 
@@ -21,25 +23,26 @@ export function addRenderListener(component: Node, listener: EventListener) {
   }
 }
 
-const RENDER_TIMEOUT = 1000;
+const RENDER_TIMEOUT = 60000;
 const RENDER_MS_WARNING = 50;
 
 export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: EventListener): void {
   cancelRender(component);
-  /*const firstRun = !hasCache(component);
-  console.log(`queue${firstRun ? " create " : " update "}render %o`, component);*/
-
+  const startMS = Date.now();
+  const firstRun = !hasCache(component);
+  log(LOG_LEVEL.debug, `queue${firstRun ? " create " : " update "}render %o`, component);
   const oldRefreshTimeout = refreshTimeouts.get(component);
   const abortController = new AbortController();
   const eventTarget = oldRefreshTimeout ? oldRefreshTimeout.eventTarget : new EventTarget();
   const timeout = setTimeout(async function queueRenderTrigger() {
     const renderTimeout = setTimeout(function queueRenderTriggerTimeout() {
+      log(LOG_LEVEL.warn, `${firstRun ? "create " : "update "}render %o max timeout %s`, component, RENDER_TIMEOUT);
       abortController.abort();
     }, RENDER_TIMEOUT);
     try {
       const firstRun = !hasCache(component);
-      // console.log(`${firstRun ? "create " : "update "}render %o`, component);
-      const startMS = Date.now();
+      log(LOG_LEVEL.debug, `${firstRun ? "create " : "update "}render %o`, component);
+
       if (!abortController.signal.aborted) {
         const renderAction = await realRender(abortController.signal, component, t, values);
         if (!abortController.signal.aborted) {
@@ -48,15 +51,17 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
             if (changesRendered) {
               const tookMS = Date.now() - startMS;
               if (tookMS > RENDER_MS_WARNING) {
-                console.warn(`${firstRun ? "create " : "update "}render %o done in %sms`, component, tookMS);
+                log(LOG_LEVEL.warn, `${firstRun ? "create " : "update "}render %o took %sms!`, component, tookMS);
+              } else {
+                log(LOG_LEVEL.debug, `${firstRun ? "create " : "update "}render %o took %sms`, component, tookMS);
               }
+              eventTarget.dispatchEvent(new CustomEvent("render"));
             }
           }
-          eventTarget.dispatchEvent(new CustomEvent("render"));
         }
       }
     } catch (e) {
-      console.error(e);
+      log(LOG_LEVEL.error, e);
     }
     clearTimeout(renderTimeout);
     const refreshTimeout = refreshTimeouts.get(component);

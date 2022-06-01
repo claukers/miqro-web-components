@@ -33,7 +33,6 @@ export function isRouteActive(route: Route, activeRoute: Route | undefined, useD
   if (activeRoute && route.element !== activeRoute.element && active && isRouteActive(activeRoute, activeRoute, false)) {
     active = false;
   }
-  // console.log("default:%s path:%s on %s isActive %s", route.isDefault, path, pathname, active);
   return active;
 }
 

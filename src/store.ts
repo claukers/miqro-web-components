@@ -1,3 +1,5 @@
+import {log, LOG_LEVEL} from "./log.js";
+
 export type Selector<S = any, R = any> = (state: S) => R;
 export type StoreListener<S = any, R = any> = (value: R) => void;
 export type Reducer<S = any> = (action: Action, state: S) => S;
@@ -70,12 +72,12 @@ function dispatch<S = any>(store: Store, action: Action, listenerMap: Map<StoreL
       try {
         const result = listenerInfo.selector(state);
         if (result !== listenerInfo.lastResult) {
-          console.log("dispatch listener");
+          log(LOG_LEVEL.trace, "dispatch listener");
           listenerInfo.lastResult = result;
           listener(result);
         }
       } catch (e) {
-        console.error(e);
+        log(LOG_LEVEL.error, e);
         store.dispatchEvent(new ErrorEvent(String(e) + " " + String((e as Error).stack)));
       }
     }

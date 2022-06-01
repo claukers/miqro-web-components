@@ -1,6 +1,7 @@
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM, DATA_IF, DATA_ON, DATA_REF, DATA_STATE} from "./constants.js";
 import {evaluateTextTemplate, get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {TemplateElementNode} from "../element.js";
+import {log, LOG_LEVEL} from "../../../../log.js";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
 
@@ -10,7 +11,6 @@ export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, chi
     if (IGNORE_ATTRIBUTES.indexOf(attribute) === -1) {
       const attributeValue = (node as Element).getAttribute(attribute);
       if (attributeValue) {
-        // console.log("%o %o %o", childElement, attribute, attributeValue);
         if (attribute.indexOf(DATA_ON) === 0) {
           const eventName = attributeValue ? attribute.substring(DATA_ON.length) : undefined;
           const dataOnPath = attributeValue ? getTemplateTokenValue(attributeValue) : undefined;
@@ -20,16 +20,14 @@ export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, chi
             childElement.listeners.push({eventName, callback});
             // childElement.addEventListener(eventName, callback);
           } else {
-            console.error("invalid value for %s [%s]=[%o] for [%o]", attribute, attributeValue, value, values.this);
+            log(LOG_LEVEL.error, "invalid value for %s [%s]=[%o] for [%o]", attribute, attributeValue, value, values.this);
             throw new Error(`invalid value for ${attribute}`);
           }
         } else {
           childElement.attributes.push({attribute, value: evaluateTextTemplate(attributeValue, values)});
-          //childElement.setAttribute(attribute, evaluateTextTemplate(attributeValue, values));
         }
       } else {
         childElement.attributes.push({attribute, value: ""});
-        //childElement.setAttribute(attribute, "");
       }
     }
   }

@@ -1,4 +1,5 @@
 import {RenderFunctionOutput, TemplateValues} from "../template/index.js";
+import {Selector, Store} from "../store";
 
 export type FunctionComponentOutput = { template: RenderFunctionOutput; values?: TemplateValues; };
 
@@ -11,9 +12,7 @@ export interface FunctionMeta {
   queryFilter: string[];
   popStateListener: () => void;
   refresh: (firstRun?: boolean) => void;
-  effects: {
-    disconnected?: () => void;
-  }[];
+  effects: { disconnected: () => void }[];
   templateChildren?: Node[];
   componentValues: {
     value?: any;
@@ -21,15 +20,18 @@ export interface FunctionMeta {
   }[];
 }
 
+export type Effect = () => undefined | (() => void);
+
 export type SetFunction<T = any> = (newValue: T) => void;
 
 export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, SetFunction<T>];
-
+export type UseSubscriptionFunction<R = any> = <S, R>(store: Store, selector: Selector<S, R>) => R | undefined;
 export type UseAttributeFunction = (name: string, defaultValue?: string) => string | null;
 export type UseQueryFunction = (name: string, defaultValue?: string | string[]) => [string[] | string | null, SetFunction<string[] | string | null>];
-export type UseEffectFunction = (effect: () => undefined | (() => void)) => void;
+export type UseEffectFunction = (effect: Effect) => void;
 
 export interface FunctionContext {
+  useSubscription: UseSubscriptionFunction;
   useState: UseStateFunction;
   useAttribute: UseAttributeFunction;
   useQuery: UseQueryFunction;
@@ -37,6 +39,7 @@ export interface FunctionContext {
 }
 
 export interface RenderContext {
-  this: FunctionContext,
+  this: FunctionContext;
   validate: () => boolean;
+  after?: () => void;
 }

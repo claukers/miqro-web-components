@@ -2,6 +2,7 @@ import {disconnect, nodeList2Array} from "../template/index.js";
 import {renderFunction} from "./render.js";
 import {getRenderContext, setupObserver} from "./context.js";
 import {FunctionComponent, FunctionMeta} from "./common.js";
+import {log, LOG_LEVEL} from "../log.js";
 
 export function defineFunction(tag: string, render: FunctionComponent, shadowRootInit?: ShadowRootInit | false): void {
   return customElements.define(tag, class extends HTMLElement {
@@ -56,7 +57,7 @@ export function defineFunction(tag: string, render: FunctionComponent, shadowRoo
           try {
             effect.disconnected();
           } catch (e) {
-            console.error(e);
+            log(LOG_LEVEL.error, e);
           }
         }
       }

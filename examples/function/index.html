@@ -4,17 +4,27 @@
 <root-component>
 </root-component>
 <script type="module">
-  import {defineFunction} from "./lib/index.js";
+  import {defineFunction, Store} from "./lib/index.js";
 
-  defineFunction("root-component", async function () {
+  defineFunction("root-component", function () {
     console.log("root-component");
     const [showChildren, setShowChildren] = this.useState(true);
     const [initialCount, setInitialCount] = this.useState(0);
     const [limit] = this.useQuery("limit", 0);
     //console.log("showChildren %s", showChildren);
     return {
-      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end {limit}</p>`,
+      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end {limit}</p><p data-on-click="{add}">add</p><p data-on-click="{subtract}">subtract</p>`,
       values: {
+        add: () => {
+          store.dispatch({
+            type: "add"
+          });
+        },
+        subtract: () => {
+          store.dispatch({
+            type: "subtract"
+          });
+        },
         limit,
         showChildren,
         initialCount,
@@ -27,14 +37,38 @@
         }
       }
     }
-  })
+  });
 
-  defineFunction("label-fn", async function () {
-    console.log("label-fn");
+  const store = new Store({
+    subtract: (action, state) => {
+      return {
+        ...state,
+        storeValue: state.storeValue - 1
+      };
+    },
+    add: (action, state) => {
+      return {
+        ...state,
+        storeValue: state.storeValue + 1
+      };
+    }
+  }, {
+    storeValue: 1
+  });
+
+  defineFunction("label-fn", function () {
+    const storeValue = this.useSubscription(store, s => s.storeValue);
     const [initialCount, setInitialCount] = this.useState(0);
-
     const [count, setCount] = this.useState(0);
-    console.log("label-fn count " + count);
+    const [limit, setLimit] = this.useQuery("limit", 0);
+    const initialCountAttribute = this.useAttribute("data-count", "0");// this.attributes["data-count"].value;
+
+    console.log("label-fn count %s initialCount %s storeValue %s limit %s initialCountAttribute %s", count, initialCount, storeValue, limit, initialCountAttribute);
+    if (count === 0) {
+      setCount(1);
+    }
+
+
     this.useEffect(() => {
       console.log("label-fn effect on");
       return () => {
@@ -42,20 +76,17 @@
       }
     });
 
-    const initialCountAttribute = this.useAttribute("data-count", "0");// this.attributes["data-count"].value;
-
     if (initialCount != initialCountAttribute) {
       const newInitialCount = parseInt(initialCountAttribute, 10);
       setCount(newInitialCount);
       setInitialCount(newInitialCount);
     }
 
-    const [limit, setLimit] = this.useQuery("limit", 0);
-
     return {
-      template: '<p data-on-click="{click}">click count {count}</p><p>initial Count {initialCount}</p><p>limit {limit}</p>',
+      template: '<p data-on-click="{click}">click count {count}</p><p>initial Count {initialCount}</p><p>limit {limit}</p><p>storeValue {storeValue}</p>',
       values: {
         limit,
+        storeValue,
         initialCount,
         count,
         click: function (ev) {

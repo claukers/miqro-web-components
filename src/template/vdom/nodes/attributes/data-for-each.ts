@@ -1,6 +1,7 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM} from "./constants.js";
 import {TemplateNode} from "../node.js";
+import {log, LOG_LEVEL} from "../../../../log.js";
 
 export async function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => Promise<TemplateNode | undefined>): Promise<TemplateNode[]> {
   const forEachValue = (node as Element).getAttribute(DATA_FOR_EACH);
@@ -24,7 +25,7 @@ export async function dataForEach(node: Node, values: TemplateValues, cb: (node:
       }
       return ret;
     } else {
-      console.error("invalid value for %s [%s]=[%o] for [%o]", DATA_FOR_EACH, forEachValue, value, values.this);
+      log(LOG_LEVEL.error, "invalid value for %s [%s]=[%o] for [%o]", DATA_FOR_EACH, forEachValue, value, values.this)
       throw new Error(`invalid value for ${DATA_FOR_EACH}`);
     }
   } else {
