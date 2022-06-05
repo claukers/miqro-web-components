@@ -1,5 +1,6 @@
 import {Component} from "../component/index.js";
 import {Route, updateRouter} from "./utils.js";
+import {windowAddEventListener, windowRemoveEventListener} from "../template/utils";
 
 const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}></${tagName}>`;
 
@@ -49,7 +50,7 @@ export class PathRouter<S extends PathRouterState = PathRouterState> extends Com
 
   public connectedCallback() {
     updateRouter(this, false);
-    window.addEventListener("popstate", this.popStateListener);
+    windowAddEventListener("popstate", this.popStateListener);
     return super.connectedCallback();
   }
 
@@ -60,7 +61,7 @@ export class PathRouter<S extends PathRouterState = PathRouterState> extends Com
   }
 
   public disconnectedCallback(): void {
-    window.removeEventListener("popstate", this.popStateListener);
+    windowRemoveEventListener("popstate", this.popStateListener);
   }
 
   public render() {

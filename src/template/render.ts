@@ -1,11 +1,21 @@
-import {RenderFunction, RenderFunctionOutput, TemplateValues} from "./utils/index.js";
+import {
+  parseXML,
+  RenderFunction,
+  RenderFunctionOutput,
+  TemplateValues,
+  weakMapGet,
+  weakMapHas,
+  weakMapSet
+} from "./utils/index.js";
 import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "./vdom/index.js";
 import {renderTemplate} from "./render-template.js";
 import {log, LOG_LEVEL} from "../log.js";
+import {cancelRender} from "./render-queue.js";
 
 export type ApplyRenderCallback = () => boolean;
 
 export function disconnect(component: Node) {
+  cancelRender(component);
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, component);
   if (oldTemplate) {
     disconnectAll(oldTemplate.output);
@@ -22,9 +32,13 @@ export async function render(abortSignal: AbortSignal, element: Node, template: 
   if (values !== undefined && typeof template === "function") {
     throw new Error("cannot provide a RenderFunction with values");
   }
-  const t = typeof template === "string" ? template : typeof template === "function" ? await template() : template ? await template : undefined;
+  const t = typeof template === "string" ? template : typeof template === "function" ? await template({
+    abortSignal
+  }) : template ? await template : undefined;
   const v = typeof t === "object" ? t.values : values;
-  const stringTemplate: string | void = typeof t === "object" ? await t.template : await t;
+  let output: string[] | string | void = t instanceof Array ? t : (typeof t === "object" ? await t.template : await t);
+  const stringTemplate = output instanceof Array ? output.join() : output;
+  output = undefined;
 
   if (abortSignal.aborted) {
     log(LOG_LEVEL.trace, "render aborted %o", element);
@@ -54,7 +68,7 @@ async function renderTemplateOnElement(template: string, element: Node, values: 
 
   const xmlDocument = oldTemplate && oldTemplate.template === template ?
     oldTemplate.xmlDocument :
-    ((new DOMParser()).parseFromString(`<root>${template}</root>`, "text/xml") as XMLDocument);
+    parseXML(template)
 
   const output = await renderTemplate(template, values, xmlDocument);
 
@@ -85,11 +99,6 @@ interface TemplateMapValue {
 }
 
 const lastTemplateMap = new WeakMap<Node, TemplateMapValue>();
-const weakMapGet = WeakMap.prototype.get;
-const weakMapHas = WeakMap.prototype.has;
-const weakMapSet = WeakMap.prototype.set;
-
-//const weakMapDelete = WeakMap.prototype.delete;
 
 function disconnectAll(nodes: ITemplateNode[]): void {
   for (const n of nodes) {

@@ -1,9 +1,9 @@
 import {Component} from "../component/index.js";
 import {historyPushPath} from "./history.js";
 import {isPathLocation} from "./utils.js";
-import {TemplateValues} from "../template/index.js";
+import {windowAddEventListener, windowRemoveEventListener} from "../template/utils";
 
-export interface RouteLinkState extends TemplateValues {
+export interface RouteLinkState {
   active?: boolean;
 }
 
@@ -31,7 +31,7 @@ export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Compon
 
   public connectedCallback() {
     this.addEventListener("click", this.clickListener);
-    window.addEventListener("popstate", this.popStateListener);
+    windowAddEventListener("popstate", this.popStateListener);
     const isActive = isPathLocation(this.dataset.path);
     if (this.state.active !== isActive) {
       this.state.active = isActive;
@@ -41,10 +41,10 @@ export class RouteLink<S extends RouteLinkState = RouteLinkState> extends Compon
 
   public disconnectedCallback() {
     this.removeEventListener("click", this.clickListener);
-    window.removeEventListener("popstate", this.popStateListener);
+    windowRemoveEventListener("popstate", this.popStateListener);
   }
 
-  public render(): Promise<string> | string | void {
+  public render() {
     if (this.classList.contains("active") && !this.state.active) {
       this.classList.remove("active");
     } else if (!this.classList.contains("active") && this.state.active) {

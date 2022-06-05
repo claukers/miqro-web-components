@@ -1,4 +1,5 @@
 import {log, LOG_LEVEL} from "./log.js";
+import {mapDelete, mapGet, mapKeys, mapSet} from "./template/utils";
 
 export type Selector<S = any, R = any> = (state: S) => R;
 export type StoreListener<S = any, R = any> = (value: R) => void;
@@ -32,12 +33,12 @@ export class Store<S = any> extends EventTarget {
 
   public subscribe<R = any>(selector: Selector<S, R>, listener: StoreListener<S, R>): R {
     const lastResult = selector(this.state);
-    this.listenerMap.set(listener, {lastResult, selector});
+    mapSet.call(this.listenerMap, listener, {lastResult, selector});
     return lastResult;
   }
 
   public unSubscribe<R = any>(listener: StoreListener<S, R>): boolean {
-    return this.listenerMap.delete(listener);
+    return mapDelete.call(this.listenerMap, listener);
   }
 
   public getState(): S {
@@ -65,9 +66,9 @@ interface ListenerInfo<S = any> {
 
 function dispatch<S = any>(store: Store, action: Action, listenerMap: Map<StoreListener<S>, ListenerInfo<S>>): void {
   const state = store.getState();
-  const listeners = listenerMap.keys();
+  const listeners = mapKeys.call(listenerMap) as IterableIterator<StoreListener<S>>;
   for (const listener of listeners) {
-    const listenerInfo = listenerMap.get(listener);
+    const listenerInfo = mapGet.call(listenerMap, listener) as ListenerInfo<S> | undefined;
     if (listenerInfo) {
       try {
         const result = listenerInfo.selector(state);

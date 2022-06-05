@@ -2,9 +2,10 @@ import {disconnect, RenderFunction} from "../template/index.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {FunctionComponentMeta} from "./common.js";
 import {renderFunction} from "./render.js";
+import {weakMapGet, weakMapHas, weakMapSet} from "../template/utils";
 
 export function constructorCallback(element: HTMLElement, func: RenderFunction): void {
-  if (metaMap.has(element)) {
+  if (weakMapHas.call(metaMap, element)) {
     throw new Error("createHookContext called twice on element");
   }
 
@@ -23,7 +24,7 @@ export function constructorCallback(element: HTMLElement, func: RenderFunction):
       return renderFunction(element, false, meta);
     }
   };
-  metaMap.set(element, meta);
+  weakMapSet.call(metaMap, element, meta);
 }
 
 export function connectedCallback(element: HTMLElement): void {
@@ -46,8 +47,10 @@ export function disconnectedCallback(element: HTMLElement): void {
 
 const metaMap = new WeakMap<HTMLElement, FunctionComponentMeta>();
 
+
 function getMeta(element: HTMLElement): FunctionComponentMeta {
-  const meta = metaMap.get(element);
+
+  const meta = weakMapGet.call(metaMap, element) as FunctionComponentMeta;
   if (!meta) {
     throw new Error("getMeta no meta for element");
   }

@@ -72,7 +72,7 @@
     storeValue: 1
   });
 
-  defineFunction("label-fn", function () {
+  defineFunction("label-fn", function ({abortSignal}) {
     const storeValue = this.useSubscription(store, s => s.storeValue);
     const [initialCount, setInitialCount] = this.useState(0);
     const [count, setCount] = this.useState(0);

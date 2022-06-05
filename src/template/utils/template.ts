@@ -3,23 +3,27 @@ import {ITemplateNode} from "../vdom/nodes/node.js";
 
 export type RefreshCallback = () => void;
 
-export type RenderFunctionOutput = Promise<string> | string | void;
+export type RenderFunctionOutput = Promise<string[] | string | undefined> | string[] | string | void;
 
 export interface AsyncRenderFunctionOutputPair {
   template: RenderFunctionOutput;
   values?: TemplateValues;
 }
 
-export type RenderFunction = () => AsyncRenderFunctionOutputPair | Promise<AsyncRenderFunctionOutputPair | string | undefined> | string | undefined;
+export interface RenderFunctionArgs {
+  abortSignal: AbortSignal;
+}
 
-export interface IComponent<S extends TemplateValues = TemplateValues> extends Node {
+export type RenderFunction = (args: RenderFunctionArgs) => AsyncRenderFunctionOutputPair | Promise<AsyncRenderFunctionOutputPair | string | undefined> | string | undefined;
+
+/*export interface IComponent<S extends TemplateValues = TemplateValues> extends Node {
   state?: S;
-  template?: string;
-  templateChildren?: Array<Node | HTMLElement>;
+  //template?: string;
+  //templateChildren?: Array<Node | HTMLElement>;
   render?: () => RenderFunctionOutput;
   setState?: (args: any, callback?: () => void) => void;
   refresh?: () => void;
-}
+}*/
 
 export interface TemplateValues {
   //this: undefined;

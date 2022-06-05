@@ -11,32 +11,36 @@
 <script type="module">
   import {defineFunction} from "./lib/index.js";
 
-  defineFunction("my-loading", function () {
-    return "<p>loading</p>";
-  });
-
-  const SUSPEND_DEFAULT_FALLBACK_MS = 10;
-
-  defineFunction("my-suspend", function () {
-    this.useEffect(() => {
-      setTimeout(function () {
-
-      }, SUSPEND_DEFAULT_FALLBACK_MS);
-    });
-    return "{children}";
-  });
-
-  defineFunction("my-element", async function () {
+  defineFunction("my-element", async function ({abortSignal}) {
     await new Promise(resolve => {
       setTimeout(() => {
         resolve();
-      }, 1000);
+      }, 4000);
     });
+    if (abortSignal.aborted) {
+      console.log("ABORTED");
+      return;
+    }
     return "<p>out</p>";
   });
 
   defineFunction("my-root", async function () {
-    return "<my-suspend><my-element/></my-suspend>";
+    const [show, setShow] = this.useState(true);
+    this.useEffect(() => {
+      const timeout = setTimeout(() => {
+        setShow(false);
+      }, 2000);
+      return () => {
+        clearTimeout(timeout);
+      }
+    });
+
+    return {
+      template: '<my-element/><my-element data-if="{show}"/>',
+      values: {
+        show
+      }
+    };
   });
 </script>
 </body>

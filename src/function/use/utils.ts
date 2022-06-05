@@ -1,5 +1,13 @@
+import {windowDispatchEvent, windowPushState} from "../../template/utils/index.js";
+
+const URLSearchParamsGetAll = URLSearchParams.prototype.getAll;
+const URLSearchParamsSet = URLSearchParams.prototype.set;
+const URLSearchParamsAppend = URLSearchParams.prototype.append;
+const URLSearchParamsDelete = URLSearchParams.prototype.delete;
+const URLSearchParamsToString = URLSearchParams.prototype.toString;
+
 export function getQueryValue(name: string, defaultValue?: string[] | string | null): string[] | string | null {
-  const ret = new URL(window.location.href).searchParams.getAll(name);
+  const ret = URLSearchParamsGetAll.call(new URL(window.location.href).searchParams, name);
   if (ret.length === 0) {
     return defaultValue !== undefined ? defaultValue : null;
   }
@@ -10,13 +18,13 @@ export function setQueryValue(name: string, value: string[] | string | null): vo
   const url = new URL(window.location.href);
   if (value instanceof Array) {
     for (const v of value) {
-      url.searchParams.append(name, v)
+      URLSearchParamsAppend.call(url.searchParams, name, v);
     }
   } else if (value !== null) {
-    url.searchParams.set(name, value);
+    URLSearchParamsSet.call(url.searchParams, name, value);
   } else {
-    url.searchParams.delete(name);
+    URLSearchParamsDelete.call(url.searchParams, name);
   }
-  window.history.pushState(null, null as any, url.toString());
-  window.dispatchEvent(new PopStateEvent("popstate"));
+  windowPushState(null, null as any, URLSearchParamsToString.call(url));
+  windowDispatchEvent(new PopStateEvent("popstate"));
 }

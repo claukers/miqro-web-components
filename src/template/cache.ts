@@ -1,12 +1,11 @@
+import {mapGet, mapSet, parseXML} from "./utils/index.js";
+
 interface TemplateCacheItem {
   template: string;
   xmlDocument: XMLDocument
 }
 
 let _templateCache: Map<string, TemplateCacheItem> | null = null;
-
-const mapGet = Map.prototype.get;
-const mapSet = Map.prototype.set;
 
 export interface TemplateLocation {
   url: string;
@@ -72,7 +71,7 @@ function getTemplate(location: string | TemplateLocation): TemplateCacheItem | u
 function putTemplate(location: TemplateLocation | string, template: string): TemplateCacheItem {
   _templateCache = _templateCache !== null ? _templateCache : new Map<string, { template: string; xmlDocument: XMLDocument }>();
   const key = getTemplateKey(location);
-  const xmlDocument: XMLDocument = ((new DOMParser()).parseFromString(`<root>${template}</root>`, "text/xml") as XMLDocument);
+  const xmlDocument: XMLDocument = parseXML(template);
   const item = {
     template,
     xmlDocument

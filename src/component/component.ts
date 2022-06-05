@@ -1,4 +1,4 @@
-import {disconnect, IComponent, nodeList2Array, render, set, TemplateValues} from "../template/index.js";
+import {disconnect, nodeList2Array, render, set, TemplateValues} from "../template/index.js";
 import {Selector, Store, StoreListener} from "../store.js";
 
 interface ComponentSubscriptionInfo {
@@ -8,11 +8,11 @@ interface ComponentSubscriptionInfo {
   listener: StoreListener
 }
 
-export class Component<S extends TemplateValues = TemplateValues> extends HTMLElement implements IComponent {
+export class Component<S extends TemplateValues = TemplateValues> extends HTMLElement {
 
   public state: S;
-  public templateChildren: Array<Node | HTMLElement> | undefined;
-  public storeListeners: ComponentSubscriptionInfo[] = [];
+  protected templateChildren: Array<Node | HTMLElement> | undefined;
+  protected storeListeners: ComponentSubscriptionInfo[] = [];
 
   constructor() {
     super();
@@ -55,7 +55,7 @@ export class Component<S extends TemplateValues = TemplateValues> extends HTMLEl
     return this.unSubscribeAll();
   }
 
-  public render(): Promise<string> | string | void {
+  public render(): Promise<string | undefined> | string | void {
 
   }
 

@@ -2,16 +2,22 @@ import {nodeList2Array, render} from "../template/index.js";
 import {createFunctionContext} from "./context.js";
 import {getQueryValue} from "./use/utils.js";
 import {FunctionComponentMeta} from "./common.js";
+import {
+  mutationObserverDisconnect,
+  mutationObserverObserve,
+  windowAddEventListener,
+  windowRemoveEventListener
+} from "../template/utils/index.js";
 
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
-  return render(meta.shadowRoot ? meta.shadowRoot : element, async () => {
+  return render(meta.shadowRoot ? meta.shadowRoot : element, async (args) => {
     meta.templateChildren = meta.templateChildren ? meta.templateChildren : nodeList2Array(element.childNodes);
 
     const context = createFunctionContext(element, meta, firstRun);
 
     const funcBound = meta.func.bind({...context.this});
 
-    const output = await funcBound();
+    const output = await funcBound(args);
 
     context.validateAndLock();
 
@@ -47,9 +53,9 @@ export function renderFunction(element: HTMLElement, firstRun: boolean, meta: Fu
           }
         }
 
-        window.addEventListener("popstate", listener);
+        windowAddEventListener("popstate", listener);
         return () => {
-          window.removeEventListener("popstate", listener);
+          windowRemoveEventListener("popstate", listener);
         }
       });
     }
@@ -59,12 +65,12 @@ export function renderFunction(element: HTMLElement, firstRun: boolean, meta: Fu
         const observer = new MutationObserver(function () {
           meta.refresh();
         });
-        observer.observe(element, {
+        mutationObserverObserve.call(observer, element, {
           attributes: true,
           attributeFilter: meta.attributeWatch
         });
         return () => {
-          observer.disconnect();
+          mutationObserverDisconnect.call(observer);
         }
       });
     }

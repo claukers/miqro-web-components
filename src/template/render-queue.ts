@@ -1,13 +1,21 @@
-import {RenderFunction, RenderFunctionOutput, TemplateValues} from "./utils/index.js";
+import {
+  RenderFunction,
+  RenderFunctionOutput,
+  TemplateValues, weakMapDelete,
+  weakMapGet,
+  weakMapHas,
+  weakMapSet
+} from "./utils/index.js";
 import {render as realRender} from "./render.js";
 import {log, LOG_LEVEL} from "../log.js";
 
 export function isRenderQueued(component: Node) {
-  return refreshTimeouts.has(component);
+  return weakMapHas.call(refreshTimeouts, component);
 }
 
 export function cancelRender(component: Node) {
-  const oldRefreshTimeout = refreshTimeouts.get(component);
+
+  const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
   if (oldRefreshTimeout && oldRefreshTimeout.timeout) {
     clearTimeout(oldRefreshTimeout.timeout);
     oldRefreshTimeout.abortController.abort();
@@ -17,7 +25,7 @@ export function cancelRender(component: Node) {
 }
 
 export function addRenderListener(component: Node, listener: EventListener) {
-  const oldRefreshTimeout = refreshTimeouts.get(component);
+  const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
   if (oldRefreshTimeout) {
     oldRefreshTimeout.eventTarget.addEventListener("render", listener)
   }
@@ -30,7 +38,7 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
   cancelRender(component);
   const startMS = Date.now();
   log(LOG_LEVEL.trace, `queue render %o`, component);
-  const oldRefreshTimeout = refreshTimeouts.get(component);
+  const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
   const abortController = new AbortController();
   const eventTarget = oldRefreshTimeout ? oldRefreshTimeout.eventTarget : new EventTarget();
   const timeout = setTimeout(async function queueRenderTrigger() {
@@ -62,19 +70,25 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
       log(LOG_LEVEL.error, e);
     }
     clearTimeout(renderTimeout);
-    const refreshTimeout = refreshTimeouts.get(component);
+    const refreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
     if (refreshTimeout) {
-      refreshTimeouts.delete(component);
+      weakMapDelete.call(refreshTimeouts, component);
     }
   }, 0);
-  refreshTimeouts.set(component, {
+  weakMapSet.call(refreshTimeouts, component, {
     eventTarget,
     abortController,
     timeout
-  });
+  } as RefreshTimeoutMapValue);
   if (listener) {
     addRenderListener(component, listener);
   }
 }
 
-const refreshTimeouts = new WeakMap<Node, { eventTarget: EventTarget, abortController: AbortController; timeout: any; }>();
+interface RefreshTimeoutMapValue {
+  eventTarget: EventTarget,
+  abortController: AbortController;
+  timeout: any;
+}
+
+const refreshTimeouts = new WeakMap<Node, RefreshTimeoutMapValue>();
