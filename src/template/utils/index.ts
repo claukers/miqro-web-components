@@ -8,7 +8,6 @@ export {
   TemplateValues,
   textTemplateReplace,
   re,
-  ComponentState,
   removeChildrenFrom,
   removeChild,
   removeChildren,

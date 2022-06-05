@@ -1,11 +1,30 @@
-export {defineFunction} from "./function.js";
+import {connectedCallback, constructorCallback, disconnectedCallback} from "./callbacks.js";
+import {FunctionComponent} from "./common.js";
+
 export {
-  FunctionComponent,
-  FunctionContext,
-  FunctionComponentOutput,
+  Effect,
+  UseQueryFunction,
   SetFunction,
-  UseStateFunction,
+  UseAttributeFunction,
   UseEffectFunction,
-  FunctionMeta,
-  RenderContext
+  UseStateFunction,
+  UseSubscriptionFunction,
+  FunctionComponent
 } from "./common.js";
+
+export function defineFunction(tag: string, hook: FunctionComponent) {
+  customElements.define(tag, class extends HTMLElement {
+    constructor() {
+      super();
+      constructorCallback(this, hook);
+    }
+
+    connectedCallback() {
+      return connectedCallback(this);
+    }
+
+    disconnectedCallback() {
+      return disconnectedCallback(this);
+    }
+  })
+}

@@ -9,15 +9,7 @@ a **very basic template** influenced by ReactJS.
 import {defineFunction} from "@miqro/web-components";
 
 defineFunction("my-element", async function () {
-  const [count, setCount] = this.useState(0); // will watch for state changes
-  const [limit, setLimit] = this.useQuery("limit", 10); // will watch for window.location.search changes
-  const name = this.useAttribute("name", "defaultName"); // will watch for attribute changes 
-  this.useEffect(() => {
-      console.log("my-element connected");
-      return () => {
-        console.log("my-element disconnected");
-      }
-  });
+  const [count, setCount] = this.useState(0); 
   return {
     template: `<p data-on-click="{click}">clicked {count}</p>`,
     values: {
@@ -176,19 +168,6 @@ to loop list. the value for ```data-for-each``` must be an Array or a function t
 
 to change ```item``` for another string set the ```data-for-each-item``` attribute.
 
-#### data-state
-
-set the initial state of a custom component and to transfer objects though attributes without serialization.
-
-***the value must be an object.***
-
-for example this will call ```this.setState(...)``` on ```custom-element``` before it is connected to the dom.
-
-```xml
-<!--data-state example-->
-<custom-element data-state="{this.state.divData}"/>
-```
-
 #### data-ref
 
 get the actual ```HTMLElement``` reference of an element rendered.
@@ -282,52 +261,6 @@ will be included.
 
 ```typescript
 setCache(require("./cache.json"));
-```
-
-### Use Built-in Template engine without the Component Class
-
-example with ShadowRoot
-
-```typescript
-import {render} from "@miqro/web-components";
-
-const weakMapGet = WeakMap.prototype.get;
-const weakMapSet = WeakMap.prototype.set;
-const attachShadow = HTMLElement.prototype.attachShadow;
-
-const shadowMap = new WeakMap();
-
-customElements.define("my-root", class extends HTMLElement {
-  constructor() {
-    super();
-    const shadowRoot = attachShadow.call(this, {
-      mode: "closed"
-    });
-    weakMapSet.call(shadowMap, this, shadowRoot);
-    let count = 0;
-    let showButton = true;
-    const refresh = () => render(shadowRoot,
-      '<p>hello</p><p>{text}</p><button data-if="{showButton}" data-on-click="{click}">clicked {count}</button>',
-      {
-        count,
-        showButton,
-        text: 'wORLD',
-        click: () => {
-          count++;
-          if (count > 10) {
-            showButton = false;
-          }
-          refresh();
-        }
-      });
-    refresh();
-  }
-
-  disconnectedCallback() {
-    const shadowRoot = weakMapGet.prototype.call(shadowMap, this);
-    dispose(shadowRoot);
-  }
-});
 ```
 
 ### Using external Template Engine

@@ -3,8 +3,6 @@ import {ITemplateNode} from "../vdom/nodes/node.js";
 
 export type RefreshCallback = () => void;
 
-export type ComponentState = { [p: string]: any };
-
 export type RenderFunctionOutput = Promise<string> | string | void;
 
 export type RenderFunction = () =>
@@ -13,7 +11,7 @@ export type RenderFunction = () =>
   undefined |
   string;
 
-export interface IComponent<S extends ComponentState = ComponentState> extends Node {
+export interface IComponent<S extends TemplateValues = TemplateValues> extends Node {
   state?: S;
   template?: string;
   templateChildren?: Array<Node | HTMLElement>;

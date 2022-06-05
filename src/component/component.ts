@@ -1,4 +1,4 @@
-import {render, disconnect, set, ComponentState, IComponent, nodeList2Array} from "../template/index.js";
+import {disconnect, IComponent, nodeList2Array, render, set, TemplateValues} from "../template/index.js";
 import {Selector, Store, StoreListener} from "../store.js";
 
 interface ComponentSubscriptionInfo {
@@ -8,7 +8,7 @@ interface ComponentSubscriptionInfo {
   listener: StoreListener
 }
 
-export class Component<S extends ComponentState = ComponentState> extends HTMLElement implements IComponent {
+export class Component<S extends TemplateValues = TemplateValues> extends HTMLElement implements IComponent {
 
   public state: S;
   public templateChildren: Array<Node | HTMLElement> | undefined;

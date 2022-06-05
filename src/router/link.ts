@@ -1,9 +1,9 @@
 import {Component} from "../component/index.js";
 import {historyPushPath} from "./history.js";
 import {isPathLocation} from "./utils.js";
-import {ComponentState} from "../template/index.js";
+import {TemplateValues} from "../template/index.js";
 
-export interface RouteLinkState extends ComponentState {
+export interface RouteLinkState extends TemplateValues {
   active?: boolean;
 }
 
