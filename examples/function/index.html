@@ -2,6 +2,7 @@
 <html>
 <body>
 <root-component>
+  <external-component></external-component>
 </root-component>
 <script type="module">
   import {defineFunction, Store, setLogLevel} from "./lib/index.js";
@@ -28,7 +29,7 @@
     const [limit] = this.useQuery("limit", 0);
     //console.log("showChildren %s", showChildren);
     return {
-      template: `<external-component/><p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end {limit}</p><p data-on-click="{add}">add</p><p data-on-click="{subtract}">subtract</p>`,
+      template: `{children}<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end {limit}</p><p data-on-click="{add}">add</p><p data-on-click="{subtract}">subtract</p>`,
       values: {
         add: () => {
           store.dispatch({
