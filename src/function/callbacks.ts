@@ -1,14 +1,13 @@
-import {disconnect, render} from "../template/index.js";
-import {createHookContext} from "./context.js";
+import {disconnect} from "../template/index.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {FunctionComponent, FunctionComponentMeta} from "./common.js";
-import {getQueryValue} from "./use/utils.js";
+import {renderFunction} from "./render";
 
 export function constructorCallback(element: HTMLElement, hook: FunctionComponent): void {
   if (metaMap.has(element)) {
     throw new Error("createHookContext called twice on element");
   }
-  metaMap.set(element, {
+  const meta = {
     shadowRoot: element.attachShadow({
       mode: "closed"
     }),
@@ -20,13 +19,15 @@ export function constructorCallback(element: HTMLElement, hook: FunctionComponen
     attributeWatch: [],
     contextCalls: [],
     refresh: () => {
-      return callHook(element, false);
+      return renderFunction(element, false, meta);
     }
-  });
+  };
+  metaMap.set(element, meta);
 }
 
 export function connectedCallback(element: HTMLElement): void {
-  return callHook(element, true);
+  const meta = getMeta(element);
+  return renderFunction(element, true, meta);
 }
 
 export function disconnectedCallback(element: HTMLElement): void {
@@ -43,67 +44,6 @@ export function disconnectedCallback(element: HTMLElement): void {
 }
 
 const metaMap = new WeakMap<HTMLElement, FunctionComponentMeta>();
-
-function callHook(element: HTMLElement, firstRun: boolean): void {
-  const meta = getMeta(element);
-  return render(meta.shadowRoot ? meta.shadowRoot : element, async () => {
-
-    const context = createHookContext(element, meta, firstRun);
-    const hookBound = meta.hook.bind({...context.this});
-    const output = await hookBound();
-
-    context.validateAndLock();
-
-    return output;
-  }, undefined, firstRun ? () => {
-
-    if (meta.queryWatch.length > 0) {
-      meta.effects.unshift(() => {
-        function listener() {
-          let changed = false;
-          for (const q of meta.queryWatch) {
-            const currentValue = getQueryValue(q.name, q.lastValue);
-            if (currentValue !== q.lastValue) {
-              changed = true;
-              break;
-            }
-          }
-          if (changed) {
-            meta.refresh();
-          }
-        }
-
-        window.addEventListener("popstate", listener);
-        return () => {
-          window.removeEventListener("popstate", listener);
-        }
-      });
-    }
-
-    if (meta.attributeWatch.length > 0) {
-      meta.effects.unshift(() => {
-        const observer = new MutationObserver(function () {
-          meta.refresh();
-        });
-        observer.observe(element, {
-          attributes: true,
-          attributeFilter: meta.attributeWatch
-        });
-        return () => {
-          observer.disconnect();
-        }
-      });
-    }
-
-    for (const effect of meta.effects) {
-      const disconnect = effect();
-      if (disconnect) {
-        meta.disconnectCallbacks.push(disconnect);
-      }
-    }
-    meta.effects.splice(0, meta.effects.length); // clear effects
-  } : undefined);
-}
 
 function getMeta(element: HTMLElement): FunctionComponentMeta {
   const meta = metaMap.get(element);

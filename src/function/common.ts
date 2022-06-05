@@ -35,14 +35,7 @@ export interface ContextCall {
   name: string;
 }
 
-export interface BasicComponentContext {
-  this: {
-    useState: UseStateFunction;
-    useEffect: UseEffectFunction;
-  }
-}
-
-export interface FunctionComponentContext extends BasicComponentContext {
+export interface FunctionComponentContext {
   this: {
     useState: UseStateFunction;
     useEffect: UseEffectFunction;
