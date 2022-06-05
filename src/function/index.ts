@@ -12,11 +12,11 @@ export {
   FunctionComponent
 } from "./common.js";
 
-export function defineFunction(tag: string, hook: FunctionComponent) {
+export function defineFunction(tag: string, func: FunctionComponent) {
   customElements.define(tag, class extends HTMLElement {
     constructor() {
       super();
-      constructorCallback(this, hook);
+      constructorCallback(this, func);
     }
 
     connectedCallback() {

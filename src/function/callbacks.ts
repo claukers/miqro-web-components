@@ -3,15 +3,15 @@ import {log, LOG_LEVEL} from "../log.js";
 import {FunctionComponent, FunctionComponentMeta} from "./common.js";
 import {renderFunction} from "./render";
 
-export function constructorCallback(element: HTMLElement, hook: FunctionComponent): void {
+export function constructorCallback(element: HTMLElement, func: FunctionComponent): void {
   if (metaMap.has(element)) {
     throw new Error("createHookContext called twice on element");
   }
-  const meta = {
+  const meta: FunctionComponentMeta = {
     shadowRoot: element.attachShadow({
       mode: "closed"
     }),
-    hook,
+    func: func,
     state: {},
     effects: [],
     disconnectCallbacks: [],

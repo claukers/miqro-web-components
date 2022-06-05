@@ -1,13 +1,13 @@
 import {render} from "../template/index.js";
-import {createHookContext} from "./context.js";
+import {createFunctionContext} from "./context.js";
 import {getQueryValue} from "./use/utils.js";
 import {FunctionComponentMeta} from "./common.js";
 
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
   return render(meta.shadowRoot ? meta.shadowRoot : element, async () => {
-    const context = createHookContext(element, meta, firstRun);
-    const hookBound = meta.hook.bind({...context.this});
-    const output = await hookBound();
+    const context = createFunctionContext(element, meta, firstRun);
+    const funcBound = meta.func.bind({...context.this});
+    const output = await funcBound();
 
     context.validateAndLock();
 

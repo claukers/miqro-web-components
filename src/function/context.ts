@@ -2,23 +2,23 @@ import {ContextCall, FunctionComponentContext, FunctionComponentMeta, UseFunctio
 import {Selector, Store} from "../store.js";
 import {useAttribute, useEffect, useQuery, useState} from "./use/index.js";
 
-export function createHookContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean): FunctionComponentContext {
+export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean): FunctionComponentContext {
 
   let lock = false;
   const usage: ContextCall[] = [];
 
-  function createUseFunction<R = any>(name: string, hook: UseFunction<R>) {
+  function createUseFunction<R = any>(name: string, useFunc: UseFunction<R>) {
     return function (...args: any[]) {
       if (lock) {
         throw new Error(`cannot use ${name} after render!`);
       }
       const usageArg: ContextCall = {
         call: name,
-        name: `hook-${name}-${usage.length}`,
+        name: `func-${name}-${usage.length}`,
         firstRun
       };
       usage.push(usageArg);
-      return hook(element, usageArg, meta, ...args);
+      return useFunc(element, usageArg, meta, ...args);
     }
   }
 

@@ -4,7 +4,7 @@ import {RenderFunctionOutput, TemplateValues} from "../template/index.js";
 export type FunctionComponent = () => { template: RenderFunctionOutput, values: TemplateValues } | Promise<{ template: RenderFunctionOutput, values: TemplateValues }>;
 
 export interface FunctionComponentMeta {
-  hook: FunctionComponent;
+  func: FunctionComponent;
   shadowRoot: ShadowRoot;
   state: {
     [key: string]: any;
