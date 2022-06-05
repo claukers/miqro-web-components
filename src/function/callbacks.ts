@@ -1,17 +1,18 @@
-import {disconnect} from "../template/index.js";
+import {disconnect, RenderFunction} from "../template/index.js";
 import {log, LOG_LEVEL} from "../log.js";
-import {FunctionComponent, FunctionComponentMeta} from "./common.js";
+import {FunctionComponentMeta} from "./common.js";
 import {renderFunction} from "./render.js";
 
-export function constructorCallback(element: HTMLElement, func: FunctionComponent): void {
+export function constructorCallback(element: HTMLElement, func: RenderFunction): void {
   if (metaMap.has(element)) {
     throw new Error("createHookContext called twice on element");
   }
+
   const meta: FunctionComponentMeta = {
     shadowRoot: element.attachShadow({
       mode: "closed"
     }),
-    func: func,
+    func,
     state: {},
     effects: [],
     disconnectCallbacks: [],

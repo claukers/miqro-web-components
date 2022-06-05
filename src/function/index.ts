@@ -1,5 +1,5 @@
 import {connectedCallback, constructorCallback, disconnectedCallback} from "./callbacks.js";
-import {FunctionComponent} from "./common.js";
+import {RenderFunction} from "../template";
 
 export {
   Effect,
@@ -8,11 +8,11 @@ export {
   UseAttributeFunction,
   UseEffectFunction,
   UseStateFunction,
-  UseSubscriptionFunction,
-  FunctionComponent
+  UseSubscriptionFunction
 } from "./common.js";
 
-export function defineFunction(tag: string, func: FunctionComponent) {
+export function defineFunction(tag: string, func: RenderFunction) {
+
   customElements.define(tag, class extends HTMLElement {
     constructor() {
       super();

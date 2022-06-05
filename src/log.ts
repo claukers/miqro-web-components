@@ -23,9 +23,9 @@ const DEFAULT_LEVEL = LOG_LEVEL_PRIORITY.warn;
 
 let currentLogLevel: number | null = null;
 
-export function setLogLevel(level = "info") {
+export function setLogLevel(level: LOG_LEVEL_STRING) {
   if (currentLogLevel === null) {
-    currentLogLevel = DEFAULT_LEVEL;
+    currentLogLevel = LOG_LEVEL_PRIORITY[level];
   } else {
     throw new Error("cannot change LOG_LEVEL at this stage!");
   }

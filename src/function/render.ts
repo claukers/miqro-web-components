@@ -6,7 +6,9 @@ import {FunctionComponentMeta} from "./common.js";
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
   return render(meta.shadowRoot ? meta.shadowRoot : element, async () => {
     const context = createFunctionContext(element, meta, firstRun);
+
     const funcBound = meta.func.bind({...context.this});
+
     const output = await funcBound();
 
     context.validateAndLock();

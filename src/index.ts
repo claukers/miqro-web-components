@@ -1,6 +1,5 @@
 export {
   defineFunction,
-  FunctionComponent,
   UseSubscriptionFunction,
   UseStateFunction,
   UseEffectFunction,

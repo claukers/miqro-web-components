@@ -4,7 +4,22 @@
 <root-component>
 </root-component>
 <script type="module">
-  import {defineFunction, Store} from "./lib/index.js";
+  import {defineFunction, Store, setLogLevel} from "./lib/index.js";
+  setLogLevel("debug");
+
+  defineFunction("external-component", function () {
+    const [count, setCount] = this.useState(0);
+    return {
+      template: "<!--{external.html}-->",
+      values: {
+        text: "count " + count,
+        click: function (ev) {
+          ev.preventDefault();
+          setCount(count + 1);
+        }
+      }
+    }
+  });
 
   defineFunction("root-component", function () {
     console.log("root-component");
@@ -13,7 +28,7 @@
     const [limit] = this.useQuery("limit", 0);
     //console.log("showChildren %s", showChildren);
     return {
-      template: `<p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end {limit}</p><p data-on-click="{add}">add</p><p data-on-click="{subtract}">subtract</p>`,
+      template: `<external-component/><p data-on-click="{toggleShow}">children start</p><div data-if="{showChildren}"><label-fn data-count="{initialCount}"/></div><p data-on-click="{resetCount}">children end {limit}</p><p data-on-click="{add}">add</p><p data-on-click="{subtract}">subtract</p>`,
       values: {
         add: () => {
           store.dispatch({

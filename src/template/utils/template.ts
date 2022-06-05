@@ -5,11 +5,12 @@ export type RefreshCallback = () => void;
 
 export type RenderFunctionOutput = Promise<string> | string | void;
 
-export type RenderFunction = () =>
-  { template: RenderFunctionOutput; values: TemplateValues; } |
-  Promise<{ template: RenderFunctionOutput; values: TemplateValues; } | undefined | string> |
-  undefined |
-  string;
+export interface AsyncRenderFunctionOutputPair {
+  template: RenderFunctionOutput;
+  values?: TemplateValues;
+}
+
+export type RenderFunction = () => AsyncRenderFunctionOutputPair | Promise<AsyncRenderFunctionOutputPair | string | undefined> | string | undefined;
 
 export interface IComponent<S extends TemplateValues = TemplateValues> extends Node {
   state?: S;

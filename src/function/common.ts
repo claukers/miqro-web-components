@@ -1,10 +1,8 @@
 import {Selector, Store} from "../store.js";
-import {RenderFunctionOutput, TemplateValues} from "../template/index.js";
-
-export type FunctionComponent = () => { template: RenderFunctionOutput, values: TemplateValues } | Promise<{ template: RenderFunctionOutput, values: TemplateValues }>;
+import {RenderFunction} from "../template/index.js";
 
 export interface FunctionComponentMeta {
-  func: FunctionComponent;
+  func: RenderFunction;
   shadowRoot: ShadowRoot;
   state: {
     [key: string]: any;
