@@ -1,5 +1,5 @@
 import {RenderFunction, RenderFunctionOutput, TemplateValues} from "./utils/index.js";
-import {hasCache, render as realRender} from "./render.js";
+import {render as realRender} from "./render.js";
 import {log, LOG_LEVEL} from "../log.js";
 
 export function isRenderQueued(component: Node) {
@@ -12,7 +12,7 @@ export function cancelRender(component: Node) {
     clearTimeout(oldRefreshTimeout.timeout);
     oldRefreshTimeout.abortController.abort();
     oldRefreshTimeout.timeout = null;
-    log(LOG_LEVEL.debug, "canceling render on %o", component);
+    log(LOG_LEVEL.trace, "canceling render on %o", component);
   }
 }
 
@@ -29,19 +29,17 @@ const RENDER_MS_WARNING = 50;
 export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: EventListener): void {
   cancelRender(component);
   const startMS = Date.now();
-  const firstRun = !hasCache(component);
-  log(LOG_LEVEL.debug, `queue${firstRun ? " create " : " update "}render %o`, component);
+  log(LOG_LEVEL.trace, `queue render %o`, component);
   const oldRefreshTimeout = refreshTimeouts.get(component);
   const abortController = new AbortController();
   const eventTarget = oldRefreshTimeout ? oldRefreshTimeout.eventTarget : new EventTarget();
   const timeout = setTimeout(async function queueRenderTrigger() {
     const renderTimeout = setTimeout(function queueRenderTriggerTimeout() {
-      log(LOG_LEVEL.warn, `${firstRun ? "create " : "update "}render %o max timeout %s`, component, RENDER_TIMEOUT);
+      log(LOG_LEVEL.warn, `render %o max timeout %s`, component, RENDER_TIMEOUT);
       abortController.abort();
     }, RENDER_TIMEOUT);
     try {
-      const firstRun = !hasCache(component);
-      log(LOG_LEVEL.debug, `${firstRun ? "create " : "update "}render %o`, component);
+      log(LOG_LEVEL.trace, `render %o`, component);
 
       if (!abortController.signal.aborted) {
         const renderAction = await realRender(abortController.signal, component, t, values);
@@ -51,9 +49,9 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
             if (changesRendered) {
               const tookMS = Date.now() - startMS;
               if (tookMS > RENDER_MS_WARNING) {
-                log(LOG_LEVEL.warn, `${firstRun ? "create " : "update "}render %o took %sms!`, component, tookMS);
+                log(LOG_LEVEL.warn, `render %o took %sms!`, component, tookMS);
               } else {
-                log(LOG_LEVEL.debug, `${firstRun ? "create " : "update "}render %o took %sms`, component, tookMS);
+                log(LOG_LEVEL.debug, `render %o took %sms`, component, tookMS);
               }
               eventTarget.dispatchEvent(new CustomEvent("render"));
             }
@@ -80,13 +78,3 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
 }
 
 const refreshTimeouts = new WeakMap<Node, { eventTarget: EventTarget, abortController: AbortController; timeout: any; }>();
-const fallback = new WeakMap<Node>();
-
-function searchFallbackComponent(component: Node): Node | undefined {
-  if (component.parentElement?.tagName === "fallback-component" && hasCache(component.parentElement)) {
-    return component.parentElement as Node;
-  }
-  if (component.parentElement) {
-    return searchFallbackComponent(component.parentElement);
-  }
-}

@@ -5,7 +5,7 @@
 </root-component>
 <script type="module">
   import {defineFunction, Store, setLogLevel} from "./lib/index.js";
-  setLogLevel("debug");
+  setLogLevel("trace");
 
   defineFunction("external-component", function () {
     const [count, setCount] = this.useState(0);

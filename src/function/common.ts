@@ -2,6 +2,7 @@ import {Selector, Store} from "../store.js";
 import {RenderFunction} from "../template/index.js";
 
 export interface FunctionComponentMeta {
+  templateChildren?: Node[];
   func: RenderFunction;
   shadowRoot: ShadowRoot;
   state: {

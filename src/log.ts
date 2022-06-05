@@ -1,11 +1,9 @@
-export const LOG_LEVEL: {
-  [key: string]: LOG_LEVEL_STRING;
-} = {
-  info: "info",
-  debug: "debug",
-  trace: "trace",
-  warn: "warn",
-  error: "error"
+export const LOG_LEVEL = {
+  info: "info" as LOG_LEVEL_STRING,
+  debug: "debug" as LOG_LEVEL_STRING,
+  trace: "trace" as LOG_LEVEL_STRING,
+  warn: "warn" as LOG_LEVEL_STRING,
+  error: "error" as LOG_LEVEL_STRING
 };
 
 export type LOG_LEVEL_STRING = "info" | "debug" | "trace" | "warn" | "error";
@@ -36,6 +34,6 @@ export function log(level: LOG_LEVEL_STRING, text: string | any, ...args: any[])
     currentLogLevel = DEFAULT_LEVEL;
   }
   if (currentLogLevel <= LOG_LEVEL_PRIORITY[level]) {
-    console[level](text, ...args);
+    console[level === "trace" ? level : "debug"](text, ...args);
   }
 }

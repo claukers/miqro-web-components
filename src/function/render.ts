@@ -1,10 +1,12 @@
-import {render} from "../template/index.js";
+import {nodeList2Array, render} from "../template/index.js";
 import {createFunctionContext} from "./context.js";
 import {getQueryValue} from "./use/utils.js";
 import {FunctionComponentMeta} from "./common.js";
 
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
   return render(meta.shadowRoot ? meta.shadowRoot : element, async () => {
+    meta.templateChildren = meta.templateChildren ? meta.templateChildren : nodeList2Array(element.childNodes);
+
     const context = createFunctionContext(element, meta, firstRun);
 
     const funcBound = meta.func.bind({...context.this});
@@ -13,7 +15,20 @@ export function renderFunction(element: HTMLElement, firstRun: boolean, meta: Fu
 
     context.validateAndLock();
 
-    return output;
+    const defaultValues = {
+      children: meta.templateChildren
+    };
+
+    return output ? (typeof output === "string" ? {
+      template: output,
+      values: defaultValues
+    } : {
+      template: output.template,
+      values: {
+        ...defaultValues,
+        ...output.values
+      }
+    }) : undefined;
   }, undefined, firstRun ? () => {
 
     if (meta.queryWatch.length > 0) {
