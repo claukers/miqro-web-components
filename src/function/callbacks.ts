@@ -1,7 +1,7 @@
 import {disconnect} from "../template/index.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {FunctionComponent, FunctionComponentMeta} from "./common.js";
-import {renderFunction} from "./render";
+import {renderFunction} from "./render.js";
 
 export function constructorCallback(element: HTMLElement, func: FunctionComponent): void {
   if (metaMap.has(element)) {
