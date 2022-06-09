@@ -20,7 +20,7 @@ export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, chi
             childElement.listeners.push({eventName, callback});
             // childElement.addEventListener(eventName, callback);
           } else {
-            log(LOG_LEVEL.error, "invalid value for %s [%s]=[%o] for [%o]", attribute, attributeValue, value, values.this);
+            log(LOG_LEVEL.error, "invalid value for %s [%s]=[%o][%o] for [%o]", attribute, attributeValue, values, value, node);
             throw new Error(`invalid value for ${attribute}`);
           }
         } else {

@@ -1,4 +1,6 @@
-import {Component} from "./lib/index.js";
+import {Component, setLogLevel} from "./lib/index.js";
+
+setLogLevel("debug");
 
 customElements.define("node-element", class extends Component {
   constructor() {

@@ -9,13 +9,15 @@ export function useState<T>(element: HTMLElement, context: ContextCall, meta: Fu
   }
 
   function setValue(newValue: T) {
-    meta.state[key] = newValue;
-    meta.refresh();
+    if (meta.state[key] !== newValue) {
+      meta.state[key] = newValue;
+      meta.refresh();
+    }
   }
 
   const value = getValue();
   context.lastValue = value;
-  context.checkChanged = function() {
+  context.checkChanged = function () {
     return {
       shouldAbort: context.lastValue !== getValue(),
       shouldRefresh: false

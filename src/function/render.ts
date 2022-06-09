@@ -63,7 +63,7 @@ function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: Fun
     const values = {
       ...defaultValues,
       ...meta.templateValues,
-      ...(output && typeof output !== "string" ? output : {})
+      ...(output && typeof output !== "string" && output.values ? output.values : {})
     };
 
     meta.templateValues = {};
