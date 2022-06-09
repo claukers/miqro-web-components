@@ -20,7 +20,7 @@ export interface FunctionComponentMeta {
   refresh: () => void;
 }
 
-export type Effect = () => undefined | (() => void);
+export type Effect = () => undefined | (() => void) | void;
 export type SetFunction<T = any> = (newValue: T) => void;
 export type GetFunction<T = any> = () => T;
 
@@ -28,7 +28,7 @@ export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, Se
 export type UseEffectFunction = (effect: Effect) => void;
 export type UseAttributeFunction = (name: string, defaultValue?: string) => string | undefined | null;
 export type UseQueryFunction = (name: string, defaultValue?: string | string[]) => [string[] | string | null, SetFunction<string[] | string | null>];
-export type UseSubscriptionFunction<R = any> = <R, S>(store: Store, selector: Selector<S, R>) => R | undefined;
+export type UseSubscriptionFunction<R = any> = <R, S>(store: Store<S>, selector: Selector<S, R>) => R | undefined;
 
 export interface ContextCall {
   call: string;

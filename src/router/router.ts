@@ -11,10 +11,6 @@ export function PathRouter(this: FunctionComponentThis) {
   const currentActive = getActiveRoute(routes);
   const [activeRoute, setActiveRoute, getActive] = this.useState(currentActive ? currentActive : {element: defaultElement});
 
-  console.log("routes %o", routes);
-  console.log("currentActive %o", currentActive);
-  console.log("activeRoute %o", activeRoute);
-
   this.useEffect(function () {
     function popStateListener() {
       const currentActive = getActive();

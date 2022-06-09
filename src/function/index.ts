@@ -8,7 +8,8 @@ export {
   UseAttributeFunction,
   UseEffectFunction,
   UseStateFunction,
-  UseSubscriptionFunction
+  UseSubscriptionFunction,
+  FunctionComponentThis
 } from "./common.js";
 
 export function defineFunction(tag: string, func: RenderFunction) {

@@ -6,7 +6,8 @@ export {
   UseAttributeFunction,
   UseQueryFunction,
   Effect,
-  SetFunction
+  SetFunction,
+  FunctionComponentThis
 } from "./function/index.js";
 export {Component} from "./component/index.js";
 
