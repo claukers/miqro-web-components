@@ -27,37 +27,37 @@ export function hasCache(component: Node): boolean {
   return weakMapHas.call(lastTemplateMap, component);
 }
 
-export async function render(abortSignal: AbortSignal, element: Node, template: RenderFunction | RenderFunctionOutput, values?: TemplateValues): Promise<{ apply: ApplyRenderCallback } | undefined> {
+export async function render(abortController: AbortController, element: Node, template: RenderFunction | RenderFunctionOutput, values?: TemplateValues): Promise<{ apply: ApplyRenderCallback } | undefined> {
   log(LOG_LEVEL.trace, "render %o", element);
   if (values !== undefined && typeof template === "function") {
     throw new Error("cannot provide a RenderFunction with values");
   }
   const t = typeof template === "string" ? template : typeof template === "function" ? await template({
-    abortSignal
+    abortController
   }) : template ? await template : undefined;
   const v = typeof t === "object" ? t.values : values;
   let output: string[] | string | void = t instanceof Array ? t : (typeof t === "object" ? await t.template : await t);
   const stringTemplate = output instanceof Array ? output.join() : output;
   output = undefined;
 
-  if (abortSignal.aborted) {
+  if (abortController.signal.aborted) {
     log(LOG_LEVEL.trace, "render aborted %o", element);
     return;
   }
   if (stringTemplate) {
     const {output, xmlDocument} = await renderTemplateOnElement(stringTemplate, element, v ? v : Object.create(null));
-    if (abortSignal.aborted) {
+    if (abortController.signal.aborted) {
       log(LOG_LEVEL.trace, "render aborted %o", element);
       return;
     }
 
     return {
       apply: () => {
-        if (abortSignal.aborted) {
+        if (abortController.signal.aborted) {
           log(LOG_LEVEL.trace, "render aborted %o", element);
           return false;
         }
-        return applyRender(abortSignal, xmlDocument, stringTemplate, element, output);
+        return applyRender(abortController, xmlDocument, stringTemplate, element, output);
       }
     };
   }
@@ -75,8 +75,8 @@ async function renderTemplateOnElement(template: string, element: Node, values: 
   return {output, xmlDocument};
 }
 
-function applyRender(abortSignal: AbortSignal, xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
-  if (abortSignal.aborted) {
+function applyRender(abortController: AbortController, xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
+  if (abortController.signal.aborted) {
     log(LOG_LEVEL.trace, "render aborted %o", element);
     return false;
   }

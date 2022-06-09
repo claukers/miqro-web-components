@@ -20,6 +20,7 @@ export function constructorCallback(element: HTMLElement, func: RenderFunction):
     queryWatch: [],
     attributeWatch: [],
     contextCalls: [],
+    templateValues: {},
     refresh: () => {
       return renderFunction(element, false, meta);
     }

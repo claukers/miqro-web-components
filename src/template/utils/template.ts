@@ -11,8 +11,11 @@ export interface AsyncRenderFunctionOutputPair {
 }
 
 export interface RenderFunctionArgs {
-  abortSignal: AbortSignal;
+  abortController: AbortController;
 }
+
+
+export type RenderEventListener = (evt: CustomEvent<undefined>) => void;
 
 export type RenderFunction = (args: RenderFunctionArgs) => AsyncRenderFunctionOutputPair | Promise<AsyncRenderFunctionOutputPair | string | undefined | void> | string | undefined | void;
 
@@ -57,18 +60,20 @@ export function getTemplateTokenValue(str: string | null): string | undefined {
 
 export const re = /{[^%^{^}^\s]+}/g;
 
-export function textTemplateReplace(value: any, functionBind: any): string {
+function textTemplateReplace(value: any, functionBind: any): string {
   if (typeof value === "function") {
-    //return encodeHTML(String(value()));
     const callback = value.bind(functionBind);
     return String(callback());
   } else {
-    //return encodeHTML(String(value));
-    return String(value);
+    if (value !== undefined) {
+      return String(value);
+    } else {
+      return "";
+    }
   }
 }
 
-export function evaluateTextTemplate(textContent: string, values: any): string {
+export function evaluateTextTemplateForAttribute(textContent: string, values: any): string {
   return textContent.replace(re, (match) => {
     const path = getTemplateTokenValue(match);
     if (path) {

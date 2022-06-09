@@ -1,5 +1,5 @@
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM, DATA_IF, DATA_ON, DATA_REF, DATA_STATE} from "./constants.js";
-import {evaluateTextTemplate, get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
+import {evaluateTextTemplateForAttribute, get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {TemplateElementNode} from "../element.js";
 import {log, LOG_LEVEL} from "../../../../log.js";
 
@@ -24,7 +24,7 @@ export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, chi
             throw new Error(`invalid value for ${attribute}`);
           }
         } else {
-          childElement.attributes.push({attribute, value: evaluateTextTemplate(attributeValue, values)});
+          childElement.attributes.push({attribute, value: evaluateTextTemplateForAttribute(attributeValue, values)});
         }
       } else {
         childElement.attributes.push({attribute, value: ""});

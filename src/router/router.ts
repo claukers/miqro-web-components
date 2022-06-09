@@ -1,6 +1,7 @@
-import {Route, getActiveRoute} from "./utils.js";
+import {getActiveRoute, Route} from "./utils.js";
 import {windowAddEventListener, windowRemoveEventListener} from "../template/utils";
 import {FunctionComponentThis} from "../function/common.js";
+import {log, LOG_LEVEL} from "../log.js";
 
 const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}/>`;
 
@@ -15,10 +16,10 @@ export function PathRouter(this: FunctionComponentThis) {
     function popStateListener() {
       const currentActive = getActive();
       const newActive = getActiveRoute(routes, currentActive);
+      log(LOG_LEVEL.trace, "PathRouter popStateListener currentActive %o vs newActive %o", currentActive, newActive);
       if (newActive === undefined && currentActive !== defaultElement) {
         setActiveRoute({element: defaultElement});
-      }
-      if (newActive !== currentActive) {
+      } else if (newActive !== currentActive) {
         setActiveRoute(newActive);
       }
     }

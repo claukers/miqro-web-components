@@ -1,5 +1,5 @@
 import {ContextCall, FunctionComponentContext, FunctionComponentMeta, FunctionComponentThis} from "./common.js";
-import {useAttribute, useEffect, useQuery, useState, useSubscription} from "./use/index.js";
+import {useAs, useAttribute, useEffect, useJSONAttribute, useQuery, useState, useSubscription} from "./use/index.js";
 import {RenderFunctionArgs} from "../template/utils/template.js";
 
 export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean, renderArgs: RenderFunctionArgs): FunctionComponentContext {
@@ -21,7 +21,7 @@ export function createFunctionContext(element: HTMLElement, meta: FunctionCompon
       if (lock) {
         throw new Error(`cannot use ${name} after render!`);
       }
-      if (renderArgs.abortSignal.aborted) {
+      if (renderArgs.abortController.signal.aborted) {
         throw new Error(`cannot use ${name} after render aborted!`);
       }
 
@@ -45,17 +45,21 @@ export function createFunctionContext(element: HTMLElement, meta: FunctionCompon
     if (firstRun) {
       meta.contextCalls = usageSplice;
     } else if (usageSplice.length !== meta.contextCalls.length) {
-      throw new Error("conditional this.use calls detected(1)!");
+      throw new Error(`conditional this.use calls detected(1)! ${usageSplice.map(u=>u.name).join(",")} vs ${meta.contextCalls.map(u=>u.name).join(",")}`);
     } else if (usageSplice.filter(
       (v, i) => meta.contextCalls[i].call !== v.call || meta.contextCalls[i].name !== v.name
     ).length > 0) {
       throw new Error("conditional this.use calls detected(2)!");
+    } else {
+      meta.contextCalls = usageSplice;
     }
   }
 
   bindContextUseFunction("useState", useState);
   bindContextUseFunction("useEffect", useEffect);
+  bindContextUseFunction("useAs", useAs);
   bindContextUseFunction("useAttribute", useAttribute);
+  bindContextUseFunction("useJSONAttribute", useJSONAttribute);
   bindContextUseFunction("useQuery", useQuery);
   bindContextUseFunction("useSubscription", useSubscription);
 

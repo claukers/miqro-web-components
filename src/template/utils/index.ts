@@ -2,10 +2,9 @@ export {get} from "./get.js";
 export {set} from "./set.js";
 export {
   getTemplateTokenValue,
-  evaluateTextTemplate,
+  evaluateTextTemplateForAttribute,
   nodeList2Array,
   TemplateValues,
-  textTemplateReplace,
   re,
   removeChildrenFrom,
   removeChild,
@@ -13,7 +12,9 @@ export {
   appendChildren,
   RefreshCallback,
   RenderFunctionOutput,
-  RenderFunction
+  RenderFunction,
+  RenderFunctionArgs,
+  AsyncRenderFunctionOutputPair
 } from "./template.js";
 
 export const weakMapGet = WeakMap.prototype.get;
