@@ -1,5 +1,6 @@
 import {Selector, Store} from "../store.js";
 import {RenderFunction} from "../template/index.js";
+import { RenderFunctionArgs } from "../template/utils/template.js";
 
 export interface FunctionComponentMeta {
   templateChildren?: Node[];
@@ -26,7 +27,7 @@ export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, Se
 export type UseEffectFunction = (effect: Effect) => void;
 export type UseAttributeFunction = (name: string, defaultValue?: string) => string | undefined | null;
 export type UseQueryFunction = (name: string, defaultValue?: string | string[]) => [string[] | string | null, SetFunction<string[] | string | null>];
-export type UseSubscriptionFunction<R = any> = <S, R>(store: Store, selector: Selector<S, R>) => R | undefined;
+export type UseSubscriptionFunction<R = any> = <R, S>(store: Store, selector: Selector<S, R>) => R | undefined;
 
 export interface ContextCall {
   call: string;
@@ -34,15 +35,22 @@ export interface ContextCall {
   name: string;
 }
 
+export interface FunctionComponentThis {
+  useState: UseStateFunction;
+  useEffect: UseEffectFunction;
+  useAttribute: UseAttributeFunction;
+  useQuery: UseQueryFunction;
+  useSubscription: UseSubscriptionFunction;
+  [name: string]: any;
+}
+
 export interface FunctionComponentContext {
-  this: {
-    useState: UseStateFunction;
-    useEffect: UseEffectFunction;
-    useAttribute: UseAttributeFunction;
-    useQuery: UseQueryFunction;
-    useSubscription: UseSubscriptionFunction;
-  },
+  this: FunctionComponentThis;
   validateAndLock: () => void;
 }
 
-export type UseFunction<R = any> = (element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, ...args: any[]) => R;
+export type UseFunctionCB<R = any> = (element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => R;
+
+export interface UseFunction<R = any> extends UseFunctionCB<R>, FunctionComponentThis{
+  
+}

@@ -1,29 +1,39 @@
-import {nodeList2Array, render} from "../template/index.js";
-import {createFunctionContext} from "./context.js";
-import {getQueryValue} from "./use/utils.js";
-import {FunctionComponentMeta} from "./common.js";
-import {
-  mutationObserverDisconnect,
-  mutationObserverObserve,
-  windowAddEventListener,
-  windowRemoveEventListener
-} from "../template/utils/index.js";
+import { nodeList2Array, render } from "../template/index.js";
+import { createFunctionContext } from "./context.js";
+import { FunctionComponentMeta } from "./common.js";
+import { RenderFunction, RenderFunctionArgs } from "../template/utils/template.js";
+import { queryEffect, attributeEffect, flushEffects } from "./use/index.js";
 
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
-  return render(meta.shadowRoot ? meta.shadowRoot : element, async (args) => {
+  const renderFunction = createRenderFunction(element, firstRun, meta);
+  const listener = firstRun ? createRenderListener(element, meta) : undefined;
+  return render(
+    meta.shadowRoot ? meta.shadowRoot : element,
+    renderFunction,
+    undefined,
+    listener
+  );
+}
+
+function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): RenderFunction {
+  return async function (args: RenderFunctionArgs) {
+    if (args.abortSignal.aborted) {
+      return;
+    }
     meta.templateChildren = meta.templateChildren ? meta.templateChildren : nodeList2Array(element.childNodes);
-
-    const context = createFunctionContext(element, meta, firstRun);
-
-    const funcBound = meta.func.bind({...context.this});
-
-    const output = await funcBound(args);
-
-    context.validateAndLock();
-
     const defaultValues = {
       children: meta.templateChildren
     };
+
+    const context = createFunctionContext(element, meta, firstRun, args);
+
+    const output = await (meta.func.bind({ ...context.this }))(args);
+
+    if (args.abortSignal.aborted) {
+      return;
+    }
+
+    context.validateAndLock();
 
     return output ? (typeof output === "string" ? {
       template: output,
@@ -35,52 +45,18 @@ export function renderFunction(element: HTMLElement, firstRun: boolean, meta: Fu
         ...output.values
       }
     }) : undefined;
-  }, undefined, firstRun ? () => {
+  }
+}
 
+function createRenderListener(element: HTMLElement, meta: FunctionComponentMeta): (() => void) {
+  return function () {
     if (meta.queryWatch.length > 0) {
-      meta.effects.unshift(() => {
-        function listener() {
-          let changed = false;
-          for (const q of meta.queryWatch) {
-            const currentValue = getQueryValue(q.name, q.lastValue);
-            if (currentValue !== q.lastValue) {
-              changed = true;
-              break;
-            }
-          }
-          if (changed) {
-            meta.refresh();
-          }
-        }
-
-        windowAddEventListener("popstate", listener);
-        return () => {
-          windowRemoveEventListener("popstate", listener);
-        }
-      });
+      meta.effects.unshift(queryEffect(meta));
     }
 
     if (meta.attributeWatch.length > 0) {
-      meta.effects.unshift(() => {
-        const observer = new MutationObserver(function () {
-          meta.refresh();
-        });
-        mutationObserverObserve.call(observer, element, {
-          attributes: true,
-          attributeFilter: meta.attributeWatch
-        });
-        return () => {
-          mutationObserverDisconnect.call(observer);
-        }
-      });
+      meta.effects.unshift(attributeEffect(element, meta));
     }
-
-    for (const effect of meta.effects) {
-      const disconnect = effect();
-      if (disconnect) {
-        meta.disconnectCallbacks.push(disconnect);
-      }
-    }
-    meta.effects.splice(0, meta.effects.length); // clear effects
-  } : undefined);
+    flushEffects(meta);
+  }
 }

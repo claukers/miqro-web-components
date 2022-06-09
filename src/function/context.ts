@@ -1,67 +1,65 @@
-import {ContextCall, FunctionComponentContext, FunctionComponentMeta, UseFunction} from "./common.js";
-import {Selector, Store} from "../store.js";
-import {useAttribute, useEffect, useQuery, useState} from "./use/index.js";
+import { ContextCall, FunctionComponentContext, FunctionComponentMeta, FunctionComponentThis } from "./common.js";
+import { useSubscription, useAttribute, useEffect, useQuery, useState } from "./use/index.js";
+import { RenderFunctionArgs } from "../template/utils/template.js";
 
-export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean): FunctionComponentContext {
+export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean, renderArgs: RenderFunctionArgs): FunctionComponentContext {
 
   let lock = false;
   const usage: ContextCall[] = [];
 
-  function createUseFunction<R = any>(name: string, useFunc: UseFunction<R>) {
-    return function (...args: any[]) {
+  const FunctionContextSelf: Partial<FunctionComponentThis> = {};
+
+  function bindContextUseFunction<R = any>(name: string, useFunc: (this: FunctionComponentThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => any) {
+    const useFuncBound = useFunc.bind(FunctionContextSelf as FunctionComponentThis);
+
+    if (FunctionContextSelf[name]) {
+      throw new Error("already bound");
+    }
+    FunctionContextSelf[name] = function (...args: any[]) {
       if (lock) {
         throw new Error(`cannot use ${name} after render!`);
       }
+      if (renderArgs.abortSignal.aborted) {
+        throw new Error(`cannot use ${name} after render aborted!`);
+      }
+
       const usageArg: ContextCall = {
         call: name,
         name: `func-${name}-${usage.length}`,
         firstRun
       };
       usage.push(usageArg);
-      return useFunc(element, usageArg, meta, ...args);
+      return useFuncBound(element, usageArg, meta, renderArgs, ...args);
     }
   }
 
-  const useStateFunction = createUseFunction("useState", useState);
-  const useEffectFunction = createUseFunction("useEffect", useEffect);
+  function validateAndLock() {
+    if (lock) {
+      throw new Error("cannot use validateAndLock when locked!");
+    }
+    lock = true;
+
+    const usageSplice = usage.splice(0, usage.length);
+    if (firstRun) {
+      meta.contextCalls = usageSplice;
+    } else if (usageSplice.length !== meta.contextCalls.length) {
+      throw new Error("conditional this.use calls detected(1)!");
+    } else if (usageSplice.filter(
+      (v, i) => meta.contextCalls[i].call !== v.call || meta.contextCalls[i].name !== v.name
+    ).length > 0) {
+      throw new Error("conditional this.use calls detected(2)!");
+    }
+  }
+
+  bindContextUseFunction("useState", useState);
+  bindContextUseFunction("useEffect", useEffect);
+  bindContextUseFunction("useAttribute", useAttribute);
+  bindContextUseFunction("useAttribute", useAttribute);
+  bindContextUseFunction("useQuery", useQuery);
+  bindContextUseFunction("useEffect", useSubscription);
 
   return {
-    validateAndLock: () => {
-      if (lock) {
-        throw new Error("cannot use validateAndLock when locked!");
-      }
-      lock = true;
-
-      const usageSplice = usage.splice(0, usage.length);
-      if (firstRun) {
-        meta.contextCalls = usageSplice;
-      } else if (usageSplice.length !== meta.contextCalls.length) {
-        throw new Error("conditional this.use calls detected(1)!");
-      } else if (usageSplice.filter(
-        (v, i) => meta.contextCalls[i].call !== v.call || meta.contextCalls[i].name !== v.name
-      ).length > 0) {
-        throw new Error("conditional this.use calls detected(2)!");
-      }
-    },
-    this: {
-      useState: useStateFunction,
-      useEffect: useEffectFunction,
-      useAttribute: createUseFunction("useAttribute", useAttribute),
-      useQuery: createUseFunction("useQuery", useQuery),
-      useSubscription: function useSubscription<S, R>(store: Store<S>, selector: Selector<S, R>) {
-        const [value, setValue] = useStateFunction(selector(store.getState()));
-        useEffectFunction(() => {
-          function listener(newValue: R) {
-            setValue(newValue);
-          }
-
-          store.subscribe(selector, listener);
-          return () => {
-            store.unSubscribe(listener);
-          }
-        });
-        return value;
-      }
-    }
+    validateAndLock,
+    this: FunctionContextSelf as FunctionComponentThis
   }
 }
