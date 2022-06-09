@@ -1,4 +1,5 @@
-import {windowDispatchEvent, windowPushState} from "../../template/utils/index.js";
+//import {windowDispatchEvent, windowPushState} from "../../template/utils/index.js";
+import {windowDispatchEvent} from "../../template/utils/index.js";
 
 const URLSearchParamsGetAll = URLSearchParams.prototype.getAll;
 const URLSearchParamsSet = URLSearchParams.prototype.set;
@@ -25,6 +26,6 @@ export function setQueryValue(name: string, value: string[] | string | null): vo
   } else {
     URLSearchParamsDelete.call(url.searchParams, name);
   }
-  windowPushState(null, null as any, URLSearchParamsToString.call(url));
+  window.history.pushState(null, "", URLSearchParamsToString.call(url));
   windowDispatchEvent(new PopStateEvent("popstate"));
 }

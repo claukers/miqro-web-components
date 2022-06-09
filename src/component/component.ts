@@ -79,10 +79,12 @@ export class Component<S extends TemplateValues = TemplateValues> extends HTMLEl
     if (!this.isConnected) {
       return;
     }
-    return render(this, this.render(), {
-      this: this,
-      children: this.templateChildren ? this.templateChildren : []
-    }, callback);
+    return render(this,
+      this.constructor.hasOwnProperty("template") ? `<!--{${(this.constructor as any).template}}-->` : this.render(),
+      {
+        this: this,
+        children: this.templateChildren ? this.templateChildren : []
+      }, callback);
   }
 }
 

@@ -14,7 +14,7 @@ export interface RenderFunctionArgs {
   abortSignal: AbortSignal;
 }
 
-export type RenderFunction = (args: RenderFunctionArgs) => AsyncRenderFunctionOutputPair | Promise<AsyncRenderFunctionOutputPair | string | undefined> | string | undefined;
+export type RenderFunction = (args: RenderFunctionArgs) => AsyncRenderFunctionOutputPair | Promise<AsyncRenderFunctionOutputPair | string | undefined | void> | string | undefined | void;
 
 /*export interface IComponent<S extends TemplateValues = TemplateValues> extends Node {
   state?: S;

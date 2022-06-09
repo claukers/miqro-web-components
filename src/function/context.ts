@@ -1,13 +1,15 @@
-import { ContextCall, FunctionComponentContext, FunctionComponentMeta, FunctionComponentThis } from "./common.js";
-import { useSubscription, useAttribute, useEffect, useQuery, useState } from "./use/index.js";
-import { RenderFunctionArgs } from "../template/utils/template.js";
+import {ContextCall, FunctionComponentContext, FunctionComponentMeta, FunctionComponentThis} from "./common.js";
+import {useAttribute, useEffect, useQuery, useState, useSubscription} from "./use/index.js";
+import {RenderFunctionArgs} from "../template/utils/template.js";
 
 export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean, renderArgs: RenderFunctionArgs): FunctionComponentContext {
 
   let lock = false;
   const usage: ContextCall[] = [];
 
-  const FunctionContextSelf: Partial<FunctionComponentThis> = {};
+  const FunctionContextSelf: Partial<FunctionComponentThis> = {
+    element
+  };
 
   function bindContextUseFunction<R = any>(name: string, useFunc: (this: FunctionComponentThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => any) {
     const useFuncBound = useFunc.bind(FunctionContextSelf as FunctionComponentThis);
@@ -54,9 +56,8 @@ export function createFunctionContext(element: HTMLElement, meta: FunctionCompon
   bindContextUseFunction("useState", useState);
   bindContextUseFunction("useEffect", useEffect);
   bindContextUseFunction("useAttribute", useAttribute);
-  bindContextUseFunction("useAttribute", useAttribute);
   bindContextUseFunction("useQuery", useQuery);
-  bindContextUseFunction("useEffect", useSubscription);
+  bindContextUseFunction("useSubscription", useSubscription);
 
   return {
     validateAndLock,

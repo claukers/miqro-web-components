@@ -6,7 +6,7 @@ import {
   weakMapHas,
   weakMapSet
 } from "./utils/index.js";
-import {render as realRender} from "./render.js";
+import {hasCache, render as realRender} from "./render.js";
 import {log, LOG_LEVEL} from "../log.js";
 
 export function isRenderQueued(component: Node) {
@@ -37,17 +37,18 @@ const RENDER_MS_WARNING = 50;
 export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: EventListener): void {
   cancelRender(component);
   const startMS = Date.now();
-  log(LOG_LEVEL.trace, `queue render %o`, component);
+  const renderMode = !hasCache(component) ? "create" : "update";
+  log(LOG_LEVEL.trace, `queue render %s %o`, renderMode, component);
   const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
   const abortController = new AbortController();
   const eventTarget = oldRefreshTimeout ? oldRefreshTimeout.eventTarget : new EventTarget();
   const timeout = setTimeout(async function queueRenderTrigger() {
     const renderTimeout = setTimeout(function queueRenderTriggerTimeout() {
-      log(LOG_LEVEL.warn, `render %o max timeout %s`, component, RENDER_TIMEOUT);
+      log(LOG_LEVEL.warn, `render %s %o max timeout %s`, renderMode, component, RENDER_TIMEOUT);
       abortController.abort();
     }, RENDER_TIMEOUT);
     try {
-      log(LOG_LEVEL.trace, `render %o`, component);
+      log(LOG_LEVEL.trace, `render %s %o`, renderMode, component);
 
       if (!abortController.signal.aborted) {
         const renderAction = await realRender(abortController.signal, component, t, values);
@@ -57,9 +58,9 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
             if (changesRendered) {
               const tookMS = Date.now() - startMS;
               if (tookMS > RENDER_MS_WARNING) {
-                log(LOG_LEVEL.warn, `render %o took %sms!`, component, tookMS);
+                log(LOG_LEVEL.warn, `render %s %o took %sms!`, renderMode, component, tookMS);
               } else {
-                log(LOG_LEVEL.debug, `render %o took %sms`, component, tookMS);
+                log(LOG_LEVEL.debug, `render %s %o took %sms`, renderMode, component, tookMS);
               }
               eventTarget.dispatchEvent(new CustomEvent("render"));
             }
@@ -68,11 +69,12 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
       }
     } catch (e) {
       log(LOG_LEVEL.error, e);
-    }
-    clearTimeout(renderTimeout);
-    const refreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
-    if (refreshTimeout) {
-      weakMapDelete.call(refreshTimeouts, component);
+    } finally {
+      clearTimeout(renderTimeout);
+      const refreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
+      if (refreshTimeout) {
+        weakMapDelete.call(refreshTimeouts, component);
+      }
     }
   }, 0);
   weakMapSet.call(refreshTimeouts, component, {

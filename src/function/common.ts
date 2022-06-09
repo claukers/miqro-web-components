@@ -5,7 +5,7 @@ import { RenderFunctionArgs } from "../template/utils/template.js";
 export interface FunctionComponentMeta {
   templateChildren?: Node[];
   func: RenderFunction;
-  shadowRoot: ShadowRoot;
+  shadowRoot?: ShadowRoot;
   state: {
     [key: string]: any;
   };
@@ -22,8 +22,9 @@ export interface FunctionComponentMeta {
 
 export type Effect = () => undefined | (() => void);
 export type SetFunction<T = any> = (newValue: T) => void;
+export type GetFunction<T = any> = () => T;
 
-export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, SetFunction<T>];
+export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, SetFunction<T>, GetFunction<T>];
 export type UseEffectFunction = (effect: Effect) => void;
 export type UseAttributeFunction = (name: string, defaultValue?: string) => string | undefined | null;
 export type UseQueryFunction = (name: string, defaultValue?: string | string[]) => [string[] | string | null, SetFunction<string[] | string | null>];
@@ -41,6 +42,7 @@ export interface FunctionComponentThis {
   useAttribute: UseAttributeFunction;
   useQuery: UseQueryFunction;
   useSubscription: UseSubscriptionFunction;
+  element: HTMLElement;
   [name: string]: any;
 }
 

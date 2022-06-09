@@ -2,12 +2,15 @@
 <body>
 <my-root></my-root>
 <script type="module">
-  import {Component, PathRouter, RouteLink} from "./lib/index.js";
+  import {Component, PathRouter, RouteLink, defineFunction, setLogLevel} from "./lib/index.js";
+  setLogLevel("debug");
 
   let rootRef;
-  customElements.define(PathRouter.tagName, PathRouter);
+  /*customElements.define(PathRouter.tagName, PathRouter);
 
-  customElements.define(RouteLink.tagName, RouteLink);
+  customElements.define(RouteLink.tagName, RouteLink);*/
+  defineFunction("path-router", PathRouter);
+  defineFunction("route-link", RouteLink);
 
   customElements.define("nav-component", class extends Component {
 
@@ -46,16 +49,14 @@
     constructor() {
       super();
       this.state.count = 0;
-      this.state.routerState = {
-        defaultElement: "not-found",
-        routes: [{
+      this.state.routes = JSON.stringify([{
           path: "/404",
           element: "not-found"
         }, {
           path: "/",
           element: "home-page"
-        }]
-      };
+        }]);
+      this.state.defaultElement = "not-found";
     }
 
     navClick(ev) {
@@ -65,7 +66,7 @@
     }
 
     render() {
-      return '<nav-component data-count="{this.state.count}" data-on-nav-click="{this.navClick}"/><path-router data-state="{this.state.routerState}"/>'
+      return '<nav-component data-count="{this.state.count}" data-on-nav-click="{this.navClick}"/><path-router data-routes="{this.state.routes}" data-default-element="{this.state.defaultElement}"/>'
     }
   });
 </script>
