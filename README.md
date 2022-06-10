@@ -3,27 +3,24 @@
 very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **pluggable** template and
 a **very basic template** influenced by ReactJS.
 
-## [EXPERIMENTAL] Component Function
+## [EXPERIMENTAL] Component Function's
 
 ```typescript
 import {defineFunction} from "@miqro/web-components";
 
 defineFunction("my-element", async function () {
-  const [count, setCount] = this.useState(0); 
-  return {
-    template: `<p data-on-click="{click}">clicked {count}</p>`,
-    values: {
-      count,
-      click: (ev) => {
-        ev.preventDefault();
-        setCount(count + 1);
-      }
-    }
-  }
+  const [count, setCount] = this.useState(0);
+  this.useAs("label", this.useAttribute("label", ""));
+  this.useAs("count", count);
+  this.useAs("click", function (ev) {
+    ev.preventDefault();
+    setCount(count + 1);
+  });
+  return `<p data-on-click="{click}">clicked {count}</p><span>{label}</span>`;
 });
 ```
 
-using ```async functions``` is supported but has some restrains in the use of ```state```.
+using ```async functions``` is supported but has some restrains in it's use of ```this.use``` functions.
 
 ## Component class
 
