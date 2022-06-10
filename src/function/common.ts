@@ -27,7 +27,7 @@ export type GetFunction<T = any> = () => T;
 export type UseStateFunction<T = any> = (defaultValue?: T) => [T | undefined, SetFunction<T>, GetFunction<T>];
 export type UseAsFunction<T = any> = (name: string, value: T) => void;
 export type UseEffectFunction = (effect: Effect) => void;
-export type UseAttributeFunction = (name: string, defaultValue?: string) => string | undefined | null;
+export type UseAttributeFunction = (name: string, defaultValue?: string, watch?: boolean) => string | undefined | null;
 export type UseJSONAttributeFunction<T = any> = (name: string, defaultValue?: T) => T | undefined | null;
 export type UseQueryFunction = (name: string, defaultValue?: string | string[]) => [string[] | string | null, SetFunction<string[] | string | null>];
 export type UseSubscriptionFunction<R = any> = <R, S>(store: Store<S>, selector: Selector<S, R>) => R | undefined;

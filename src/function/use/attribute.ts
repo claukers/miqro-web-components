@@ -9,36 +9,24 @@ function getAttribute(element: HTMLElement, name: string, defaultValue?: string)
   return currentValue;
 }
 
-export function useAttribute(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string) {
+export function useAttribute(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string, watch = true) {
   context.name = name;
   const currentValue = getAttribute(element, name, defaultValue);
   log(LOG_LEVEL.trace, "useAttribute %o with value = %o", element, currentValue);
-  if (context.firstRun) {
-    if (meta.attributeWatch.indexOf(name) === -1) {
-      meta.attributeWatch.push(name);
-      /*if(meta.observer) {
-        meta.disconnectCallbacks.push(function() {
-          mutationObserverDisconnect.call(observer);
-        });
+  if (watch) {
+    if (context.firstRun) {
+      if (meta.attributeWatch.indexOf(name) === -1) {
+        meta.attributeWatch.push(name);
       }
-      const observer = meta.observer ? meta.observer : new MutationObserver(function () {
-        meta.refresh();
-      });
-      mutationObserverDisconnect.call(observer);
-      mutationObserverObserve.call(observer, element, {
-        attributes: true,
-        attributeFilter: meta.attributeWatch
-      });*/
+    }
+    context.lastValue = currentValue;
+    context.checkChanged = function () {
+      return {
+        shouldAbort: context.lastValue !== getAttribute(element, name, defaultValue),
+        shouldRefresh: true
+      }
     }
   }
-  context.lastValue = currentValue;
-  context.checkChanged = function () {
-    return {
-      shouldAbort: context.lastValue !== getAttribute(element, name, defaultValue),
-      shouldRefresh: true
-    }
-  }
-
   return currentValue;
 }
 
