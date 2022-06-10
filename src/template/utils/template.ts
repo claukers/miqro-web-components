@@ -15,7 +15,7 @@ export interface RenderFunctionArgs {
 }
 
 
-export type RenderEventListener = (evt: CustomEvent<undefined>) => void;
+export type RenderEventListener = (evt: CustomEvent<AbortSignal>) => void;
 
 export type RenderFunction = (args: RenderFunctionArgs) => AsyncRenderFunctionOutputPair | Promise<AsyncRenderFunctionOutputPair | string | undefined | void> | string | undefined | void;
 

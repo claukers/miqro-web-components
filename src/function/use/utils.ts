@@ -26,6 +26,6 @@ export function setQueryValue(name: string, value: string[] | string | null): vo
   } else {
     URLSearchParamsDelete.call(url.searchParams, name);
   }
-  window.history.pushState(null, "", URLSearchParamsToString.call(url));
+  window.history.pushState(null, "", String(url));
   windowDispatchEvent(new PopStateEvent("popstate"));
 }

@@ -1,6 +1,6 @@
 export {useJSONAttribute, useAttribute, attributeEffect} from "./attribute.js";
 //export {useJSONAttribute, useAttribute} from "./attribute.js";
-export { useEffect, flushEffects } from "./effect.js";
+export { useMountEffect, useEffect, flushEffects, flushEffectCallbacks } from "./effect.js";
 //export {useEffect} from "./effect.js";
 export {useQuery, queryEffect} from "./query.js";
 //export {useQuery} from "./query.js";

@@ -2,7 +2,8 @@ import {disconnect, RenderFunction} from "../template/index.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {FunctionComponentMeta} from "./common.js";
 import {renderFunction} from "./render.js";
-import {weakMapGet, weakMapHas, weakMapSet} from "../template/utils";
+import {weakMapGet, weakMapHas, weakMapSet} from "../template/utils/index.js";
+import {attributeEffect, flushEffectCallbacks, flushEffects, queryEffect} from "./use/index.js";
 
 export function constructorCallback(element: HTMLElement, func: RenderFunction): void {
   if (weakMapHas.call(metaMap, element)) {
@@ -15,14 +16,32 @@ export function constructorCallback(element: HTMLElement, func: RenderFunction):
     }),
     func,
     state: {},
+    mountEffects: [],
+    mountEffectCallbacks: [],
     effects: [],
-    disconnectCallbacks: [],
+    effectCallbacks: [],
     queryWatch: [],
     attributeWatch: [],
     contextCalls: [],
     templateValues: {},
-    refresh: () => {
-      return renderFunction(element, false, meta);
+    observer: new MutationObserver(function () {
+      meta.refresh();
+    }),
+    refresh: (firstRun: boolean = false) => {
+      flushEffectCallbacks(meta.effectCallbacks);
+      meta.attributeWatch.splice(0, meta.attributeWatch.length); // clear attribute watch
+      meta.queryWatch.splice(0, meta.queryWatch.length); // clear query watch
+      return renderFunction(element, firstRun, meta);
+    },
+    renderCallback: () => {
+      if (meta.queryWatch.length > 0) {
+        meta.effects.unshift(queryEffect(meta));
+      }
+
+      if (meta.attributeWatch.length > 0) {
+        meta.effects.unshift(attributeEffect(element, meta));
+      }
+      flushEffects(meta.effects, meta.effectCallbacks);
     }
   };
   weakMapSet.call(metaMap, element, meta);
@@ -30,19 +49,13 @@ export function constructorCallback(element: HTMLElement, func: RenderFunction):
 
 export function connectedCallback(element: HTMLElement): void {
   const meta = getMeta(element);
-  return renderFunction(element, true, meta);
+  return meta.refresh(true);
 }
 
 export function disconnectedCallback(element: HTMLElement): void {
   const meta = getMeta(element);
-  for (const disconnectCallback of meta.disconnectCallbacks) {
-    try {
-      disconnectCallback();
-    } catch (e) {
-      log(LOG_LEVEL.error, e);
-    }
-  }
-  meta.disconnectCallbacks.splice(0, meta.disconnectCallbacks.length); // clear disconnectedCallbacks
+  flushEffectCallbacks(meta.effectCallbacks);
+  flushEffectCallbacks(meta.mountEffectCallbacks);
   return disconnect(meta.shadowRoot ? meta.shadowRoot : element);
 }
 

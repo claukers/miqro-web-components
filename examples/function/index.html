@@ -6,7 +6,7 @@
 </root-component>
 <script type="module">
   import {defineFunction, Store, setLogLevel} from "./lib/index.js";
-  setLogLevel("trace");
+  setLogLevel("debug");
 
   defineFunction("external-component", function () {
     const [count, setCount] = this.useState(0);
@@ -80,9 +80,6 @@
     const initialCountAttribute = this.useAttribute("data-count", "0");// this.attributes["data-count"].value;
 
     console.log("label-fn count %s initialCount %s storeValue %s limit %s initialCountAttribute %s", count, initialCount, storeValue, limit, initialCountAttribute);
-    if (count === 0) {
-      setCount(1);
-    }
 
 
     this.useEffect(() => {
@@ -96,6 +93,9 @@
       const newInitialCount = parseInt(initialCountAttribute, 10);
       setCount(newInitialCount);
       setInitialCount(newInitialCount);
+    }
+    if (count === 0) {
+      setCount(1);
     }
 
     return {

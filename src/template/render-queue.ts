@@ -1,6 +1,5 @@
 import {
   RenderFunction,
-  RenderFunctionArgs,
   RenderFunctionOutput,
   TemplateValues,
   weakMapDelete,
@@ -10,7 +9,7 @@ import {
 } from "./utils/index.js";
 import {hasCache, render as realRender} from "./render.js";
 import {log, LOG_LEVEL} from "../log.js";
-import {RenderEventListener} from "./utils/template";
+import {RenderEventListener} from "./utils/template.js";
 
 export function isRenderQueued(component: Node) {
   return weakMapHas.call(refreshTimeouts, component);
@@ -38,7 +37,7 @@ export function addRenderListener(component: Node, listener: RenderEventListener
 const RENDER_TIMEOUT = 60000;
 const RENDER_MS_WARNING = 50;
 
-export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: RenderEventListener): void {
+export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: RenderEventListener, callback?: () => void): void {
   cancelRender(component);
   const startMS = Date.now();
   const element = (component instanceof ShadowRoot && component.host ? component.host : component) as HTMLElement;
@@ -64,6 +63,15 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
       }
       if (renderAction) {
         const changesRendered = renderAction.apply();
+
+        try {
+          if (callback) {
+            callback();
+          }
+        } catch (e) {
+          log(LOG_LEVEL.error, e);
+        }
+
         if (changesRendered) {
           const tookMS = Date.now() - startMS;
           if (tookMS > RENDER_MS_WARNING) {
@@ -71,10 +79,9 @@ export function render(component: Node, t: RenderFunction | RenderFunctionOutput
           } else {
             log(LOG_LEVEL.debug, `render %s %o took %sms`, renderMode, element, tookMS);
           }
-          eventTarget.dispatchEvent(new CustomEvent<RenderFunctionArgs>("render", {
-            detail: {
-              abortController
-            }
+
+          eventTarget.dispatchEvent(new CustomEvent<AbortSignal>("render", {
+            detail: abortController.signal
           }));
         }
       }

@@ -9,12 +9,16 @@ export interface FunctionComponentMeta {
   state: {
     [key: string]: any;
   };
+  observer: MutationObserver;
+  mountEffects: Effect[];
+  mountEffectCallbacks: Effect[];
   effects: Effect[];
-  disconnectCallbacks: (() => void)[];
+  effectCallbacks: (() => void)[];
   queryWatch: string[];
   attributeWatch: string[];
   contextCalls: ContextCall[];
-  refresh: () => void;
+  refresh: (firstRun?: boolean) => void;
+  renderCallback: () => void;
   templateValues: {
     [key: string]: any
   }
@@ -44,11 +48,13 @@ export interface FunctionComponentThis {
   useState: UseStateFunction;
   useAs: UseAsFunction;
   useEffect: UseEffectFunction;
+  useMountEffect: UseEffectFunction;
   useAttribute: UseAttributeFunction;
   useJSONAttribute: UseJSONAttributeFunction;
   useQuery: UseQueryFunction;
   useSubscription: UseSubscriptionFunction;
   element: HTMLElement;
+  shadowRoot?: ShadowRoot;
 
   [name: string]: any;
 }

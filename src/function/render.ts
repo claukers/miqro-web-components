@@ -1,22 +1,24 @@
 import {nodeList2Array, render} from "../template/index.js";
 import {createFunctionContext} from "./context.js";
 import {FunctionComponentMeta} from "./common.js";
-import {RenderEventListener, RenderFunction, RenderFunctionArgs} from "../template/utils/template.js";
-import {attributeEffect, flushEffects, queryEffect} from "./use/index.js";
+import {RenderFunction, RenderFunctionArgs} from "../template/utils/template.js";
 import {log, LOG_LEVEL} from "../log.js";
+import {flushEffects} from "./use/index.js";
 
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
-  const renderFunction = createRenderFunction(element, firstRun, meta);
-  const listener = firstRun ? createRenderListener(element, meta) : undefined;
   return render(
     meta.shadowRoot ? meta.shadowRoot : element,
-    renderFunction,
+    createRenderFunction(element, firstRun, meta),
     undefined,
-    listener
+    firstRun ? function () {
+      flushEffects(meta.mountEffects, meta.mountEffectCallbacks);
+    } : undefined,
+    meta.renderCallback
   );
 }
 
 function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): RenderFunction {
+
   return async function (args: RenderFunctionArgs) {
     if (args.abortController.signal.aborted) {
       return;
@@ -30,11 +32,11 @@ function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: Fun
 
     const output = await (meta.func.bind({...context.this}))(args);
 
+    context.validateAndLock();
+
     if (args.abortController.signal.aborted) {
       return;
     }
-
-    context.validateAndLock();
 
     let shouldAbort = false;
     let shouldRefresh = true;
@@ -57,6 +59,9 @@ function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: Fun
           meta.refresh();
         }, 0);
       }
+    }
+
+    if (args.abortController.signal.aborted) {
       return;
     }
 
@@ -75,18 +80,5 @@ function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: Fun
       template: output.template,
       values
     }) : undefined;
-  }
-}
-
-function createRenderListener(element: HTMLElement, meta: FunctionComponentMeta): RenderEventListener {
-  return function (args: CustomEvent<undefined>): void {
-    if (meta.queryWatch.length > 0) {
-      meta.effects.unshift(queryEffect(meta));
-    }
-
-    if (meta.attributeWatch.length > 0) {
-      meta.effects.unshift(attributeEffect(element, meta));
-    }
-    flushEffects(meta);
   }
 }

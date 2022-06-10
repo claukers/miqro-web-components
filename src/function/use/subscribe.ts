@@ -3,13 +3,16 @@ import {RenderFunctionArgs} from "../../template/utils/template.js";
 import {ContextCall, FunctionComponentMeta, FunctionComponentThis} from "../common.js";
 
 export function useSubscription<R, S>(this: FunctionComponentThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, store: Store<S>, selector: Selector<S, R>): R {
-  const [value, setValue] = this.useState(selector(store.getState()));
-  this.useEffect(() => {
-    function listener(newValue: R) {
-      setValue(newValue);
-    }
+  function listener(newValue: R) {
+    renderArgs.abortController.abort();
+    setTimeout(function () {
+      meta.refresh();
+    });
+  }
 
-    store.subscribe(selector, listener);
+  const value = store.subscribe(selector, listener);
+
+  this.useEffect(() => {
     return () => {
       store.unSubscribe(listener);
     }

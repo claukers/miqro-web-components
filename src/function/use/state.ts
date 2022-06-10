@@ -10,8 +10,11 @@ export function useState<T>(element: HTMLElement, context: ContextCall, meta: Fu
 
   function setValue(newValue: T) {
     if (meta.state[key] !== newValue) {
+      renderArgs.abortController.abort();
       meta.state[key] = newValue;
-      meta.refresh();
+      setTimeout(function () {
+        meta.refresh();
+      }, 0)
     }
   }
 
