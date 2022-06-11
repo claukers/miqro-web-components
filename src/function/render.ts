@@ -5,31 +5,6 @@ import {RenderFunction, RenderFunctionArgs} from "../template/utils/template.js"
 import {log, LOG_LEVEL} from "../log.js";
 import {flushEffects} from "./use/index.js";
 
-function checkContextCallsForChangesAndAbort(element: HTMLElement, meta: FunctionComponentMeta, args: RenderFunctionArgs) {
-  let shouldAbort = false;
-  let shouldRefresh = true;
-  for (const call of meta.contextCalls) {
-    if (call.checkChanged) {
-      const changes = call.checkChanged();
-      shouldAbort = shouldAbort ? shouldAbort : changes.shouldAbort;
-      if (shouldAbort && shouldRefresh && changes.shouldAbort && !changes.shouldRefresh) {
-        shouldRefresh = false;
-        break;
-      }
-    }
-  }
-  if (shouldAbort) {
-    log(LOG_LEVEL.debug, `render aborted before apply for %o`, element);
-    args.abortController.abort();
-    if (shouldRefresh) {
-      setTimeout(function () {
-        meta.refresh();
-      }, 0);
-    }
-  }
-}
-
-
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
   return render(
     meta.shadowRoot ? meta.shadowRoot : element,
@@ -84,5 +59,29 @@ function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: Fun
       template: output.template,
       values
     }) : undefined;
+  }
+}
+
+function checkContextCallsForChangesAndAbort(element: HTMLElement, meta: FunctionComponentMeta, args: RenderFunctionArgs) {
+  let shouldAbort = false;
+  let shouldRefresh = true;
+  for (const call of meta.contextCalls) {
+    if (call.checkChanged) {
+      const changes = call.checkChanged();
+      shouldAbort = shouldAbort ? shouldAbort : changes.shouldAbort;
+      if (shouldAbort && shouldRefresh && changes.shouldAbort && !changes.shouldRefresh) {
+        shouldRefresh = false;
+        break;
+      }
+    }
+  }
+  if (shouldAbort) {
+    log(LOG_LEVEL.debug, `render aborted before apply for %o`, element);
+    args.abortController.abort();
+    if (shouldRefresh) {
+      setTimeout(function () {
+        meta.refresh();
+      }, 0);
+    }
   }
 }
