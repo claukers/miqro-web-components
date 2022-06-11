@@ -1,16 +1,16 @@
 import {log, LOG_LEVEL} from "./log.js";
 import {mapDelete, mapGet, mapKeys, mapSet} from "./template/utils";
 
-export type Selector<S = any, R = any> = (state: S) => R;
-export type StoreListener<S = any, R = any> = (value: R) => void;
-export type Reducer<S = any> = (action: Action, state: S) => S;
-
 export interface Action {
   type: string;
 }
 
+export type Selector<S = any, R = any> = (state: S) => R;
+export type StoreListener<S = any, R = any> = (value: R) => void;
+export type Reducer<A extends Action = Action, S = any> = (action: A, state: S) => S;
+
 export interface StoreReducerMap {
-  [actionName: string]: Reducer;
+  [actionName: string]: Reducer<any, any>;
 }
 
 export interface StoreOptions {
@@ -19,7 +19,7 @@ export interface StoreOptions {
 
 export class Store<S = any> extends EventTarget {
   private readonly listenerMap: Map<StoreListener<S>, ListenerInfo<S>>;
-  private dispatchTimeout?: any;
+  private triggerListenerTimeout?: any;
   private options: { dispatchTimeout: number };
 
   constructor(private reducers: StoreReducerMap | Reducer, private state: S, options?: StoreOptions) {
@@ -51,10 +51,10 @@ export class Store<S = any> extends EventTarget {
       this.reducers(action, oldState) :
       (this.reducers[action.type] ? this.reducers[action.type](action, oldState) : oldState);
 
-    clearTimeout(this.dispatchTimeout);
+    clearTimeout(this.triggerListenerTimeout);
 
     if (oldState !== this.state) {
-      this.dispatchTimeout = setTimeout(() => dispatch<S>(this, action, this.listenerMap), this.options.dispatchTimeout);
+      this.triggerListenerTimeout = setTimeout(() => triggerListeners<S>(this, action, this.listenerMap), this.options.dispatchTimeout);
     }
   }
 }
@@ -64,7 +64,7 @@ interface ListenerInfo<S = any> {
   selector: Selector<S>;
 }
 
-function dispatch<S = any>(store: Store, action: Action, listenerMap: Map<StoreListener<S>, ListenerInfo<S>>): void {
+function triggerListeners<S = any>(store: Store, action: Action, listenerMap: Map<StoreListener<S>, ListenerInfo<S>>): void {
   const state = store.getState();
   const listeners = mapKeys.call(listenerMap) as IterableIterator<StoreListener<S>>;
   for (const listener of listeners) {

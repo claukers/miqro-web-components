@@ -3,6 +3,7 @@ import {RenderFunction} from "../template/index.js";
 import {RenderFunctionArgs} from "../template/utils/template.js";
 
 export interface FunctionComponentMeta {
+  lock: boolean;
   templateChildren?: Node[];
   func: RenderFunction;
   shadowRoot?: ShadowRoot;

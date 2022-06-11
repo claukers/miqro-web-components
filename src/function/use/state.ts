@@ -19,6 +19,7 @@ export function useState<T>(element: HTMLElement, context: ContextCall, meta: Fu
   }
 
   const value = getValue();
+  meta.state[key] = value;
   context.lastValue = value;
   context.checkChanged = function () {
     return {

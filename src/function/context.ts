@@ -1,5 +1,14 @@
 import {ContextCall, FunctionComponentContext, FunctionComponentMeta, FunctionComponentThis} from "./common.js";
-import {useMountEffect, useAs, useAttribute, useEffect, useJSONAttribute, useQuery, useState, useSubscription} from "./use/index.js";
+import {
+  useAs,
+  useAttribute,
+  useEffect,
+  useJSONAttribute,
+  useMountEffect,
+  useQuery,
+  useState,
+  useSubscription
+} from "./use/index.js";
 import {RenderFunctionArgs} from "../template/utils/template.js";
 
 export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean, renderArgs: RenderFunctionArgs): FunctionComponentContext {
@@ -36,26 +45,6 @@ export function createFunctionContext(element: HTMLElement, meta: FunctionCompon
     }
   }
 
-  function validateAndLock() {
-    if (lock) {
-      throw new Error("cannot use validateAndLock when locked!");
-    }
-    lock = true;
-
-    const usageSplice = usage.splice(0, usage.length);
-    if (firstRun) {
-      meta.contextCalls = usageSplice;
-    } else if (usageSplice.length !== meta.contextCalls.length) {
-      throw new Error(`conditional this.use calls detected(1)! ${usageSplice.map(u => u.name).join(",")} vs ${meta.contextCalls.map(u => u.name).join(",")}`);
-    } else if (usageSplice.filter(
-      (v, i) => meta.contextCalls[i].call !== v.call || meta.contextCalls[i].name !== v.name
-    ).length > 0) {
-      throw new Error("conditional this.use calls detected(2)!");
-    } else {
-      meta.contextCalls = usageSplice;
-    }
-  }
-
   bindContextUseFunction("useState", useState);
   bindContextUseFunction("useEffect", useEffect);
   bindContextUseFunction("useMountEffect", useMountEffect);
@@ -66,7 +55,27 @@ export function createFunctionContext(element: HTMLElement, meta: FunctionCompon
   bindContextUseFunction("useSubscription", useSubscription);
 
   return {
-    validateAndLock,
+    validateAndLock: function validateAndLock() {
+      if (lock) {
+        throw new Error("cannot use validateAndLock when locked!");
+      }
+      lock = true;
+
+      const usageSplice = usage.splice(0, usage.length);
+      if (firstRun) {
+        meta.contextCalls = usageSplice;
+      } else if (usageSplice.length !== meta.contextCalls.length) {
+        meta.lock = true;
+        throw new Error(`conditional this.use calls detected(1)! ${usageSplice.map(u => u.name).join(",")} vs ${meta.contextCalls.map(u => u.name).join(",")}`);
+      } else if (usageSplice.filter(
+        (v, i) => meta.contextCalls[i].call !== v.call || meta.contextCalls[i].name !== v.name
+      ).length > 0) {
+        meta.lock = true;
+        throw new Error("conditional this.use calls detected(2)!");
+      } else {
+        meta.contextCalls = usageSplice;
+      }
+    },
     this: FunctionContextSelf as FunctionComponentThis
   }
 }

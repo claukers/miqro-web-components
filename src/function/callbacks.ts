@@ -11,6 +11,7 @@ export function constructorCallback(element: HTMLElement, func: RenderFunction):
   }
 
   const meta: FunctionComponentMeta = {
+    lock: false,
     shadowRoot: element.attachShadow({
       mode: "closed"
     }),
@@ -28,6 +29,9 @@ export function constructorCallback(element: HTMLElement, func: RenderFunction):
       meta.refresh();
     }),
     refresh: (firstRun: boolean = false) => {
+      if (meta.lock) {
+        throw new Error("conditional this.use calls detected. function component locked!");
+      }
       flushEffectCallbacks(meta.effectCallbacks);
       meta.attributeWatch.splice(0, meta.attributeWatch.length); // clear attribute watch
       meta.queryWatch.splice(0, meta.queryWatch.length); // clear query watch
