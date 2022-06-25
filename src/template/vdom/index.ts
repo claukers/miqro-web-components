@@ -41,15 +41,9 @@ export function renderTemplateNodeDiff(root: Node, current?: ITemplateNode<Node>
             debugger;
           }
           const oldChildren = oldTemplateNode.children;
-          const r = currentTemplateNode.update(currentRef);
-          if (r) {
-            ret = true;
-          }
+          ret = currentTemplateNode.update(currentRef) ? true : ret;
           // recursive on children
-          const r2 = renderTemplateNodeDiff(currentRef, currentTemplateNode.children, oldChildren);
-          if (r2) {
-            ret = true;
-          }
+          ret = renderTemplateNodeDiff(currentRef, currentTemplateNode.children, oldChildren) ? true : ret;
         }
       }
     }

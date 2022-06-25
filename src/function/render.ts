@@ -58,7 +58,10 @@ function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: Fun
     } : {
       template: output.template,
       values
-    }) : undefined;
+    }) : (meta.template ? {
+      template: meta.template,
+      values
+    } : undefined);
   }
 }
 
@@ -71,12 +74,13 @@ function checkContextCallsForChangesAndAbort(element: HTMLElement, meta: Functio
       shouldAbort = shouldAbort ? shouldAbort : changes.shouldAbort;
       if (shouldAbort && shouldRefresh && changes.shouldAbort && !changes.shouldRefresh) {
         shouldRefresh = false;
+        log(LOG_LEVEL.debug, `render aborted before apply for %o shouldRefresh %s because %s`, element, shouldRefresh, call.name);
         break;
       }
     }
   }
   if (shouldAbort) {
-    log(LOG_LEVEL.debug, `render aborted before apply for %o`, element);
+    log(LOG_LEVEL.debug, `render aborted before apply for %o shouldRefresh %s`, element, shouldRefresh);
     args.abortController.abort();
     if (shouldRefresh) {
       setTimeout(function () {

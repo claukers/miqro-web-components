@@ -2,20 +2,23 @@ import {disconnect, RenderFunction} from "../template/index.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {FunctionComponentMeta} from "./common.js";
 import {renderFunction} from "./render.js";
-import {weakMapGet, weakMapHas, weakMapSet} from "../template/utils/index.js";
+import {weakMapGet, weakMapHas, weakMapSet} from "../utils.js";
 import {attributeEffect, flushEffectCallbacks, flushEffects, queryEffect} from "./use/index.js";
 
-export function constructorCallback(element: HTMLElement, func: RenderFunction): void {
+export function constructorCallback(element: HTMLElement, func: RenderFunction, shadowInit?: ShadowRootInit | boolean, template?: string): void {
   if (weakMapHas.call(metaMap, element)) {
     throw new Error("createHookContext called twice on element");
   }
 
   const meta: FunctionComponentMeta = {
     lock: false,
-    shadowRoot: element.attachShadow({
-      mode: "closed"
-    }),
+    shadowRoot: shadowInit || shadowInit === undefined ? element.attachShadow(
+      shadowInit && typeof shadowInit === "object" ?
+        shadowInit : {
+          mode: "closed"
+        }) : undefined,
     func,
+    template,
     state: {},
     mountEffects: [],
     mountEffectCallbacks: [],

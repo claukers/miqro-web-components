@@ -12,12 +12,12 @@ export {
   FunctionComponentThis
 } from "./common.js";
 
-export function defineFunction(tag: string, func: RenderFunction) {
+export function defineFunction(tag: string, func: RenderFunction, shadowInit?: ShadowRootInit | boolean, template?: string) {
 
   customElements.define(tag, class extends HTMLElement {
     constructor() {
       super();
-      constructorCallback(this, func);
+      constructorCallback(this, func, shadowInit, template);
     }
 
     connectedCallback() {

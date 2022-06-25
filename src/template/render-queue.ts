@@ -1,15 +1,17 @@
 import {
   RenderFunction,
   RenderFunctionOutput,
-  TemplateValues,
-  weakMapDelete,
-  weakMapGet,
-  weakMapHas,
-  weakMapSet
+  TemplateValues
 } from "./utils/index.js";
 import {hasCache, render as realRender} from "./render.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {RenderEventListener} from "./utils/template.js";
+import {
+  weakMapDelete,
+  weakMapGet,
+  weakMapHas,
+  weakMapSet
+} from "../utils.js";
 
 export function isRenderQueued(component: Node) {
   return weakMapHas.call(refreshTimeouts, component);

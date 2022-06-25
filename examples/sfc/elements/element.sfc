@@ -1,0 +1,8 @@
+<my-component>
+  <template>
+    <p>{text}</p>
+  </template>
+  <script>
+    this.useAs("text", "helloWorld");
+  </script>
+</my-component>

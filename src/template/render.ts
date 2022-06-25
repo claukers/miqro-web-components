@@ -2,15 +2,17 @@ import {
   parseXML,
   RenderFunction,
   RenderFunctionOutput,
-  TemplateValues,
-  weakMapGet,
-  weakMapHas,
-  weakMapSet
+  TemplateValues
 } from "./utils/index.js";
 import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "./vdom/index.js";
 import {renderTemplate} from "./render-template.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {cancelRender} from "./render-queue.js";
+import {
+  weakMapGet,
+  weakMapHas,
+  weakMapSet
+} from "../utils.js";
 
 export type ApplyRenderCallback = () => boolean;
 

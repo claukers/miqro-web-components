@@ -4,6 +4,7 @@ import {RenderFunctionArgs} from "../template/utils/template.js";
 
 export interface FunctionComponentMeta {
   lock: boolean;
+  template?: string;
   templateChildren?: Node[];
   func: RenderFunction;
   shadowRoot?: ShadowRoot;

@@ -34,6 +34,6 @@ export function log(level: LOG_LEVEL_STRING, text: string | any, ...args: any[])
     currentLogLevel = DEFAULT_LEVEL;
   }
   if (currentLogLevel <= LOG_LEVEL_PRIORITY[level]) {
-    console[level === "trace" ? level : "debug"](text, ...args);
+    console[level === "trace" ? "debug" : level](text, ...args);
   }
 }
