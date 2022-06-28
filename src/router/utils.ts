@@ -1,22 +1,5 @@
-import {PathRouter} from "./router.js";
-
 let basePath: string | null = null;
 export const BASE_PATH = () => basePath === null ? normalizePath(document.documentElement.getAttribute("data-router-base-path") ? document.documentElement.getAttribute("data-router-base-path") as string : "") : basePath;
-
-/*export function updateRouter(router: PathRouter, setState = true): boolean {
-  const active = getActiveRoute(router.state.routes, router.state.active);
-  if (active !== router.state.active) {
-    if (setState) {
-      router.setState({
-        active
-      });
-    } else {
-      router.state.active = active;
-    }
-    return true;
-  }
-  return false;
-}*/
 
 export function isPathLocation(p?: string) {
   if (p === undefined) {
