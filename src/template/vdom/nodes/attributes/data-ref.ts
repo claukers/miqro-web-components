@@ -1,9 +1,9 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_REF} from "./constants.js";
-import {TemplateElementNode} from "../element.js";
+import {VDOMElement} from "../element.js";
 import {log, LOG_LEVEL} from "../../../../log.js";
 
-export function dataRef(node: Node, values: TemplateValues, childElement: TemplateElementNode): void {
+export function dataRef(node: Node, values: TemplateValues, childElement: VDOMElement): void {
   const dataRefValue = (node as Element).getAttribute(DATA_REF);
   if (dataRefValue !== null) {
     const dataRefPath = getTemplateTokenValue(dataRefValue);

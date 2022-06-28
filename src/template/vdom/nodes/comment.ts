@@ -1,9 +1,9 @@
 import {getTemplateTokenValue, TemplateValues} from "../../utils/index.js";
 import {getTemplateFromLocation} from "../../cache.js";
-import {TemplateNode} from "./node.js";
-import {renderTemplate} from "../../render-template.js";
+import {VDOMNode} from "./node.js";
+import {parseTemplateXML} from "../parse.js";
 
-class TemplateCommentNode extends TemplateNode<Comment> {
+class VDOMComment extends VDOMNode<Comment> {
   constructor(public textContent: string) {
     super("Comment");
   }
@@ -28,18 +28,18 @@ class TemplateCommentNode extends TemplateNode<Comment> {
   }
 }
 
-export async function renderCommentNode(node: Node, values: TemplateValues): Promise<Array<TemplateNode>> {
+export async function renderCommentNode(node: Node, values: TemplateValues): Promise<Array<VDOMNode>> {
   const path = getTemplateTokenValue(node.textContent);
   if (!path) {
-    return node.textContent ? [new TemplateCommentNode(node.textContent)] : [];
+    return node.textContent ? [new VDOMComment(node.textContent)] : [];
   } else {
     const templateLocation = getTemplateFromLocation(path);
     if (!(templateLocation instanceof Promise)) {
-      const ret = renderTemplate(templateLocation.template, values, templateLocation.xmlDocument);
+      const ret = parseTemplateXML(templateLocation.template, values, templateLocation.xmlDocument);
       return ret ? ret : [];
     } else {
       const templateCache = await templateLocation;
-      const ret = renderTemplate(templateCache.template, values, templateCache.xmlDocument);
+      const ret = parseTemplateXML(templateCache.template, values, templateCache.xmlDocument);
       return ret ? ret : [];
     }
   }

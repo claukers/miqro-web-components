@@ -1,9 +1,9 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM} from "./constants.js";
-import {TemplateNode} from "../node.js";
+import {VDOMNode} from "../node.js";
 import {log, LOG_LEVEL} from "../../../../log.js";
 
-export async function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => Promise<TemplateNode | undefined>): Promise<TemplateNode[]> {
+export async function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => Promise<VDOMNode | undefined>): Promise<VDOMNode[]> {
   const forEachValue = (node as Element).getAttribute(DATA_FOR_EACH);
   const forEachItemValue = (node as Element).getAttribute(DATA_FOR_EACH_ITEM);
   if (forEachValue !== null) {

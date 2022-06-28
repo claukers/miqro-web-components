@@ -1,9 +1,9 @@
 import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef} from "./attributes/index.js";
-import {renderChildNodes} from "../../render-children.js";
+import {renderChildNodes} from "./child-nodes.js";
 import {TemplateValues} from "../../utils/index.js";
-import {TemplateNode} from "./node.js";
+import {VDOMNode} from "./node.js";
 
-export class TemplateElementNode extends TemplateNode<HTMLElement> {
+export class VDOMElement extends VDOMNode<HTMLElement> {
 
   public attributes: { attribute: string; value: string; }[];
 
@@ -64,7 +64,7 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
     super.disconnect(ref);
   }
 
-  public compare(other: TemplateElementNode): boolean {
+  public compare(other: VDOMElement): boolean {
     return super.compare(other) && other.tagName === this.tagName;
   }
 
@@ -73,11 +73,11 @@ export class TemplateElementNode extends TemplateNode<HTMLElement> {
   }
 }
 
-export async function renderElementNode(node: Node, values: TemplateValues): Promise<TemplateNode[]> {
+export async function renderElementNode(node: Node, values: TemplateValues): Promise<VDOMNode[]> {
   return dataForEach(node, values, async (node: Node, values: TemplateValues) => {
     if (dataIf(node as Element, values) && dataIfn(node as Element, values)) {
       const tagName = (node as Element).tagName;
-      const childElement = new TemplateElementNode(tagName);
+      const childElement = new VDOMElement(tagName);
       //dataState(node, values, childElement);
       dataRef(node, values, childElement);
       dataOnAndOtherAttributes(node, values, childElement);

@@ -1,11 +1,11 @@
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM, DATA_IF, DATA_ON, DATA_REF, DATA_STATE} from "./constants.js";
 import {evaluateTextTemplateForAttribute, get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
-import {TemplateElementNode} from "../element.js";
+import {VDOMElement} from "../element.js";
 import {log, LOG_LEVEL} from "../../../../log.js";
 
 const IGNORE_ATTRIBUTES = [DATA_REF, DATA_IF, DATA_STATE, DATA_FOR_EACH, DATA_FOR_EACH_ITEM];
 
-export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, childElement: TemplateElementNode): void {
+export function dataOnAndOtherAttributes(node: Node, values: TemplateValues, childElement: VDOMElement): void {
   const attributes = (node as Element).getAttributeNames();
   for (const attribute of attributes) {
     if (IGNORE_ATTRIBUTES.indexOf(attribute) === -1) {

@@ -1,9 +1,9 @@
-import {renderChildNodes} from "./render-children.js";
-import {TemplateNode} from "./vdom/index.js";
-import {parseXML, TemplateValues} from "./utils/index.js";
-import {log, LOG_LEVEL} from "../log.js";
+import {VDOMNode} from "./nodes/node.js";
+import {parseXML, TemplateValues} from "../utils/index.js";
+import {log, LOG_LEVEL} from "../../log.js";
+import {renderChildNodes} from "./nodes/index.js";
 
-export function renderTemplate(renderOutput: string | string[] | undefined, values: TemplateValues, xml?: XMLDocument): Promise<Array<TemplateNode>> | undefined {
+export function parseTemplateXML(renderOutput: string | string[] | undefined, values: TemplateValues, xml?: XMLDocument): Promise<Array<VDOMNode>> | undefined {
   if (renderOutput instanceof Array) {
     renderOutput = renderOutput.filter(r => r).map(r => String(r)).join("");
   }

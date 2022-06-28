@@ -3,7 +3,7 @@ const {resolve} = require("path");
 const {strictEqual} = require("assert");
 const {distPath} = require("../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "component", "template", "render-children.js");
+const testFilePath = resolve(distPath, "cjs", "component", "template", "vdom", "nodes", "parse-child-nodes.js");
 
 describe("template.render-children unit tests", () => {
   

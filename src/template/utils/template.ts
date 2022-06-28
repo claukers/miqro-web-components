@@ -1,5 +1,5 @@
 import {get} from "./get.js";
-import {ITemplateNode} from "../vdom/nodes/node.js";
+import {IVDOMNode} from "../vdom/nodes/node.js";
 
 export type RefreshCallback = () => void;
 
@@ -85,7 +85,7 @@ export function evaluateTextTemplateForAttribute(textContent: string, values: an
   });
 }
 
-export function removeChild(c: ITemplateNode) {
+export function removeChild(c: IVDOMNode) {
   if (c.ref) {
     if (c.parent) {
       removeChildren(c.parent, c.ref);
@@ -95,7 +95,7 @@ export function removeChild(c: ITemplateNode) {
   }
 }
 
-export function removeChildrenFrom(old: ITemplateNode[], from: number): void {
+export function removeChildrenFrom(old: IVDOMNode[], from: number): void {
   const splicedOld = old.splice(from);
   splicedOld.forEach(removeChild);
 }

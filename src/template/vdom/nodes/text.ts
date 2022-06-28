@@ -1,7 +1,7 @@
 import {get, getTemplateTokenValue, re, TemplateValues} from "../../utils/index.js";
-import {TemplateNode} from "./node.js";
+import {VDOMNode} from "./node.js";
 
-class TemplateTextNode extends TemplateNode<Text> {
+class VDOMText extends VDOMNode<Text> {
   constructor(public textContent: string) {
     super("Text");
   }
@@ -26,7 +26,7 @@ class TemplateTextNode extends TemplateNode<Text> {
   }
 }
 
-class TemplateHTMLElementRefNode extends TemplateNode<HTMLElement> {
+class TemplateHTMLElementRefNode extends VDOMNode<HTMLElement> {
   constructor(public ref: HTMLElement) {
     super("HTMLElementRef");
   }
@@ -42,10 +42,10 @@ class TemplateHTMLElementRefNode extends TemplateNode<HTMLElement> {
   }
 }
 
-export function renderTextNode(node: Node, values: TemplateValues): Array<TemplateNode> {
-  let ret: Array<TemplateNode> = [];
+export function renderTextNode(node: Node, values: TemplateValues): Array<VDOMNode> {
+  let ret: Array<VDOMNode> = [];
   if (node.textContent) {
-    const firstTextNode = new TemplateTextNode("");
+    const firstTextNode = new VDOMText("");
     let currentTextNode = firstTextNode;
     firstTextNode.textContent = node.textContent.replace(re, (match) => {
       const path = getTemplateTokenValue(match);
@@ -60,7 +60,7 @@ export function renderTextNode(node: Node, values: TemplateValues): Array<Templa
           ret.push(currentTextNode);
           const refs = isNodeArray ? value as Node[] : [value] as Node[];
           ret = ret.concat(refs.map(ref => new TemplateHTMLElementRefNode(ref as HTMLElement)));
-          currentTextNode = new TemplateTextNode("");
+          currentTextNode = new VDOMText("");
           return "";
         } else {
           if (ret.length === 0) {

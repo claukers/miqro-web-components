@@ -4,8 +4,7 @@ import {
   RenderFunctionOutput,
   TemplateValues
 } from "./utils/index.js";
-import {ITemplateNode, renderTemplateNodeDiff, TemplateNode} from "./vdom/index.js";
-import {renderTemplate} from "./render-template.js";
+import {IVDOMNode, renderVDOMDiffOn, VDOMNode, parseTemplateXML} from "./vdom/index.js";
 import {log, LOG_LEVEL} from "../log.js";
 import {cancelRender} from "./render-queue.js";
 import {
@@ -65,26 +64,26 @@ export async function render(abortController: AbortController, element: Node, te
   }
 }
 
-async function renderTemplateOnElement(template: string, element: Node, values: TemplateValues): Promise<{ output: TemplateNode<Node>[] | undefined; xmlDocument: XMLDocument; }> {
+async function renderTemplateOnElement(template: string, element: Node, values: TemplateValues): Promise<{ output: VDOMNode<Node>[] | undefined; xmlDocument: XMLDocument; }> {
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, element);
 
   const xmlDocument = oldTemplate && oldTemplate.template === template ?
     oldTemplate.xmlDocument :
     parseXML(template)
 
-  const output = await renderTemplate(template, values, xmlDocument);
+  const output = await parseTemplateXML(template, values, xmlDocument);
 
   return {output, xmlDocument};
 }
 
-function applyRender(abortController: AbortController, xmlDocument: XMLDocument, template: string, element: Node, output?: TemplateNode<Node>[]): boolean {
+function applyRender(abortController: AbortController, xmlDocument: XMLDocument, template: string, element: Node, output?: VDOMNode<Node>[]): boolean {
   if (abortController.signal.aborted) {
     log(LOG_LEVEL.trace, "render aborted %o", element);
     return false;
   }
   const oldTemplate: TemplateMapValue = weakMapGet.call(lastTemplateMap, element);
   if (output) {
-    const ret = renderTemplateNodeDiff(element, output, oldTemplate?.output);
+    const ret = renderVDOMDiffOn(element, output, oldTemplate?.output);
     weakMapSet.call(lastTemplateMap, element, {output, template, xmlDocument} as TemplateMapValue);
     if (oldTemplate) {
       disconnectAll(oldTemplate.output);
@@ -95,14 +94,14 @@ function applyRender(abortController: AbortController, xmlDocument: XMLDocument,
 }
 
 interface TemplateMapValue {
-  output: ITemplateNode[];
+  output: IVDOMNode[];
   xmlDocument: XMLDocument;
   template: string;
 }
 
 const lastTemplateMap = new WeakMap<Node, TemplateMapValue>();
 
-function disconnectAll(nodes: ITemplateNode[]): void {
+function disconnectAll(nodes: IVDOMNode[]): void {
   for (const n of nodes) {
     const children = n.children;
     n.disconnect(n.ref as Node);

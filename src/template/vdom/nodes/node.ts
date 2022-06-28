@@ -1,8 +1,8 @@
 export type TemplateNodeType = "Element" | "Text" | "Comment" | "HTMLElementRef";
 
-export interface ITemplateNode<S extends Node = Node> {
+export interface IVDOMNode<S extends Node = Node> {
   ref?: S;
-  children?: ITemplateNode[];
+  children?: IVDOMNode[];
   type: TemplateNodeType;
   parent?: HTMLElement;
 
@@ -12,13 +12,13 @@ export interface ITemplateNode<S extends Node = Node> {
 
   disconnect(ref: S): void;
 
-  compare(other: ITemplateNode<S>): boolean;
+  compare(other: IVDOMNode<S>): boolean;
 }
 
-export class TemplateNode<S extends Node = Node> implements ITemplateNode<S> {
+export class VDOMNode<S extends Node = Node> implements IVDOMNode<S> {
 
   public ref?: S;
-  public children?: TemplateNode[];
+  public children?: VDOMNode[];
   public parent?: HTMLElement;
 
   constructor(public type: TemplateNodeType) {
@@ -45,7 +45,7 @@ export class TemplateNode<S extends Node = Node> implements ITemplateNode<S> {
 
   }
 
-  public compare(other: TemplateNode<S>): boolean {
+  public compare(other: VDOMNode<S>): boolean {
     return other.type === this.type;
   }
 
