@@ -1,9 +1,9 @@
 const {fake, requireMock, describe, it} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
-const {distPath} = require("../setup-test.js");
+const {distPath} = require("../../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "component", "template", "cache.js");
+const testFilePath = resolve(distPath, "cjs", "component", "template", "utils", "cache.js");
 
 describe("template.cache unit tests", () => {
   it("cannot call setCache twice", async () => {

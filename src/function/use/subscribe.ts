@@ -1,7 +1,7 @@
 import {deepEquals, Selector, Store} from "../../store.js";
 import {RenderFunctionArgs} from "../../template/utils/template.js";
 import {ContextCall, FunctionComponentMeta, FunctionComponentThis, SetFunction} from "../common.js";
-import {log, LOG_LEVEL} from "../../log";
+import {log, LOG_LEVEL} from "../../utils.js";
 
 export function useSubscription<R, S>(this: FunctionComponentThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, store: Store<S>, selector: Selector<S, R>): R {
   function listener(newValue: R) {

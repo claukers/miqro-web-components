@@ -1,5 +1,5 @@
-import {parseXML} from "./utils/index.js";
-import {mapGet, mapSet} from "../utils.js";
+import {parseXML} from "./xml.js";
+import {mapGet, mapSet} from "../../utils.js";
 
 interface TemplateCacheItem {
   template: string;

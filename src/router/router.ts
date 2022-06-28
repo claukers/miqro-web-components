@@ -1,7 +1,7 @@
 import {getActiveRoute, Route} from "./utils.js";
 import {windowAddEventListener, windowRemoveEventListener} from "../template/utils";
 import {FunctionComponentThis} from "../function/common.js";
-import {log, LOG_LEVEL} from "../log.js";
+import {log, LOG_LEVEL} from "../utils.js";
 
 const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}/>`;
 

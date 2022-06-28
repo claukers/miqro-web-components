@@ -1,6 +1,6 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_IF, DATA_IFN} from "./constants.js";
-import {log, LOG_LEVEL} from "../../../../log.js";
+import {log, LOG_LEVEL} from "../../../../utils.js";
 
 export function dataIfn(node: Element, values: TemplateValues): boolean {
   const ifnValue = (node as Element).getAttribute(DATA_IFN);

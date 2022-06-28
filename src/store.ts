@@ -1,5 +1,4 @@
-import {log, LOG_LEVEL} from "./log.js";
-import {mapDelete, mapGet, mapKeys, mapSet} from "./utils.js";
+import {log, LOG_LEVEL, mapDelete, mapGet, mapKeys, mapSet} from "./utils.js";
 
 export interface Action {
   type: string;

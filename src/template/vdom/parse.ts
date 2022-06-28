@@ -1,7 +1,7 @@
 import {VDOMNode} from "./nodes/node.js";
 import {parseXML, TemplateValues} from "../utils/index.js";
-import {log, LOG_LEVEL} from "../../log.js";
-import {renderChildNodes} from "./nodes/index.js";
+import {log, LOG_LEVEL} from "../../utils.js";
+import {parseChildNodes} from "./nodes/index.js";
 
 export function parseTemplateXML(renderOutput: string | string[] | undefined, values: TemplateValues, xml?: XMLDocument): Promise<Array<VDOMNode>> | undefined {
   if (renderOutput instanceof Array) {
@@ -12,7 +12,7 @@ export function parseTemplateXML(renderOutput: string | string[] | undefined, va
     const xmlDocument: XMLDocument = xml ? xml : parseXML(renderOutput);
 
     const root = xmlDocument.children[0];
-    return renderChildNodes(root.childNodes, values);
+    return parseChildNodes(root.childNodes, values);
   }
 }
 

@@ -1,7 +1,7 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_REF} from "./constants.js";
 import {VDOMElement} from "../element.js";
-import {log, LOG_LEVEL} from "../../../../log.js";
+import {log, LOG_LEVEL} from "../../../../utils.js";
 
 export function dataRef(node: Node, values: TemplateValues, childElement: VDOMElement): void {
   const dataRefValue = (node as Element).getAttribute(DATA_REF);

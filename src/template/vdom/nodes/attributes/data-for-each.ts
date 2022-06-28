@@ -1,7 +1,7 @@
 import {get, getTemplateTokenValue, TemplateValues} from "../../../utils/index.js";
 import {DATA_FOR_EACH, DATA_FOR_EACH_ITEM} from "./constants.js";
 import {VDOMNode} from "../node.js";
-import {log, LOG_LEVEL} from "../../../../log.js";
+import {log, LOG_LEVEL} from "../../../../utils.js";
 
 export async function dataForEach(node: Node, values: TemplateValues, cb: (node: Node, values: TemplateValues) => Promise<VDOMNode | undefined>): Promise<VDOMNode[]> {
   const forEachValue = (node as Element).getAttribute(DATA_FOR_EACH);

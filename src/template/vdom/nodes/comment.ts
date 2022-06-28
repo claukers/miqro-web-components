@@ -1,5 +1,4 @@
-import {getTemplateTokenValue, TemplateValues} from "../../utils/index.js";
-import {getTemplateFromLocation} from "../../cache.js";
+import {getTemplateFromLocation, getTemplateTokenValue, TemplateValues} from "../../utils/index.js";
 import {VDOMNode} from "./node.js";
 import {parseTemplateXML} from "../parse.js";
 

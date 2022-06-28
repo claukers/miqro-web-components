@@ -5,9 +5,10 @@ import {
   TemplateValues
 } from "./utils/index.js";
 import {IVDOMNode, renderVDOMDiffOn, VDOMNode, parseTemplateXML} from "./vdom/index.js";
-import {log, LOG_LEVEL} from "../log.js";
 import {cancelRender} from "./render-queue.js";
 import {
+  log,
+  LOG_LEVEL,
   weakMapGet,
   weakMapHas,
   weakMapSet

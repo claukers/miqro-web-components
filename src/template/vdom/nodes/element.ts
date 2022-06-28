@@ -1,5 +1,5 @@
 import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef} from "./attributes/index.js";
-import {renderChildNodes} from "./child-nodes.js";
+import {parseChildNodes} from "./child-nodes.js";
 import {TemplateValues} from "../../utils/index.js";
 import {VDOMNode} from "./node.js";
 
@@ -81,7 +81,7 @@ export async function renderElementNode(node: Node, values: TemplateValues): Pro
       //dataState(node, values, childElement);
       dataRef(node, values, childElement);
       dataOnAndOtherAttributes(node, values, childElement);
-      childElement.children = await renderChildNodes(node.childNodes, values);
+      childElement.children = await parseChildNodes(node.childNodes, values);
       return childElement;
     }
   });

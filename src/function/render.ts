@@ -2,7 +2,7 @@ import {nodeList2Array, render} from "../template/index.js";
 import {createFunctionContext} from "./context.js";
 import {FunctionComponentMeta} from "./common.js";
 import {RenderFunction, RenderFunctionArgs} from "../template/utils/template.js";
-import {log, LOG_LEVEL} from "../log.js";
+import {log, LOG_LEVEL} from "../utils.js";
 import {flushEffects} from "./use/index.js";
 
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {

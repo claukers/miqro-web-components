@@ -4,9 +4,10 @@ import {
   TemplateValues
 } from "./utils/index.js";
 import {hasCache, render as realRender} from "./render.js";
-import {log, LOG_LEVEL} from "../log.js";
 import {RenderEventListener} from "./utils/template.js";
 import {
+  log,
+  LOG_LEVEL,
   weakMapDelete,
   weakMapGet,
   weakMapHas,

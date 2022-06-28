@@ -1,6 +1,6 @@
 import {RenderFunctionArgs} from "../../template/utils/template.js";
 import {ContextCall, Effect, FunctionComponentMeta} from "../common.js";
-import {log, LOG_LEVEL} from "../../log.js";
+import {log, LOG_LEVEL} from "../../utils.js";
 
 export function useEffect(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, effect: Effect): void {
   meta.effects.push(effect);

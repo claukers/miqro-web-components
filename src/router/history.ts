@@ -1,5 +1,5 @@
 import {BASE_PATH} from "./utils.js";
-import {log, LOG_LEVEL} from "../log.js";
+import {log, LOG_LEVEL} from "../utils.js";
 import {windowDispatchEvent} from "../template/utils/index.js";
 
 export function historyPushPath(path: string): void {

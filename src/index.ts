@@ -21,4 +21,4 @@ export {
 } from "./template/index.js";
 export {PathRouter, RouteLink, historyPushPath} from "./router/index.js";
 export {Action, Reducer, StoreReducerMap, StoreListener, Selector, StoreOptions, Store} from "./store.js";
-export {setLogLevel} from "./log.js";
+export {setLogLevel} from "./utils.js";
