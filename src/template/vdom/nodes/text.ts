@@ -1,4 +1,5 @@
-import {get, getTemplateTokenValue, re, TemplateValues} from "../../utils/index.js";
+import { TemplateValues, get } from "../../../common/index.js";
+import {getTemplateTokenValue, re} from "../../utils/index.js";
 import {VDOMNode} from "./node.js";
 
 class VDOMText extends VDOMNode<Text> {

@@ -9,9 +9,9 @@
 </style>
 <my-root></my-root>
 <script type="module">
-  import {defineFunction} from "./lib/index.js";
+  import {define} from "./esm.bundle.js";
 
-  defineFunction("my-element", async function () {
+  define("my-element", async function () {
     await new Promise(resolve => {
       setTimeout(() => {
         resolve();
@@ -20,7 +20,7 @@
     return "<p>out</p>";
   });
 
-  defineFunction("my-root", async function () {
+  define("my-root", async function () {
     const [show, setShow] = this.useState(true);
     this.useEffect(() => {
       const timeout = setTimeout(() => {

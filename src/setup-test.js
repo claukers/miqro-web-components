@@ -4,8 +4,18 @@ globalThis.HTMLElement = class {
 
 }
 
-globalThis.window = {
+globalThis.MutationObserver = class {
 
 }
 
-module.exports.distPath = resolve(__dirname, "..", "dist");
+globalThis.DOMParser = class {
+
+}
+
+globalThis.ShadowRoot = class {
+
+}
+
+globalThis.window = {}
+
+module.exports.distPath = resolve(__dirname, "..", "dist", "cjs");

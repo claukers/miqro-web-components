@@ -1,11 +1,10 @@
 import {getActiveRoute, Route} from "./utils.js";
-import {windowAddEventListener, windowRemoveEventListener} from "../template/utils";
-import {FunctionComponentThis} from "../function/common.js";
-import {log, LOG_LEVEL} from "../utils.js";
+import {RenderFunctionThis, windowAddEventListener, windowRemoveEventListener} from "../common/index.js";
+
 
 const renderTag = (tagName: string | (() => string)) => typeof tagName === "function" ? tagName() : `<${tagName}/>`;
 
-export function PathRouter(this: FunctionComponentThis) {
+export function PathRouter(this: RenderFunctionThis) {
   const routesJSON = this.useAttribute("data-routes");
   const defaultElement = this.useAttribute("data-default-element");
   const routes = routesJSON ? JSON.parse(routesJSON) : [];
@@ -16,7 +15,6 @@ export function PathRouter(this: FunctionComponentThis) {
     function popStateListener() {
       const currentActive = getActive();
       const newActive = getActiveRoute(routes, currentActive);
-      log(LOG_LEVEL.trace, "PathRouter popStateListener currentActive %o vs newActive %o", currentActive, newActive);
       if (newActive === undefined && currentActive !== defaultElement) {
         setActiveRoute({element: defaultElement});
       } else if (newActive !== currentActive) {

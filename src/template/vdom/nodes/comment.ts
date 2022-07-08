@@ -1,6 +1,7 @@
-import {getTemplateFromLocation, getTemplateTokenValue, TemplateValues} from "../../utils/index.js";
+import {getTemplateFromLocation, getTemplateTokenValue} from "../../utils/index.js";
 import {VDOMNode} from "./node.js";
 import {parseTemplateXML} from "../parse.js";
+import { TemplateValues } from "../../../common/index.js";
 
 class VDOMComment extends VDOMNode<Comment> {
   constructor(public textContent: string) {

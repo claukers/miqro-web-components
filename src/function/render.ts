@@ -1,15 +1,19 @@
-import {nodeList2Array, render} from "../template/index.js";
+import {queueRender} from "../template/index.js";
 import {createFunctionContext} from "./context.js";
-import {FunctionComponentMeta} from "./common.js";
-import {RenderFunction, RenderFunctionArgs} from "../template/utils/template.js";
-import {log, LOG_LEVEL} from "../utils.js";
+import {
+  FunctionComponentMeta,
+  log,
+  LOG_LEVEL,
+  nodeList2Array,
+  RenderFunction,
+  RenderFunctionArgs
+} from "../common/index.js";
 import {flushEffects} from "./use/index.js";
 
 export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
-  return render(
+  return queueRender(
     meta.shadowRoot ? meta.shadowRoot : element,
     createRenderFunction(element, firstRun, meta),
-    undefined,
     firstRun ? function () {
       flushEffects(meta.mountEffects, meta.mountEffectCallbacks);
     } : undefined,

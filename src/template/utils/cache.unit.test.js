@@ -3,9 +3,21 @@ const {resolve} = require("path");
 const {strictEqual} = require("assert");
 const {distPath} = require("../../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "component", "template", "utils", "cache.js");
+const testFilePath = resolve(distPath, "template", "utils", "cache.js");
 
 describe("template.cache unit tests", () => {
+  let oldDOMParser;
+  before(function () {
+    oldDOMParser = globalThis.DOMParser;
+    globalThis.DOMParser = class {
+      parseFromString() {
+
+      }
+    }
+  });
+  after(function () {
+    globalThis.DOMParser = oldDOMParser;
+  })
   it("cannot call setCache twice", async () => {
     const {setCache} = requireMock(testFilePath, {}, distPath);
     setCache({});
@@ -26,7 +38,7 @@ describe("template.cache unit tests", () => {
     setCache({
       [templatePath]: template
     });
-    strictEqual(getTemplateFromLocation(templatePath), template);
+    strictEqual(getTemplateFromLocation(templatePath).template, template);
 
   });
   it("getTemplateFromLocation as {url} from cache returns string", async () => {
@@ -40,7 +52,7 @@ describe("template.cache unit tests", () => {
     setCache({
       [templatePath]: template
     });
-    strictEqual(getTemplateFromLocation({url: templatePath}), template);
+    strictEqual(getTemplateFromLocation({url: templatePath}).template, template);
 
   });
   it("getTemplateFromLocation as string not from cache uses fetch and returns promise", async () => {
@@ -62,7 +74,7 @@ describe("template.cache unit tests", () => {
     });
     const promise = getTemplateFromLocation(templatePath);
     strictEqual(promise instanceof Promise, true);
-    strictEqual(await promise, template);
+    strictEqual((await promise).template, template);
     strictEqual(fakeResponse.text.callCount, 1);
     strictEqual(fetch.callCount, 1);
     strictEqual(fetch.callArgs[0][0], templatePath);
@@ -86,7 +98,7 @@ describe("template.cache unit tests", () => {
     });
     const promise = getTemplateFromLocation({url: templatePath});
     strictEqual(promise instanceof Promise, true);
-    strictEqual(await promise, template);
+    strictEqual((await promise).template, template);
     strictEqual(fakeResponse.text.callCount, 1);
     strictEqual(fetch.callCount, 1);
     strictEqual(fetch.callArgs[0][0], templatePath);
@@ -117,7 +129,7 @@ describe("template.cache unit tests", () => {
       strictEqual(fakeResponse.text.callCount, 0);
       strictEqual(fetch.callCount, 1);
       strictEqual(fetch.callArgs[0][0], templatePath);
-      strictEqual(getTemplateFromLocation(templatePath), "");
+      strictEqual(getTemplateFromLocation(templatePath).template, "");
       strictEqual(fetch.callCount, 1);
     }
   });

@@ -1,7 +1,6 @@
 import {historyPushPath} from "./history.js";
 import {isPathLocation} from "./utils.js";
-import {windowAddEventListener, windowRemoveEventListener} from "../template/utils";
-import {FunctionComponentThis} from "../function/common.js";
+import {RenderFunctionThis, windowAddEventListener, windowRemoveEventListener} from "../common/index.js";
 
 function flipActiveClass(element: HTMLElement, path: string, activeClass: string) {
   const isActive = isPathLocation(path ? path : undefined);
@@ -12,7 +11,7 @@ function flipActiveClass(element: HTMLElement, path: string, activeClass: string
   }
 }
 
-export function RouteLink(this: FunctionComponentThis) {
+export function RouteLink(this: RenderFunctionThis) {
   const path = this.useAttribute("data-path", "/") as string;
   const activeClass = this.useAttribute("data-active-class", "active", false) as string;
 

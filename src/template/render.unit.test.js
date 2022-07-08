@@ -1,148 +1,89 @@
-const {fake, requireMock} = require("@miqro/test");
+const {fake, requireMock, before, after} = require("@miqro/test");
 const {resolve} = require("path");
 const {strictEqual} = require("assert");
 const {distPath} = require("../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "component", "render.js");
+const testFilePath = resolve(distPath, "template", "render.js");
 
-describe("render.unit.test", () => {
+describe("template.render.unit.test", () => {
 
   it("isConnected render returns string calls renderTemplate and renderTemplateNodeDiff", async () => {
     const nodeList = ["node1", "node2"];
-    const nodeList2ArrayRet = "some value";
+    const weakMapGet = WeakMap.prototype.get;
+    const weakMapSet = WeakMap.prototype.set;
     const getTemplateLocation = fake(() => {
 
     });
-    const renderTemplate = fake(async () => {
+    const renderVDOMDiffOn = fake(async () => {
       return nodeList;
     });
-    const renderTemplateNodeDiff = fake(() => {
+    const template = "template";
+    const component = {};
+    const renderFunctionResult = {
+      template,
+      values: {}
+    }
+    const renderFunction = fake(() => {
+      return renderFunctionResult;
+    });
+    const output = [];
+    const output2 = "output2";
+    const xmlDocument = "xmlDocument";
+    const parseTemplateXMLResult = output;
+    const parseTemplateXMLResult2 = output2;
+    const parseTemplateXML = fake(() => {
+      return parseTemplateXML.callCount > 1 ? parseTemplateXMLResult2 : parseTemplateXMLResult;
+    });
+    const parseXML = fake(() => {
+      return xmlDocument;
+    });
+    const log = fake(() => {
 
     });
-    const component = {
-      isConnected: true,
-      render: fake(() => {
-        return "stringtemplate"
-      }),
-      appendChild: fake((child) => {
-        strictEqual(child, nodeList[component.appendChild.callCount - 1]);
-      })
-    };
     const {render} = requireMock(testFilePath, {
-      "./template/index.js": {
-        getTemplateLocation, renderTemplateOnElement: renderTemplate
+      "./vdom/index.js": {
+        renderVDOMDiffOn,
+        parseTemplateXML
+      },
+      "../common/index.js": {
+        parseXML,
+        log,
+        weakMapGet,
+        weakMapSet,
+        LOG_LEVEL: {}
       }
     }, distPath);
     strictEqual(component.innerHTML, undefined);
-    await render(component);
-    strictEqual(renderTemplate.callCount, 1);
-    /*strictEqual(renderTemplateNodeDiff.callCount, 1);
-    strictEqual(renderTemplateNodeDiff.callArgs[0][0], component);
-    strictEqual(renderTemplateNodeDiff.callArgs[0][1], nodeList);*/
+    const renderOutput = await render(new AbortController(), component, renderFunction);
+    strictEqual(renderFunction.callCount, 1);
+    strictEqual(parseXML.callCount, 1);
+    strictEqual(parseXML.callArgs[0].length, 1);
+    strictEqual(parseXML.callArgs[0][0], template);
+    strictEqual(parseTemplateXML.callCount, 1);
+    strictEqual(parseTemplateXML.callArgs[0].length, 3);
+    strictEqual(parseTemplateXML.callArgs[0][0], template);
+
+    strictEqual(renderVDOMDiffOn.callCount, 0);
+    renderOutput.apply();
+
+    strictEqual(renderVDOMDiffOn.callCount, 1);
     strictEqual(getTemplateLocation.callCount, 0);
-    strictEqual(renderTemplate.callArgs[0][0], "stringtemplate");
-    strictEqual(renderTemplate.callArgs[0][1], component);
-    strictEqual(component.innerHTML, undefined);
-    strictEqual(component.appendChild.callCount, 0);
-  });
+    strictEqual(renderVDOMDiffOn.callArgs[0].length, 3);
+    strictEqual(renderVDOMDiffOn.callArgs[0][0], component);
+    strictEqual(renderVDOMDiffOn.callArgs[0][1], parseTemplateXMLResult);
+    strictEqual(renderVDOMDiffOn.callArgs[0][2], undefined);
 
-  it("isConnected static template exists in cache calls renderTemplate and renderTemplateNodeDiff", async () => {
-    const nodeList = ["node1", "node2"];
-    const nodeList2ArrayRet = ["node1-1", "node2-1"];
-    const template = "templateString";
-    const getTemplateFromLocation = fake(() => {
-      return template;
-    });
-    const renderTemplate = fake(async () => {
-      return nodeList;
-    });
-    const renderTemplateNodeDiff = fake(() => {
+    // second call sends oldOutput
 
-    });
-    const component = {
-      isConnected: true,
-      childNodes: "childNodes",
-      constructor: {
-        hasOwnProperty: fake(() => {
-          return true;
-        }),
-        template: "templatePath"
-      },
-      appendChild: fake((child) => {
-        strictEqual(child, nodeList[component.appendChild.callCount - 1]);
-      })
-    };
-    const {render} = requireMock(testFilePath, {
-      "./template/index.js": {
-        getTemplateFromLocation, renderTemplateOnElement: renderTemplate
-      }
-    }, distPath);
-    strictEqual(component.innerHTML, undefined);
-    await render(component);
-    strictEqual(renderTemplate.callCount, 1);
-    strictEqual(renderTemplate.callArgs[0][0], template);
-    strictEqual(renderTemplate.callArgs[0][1], component);
-    strictEqual(component.constructor.hasOwnProperty.callCount, 1);
-    strictEqual(component.constructor.hasOwnProperty.callArgs[0][0], "template");
-    strictEqual(getTemplateFromLocation.callCount, 1);
-    strictEqual(getTemplateFromLocation.callArgs[0][0], "templatePath");
-    strictEqual(component.innerHTML, undefined);
-    strictEqual(component.appendChild.callCount, 0);
-  });
+    const renderOutput2 = await render(new AbortController(), component, renderFunction);
+    renderOutput2.apply();
 
-  it("isConnected static template doesn't in cache calls renderTemplate and renderTemplateNodeDiff after promise resolves", async () => {
-    const nodeList = ["node1", "node2"];
-    const template = "templateString";
-    const nodeList2ArrayRet = "other value";
-    const getTemplateFromLocation = fake(() => {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve(template);
-        }, 0);
-      });
-    });
-    const renderTemplate = fake(async () => {
-      return nodeList;
-    });
-    const renderTemplateNodeDiff = fake(() => {
-    });
-    const component = {
-      isConnected: true,
-      constructor: {
-        hasOwnProperty: fake(() => {
-          return true;
-        }),
-        template: "templatePath"
-      },
-      appendChild: fake((child) => {
-        strictEqual(child, nodeList[component.appendChild.callCount - 1]);
-      })
-    };
-    const {render} = requireMock(testFilePath, {
-      "./template/index.js": {
-        getTemplateFromLocation, renderTemplateOnElement: renderTemplate
-      }
-    }, distPath);
-    strictEqual(component.innerHTML, undefined);
-    await render(component);
-    strictEqual(renderTemplate.callCount, 0);
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 10);
-    });
-    strictEqual(renderTemplate.callCount, 1);
-    strictEqual(renderTemplate.callArgs[0][0], template);
-    /*strictEqual(renderTemplateNodeDiff.callCount, 1);
-    strictEqual(renderTemplateNodeDiff.callArgs[0][0], component);
-    strictEqual(renderTemplateNodeDiff.callArgs[0][1], nodeList);*/
-    strictEqual(renderTemplate.callArgs[0][1], component);
-    strictEqual(component.constructor.hasOwnProperty.callCount, 1);
-    strictEqual(component.constructor.hasOwnProperty.callArgs[0][0], "template");
-    strictEqual(getTemplateFromLocation.callCount, 1);
-    strictEqual(getTemplateFromLocation.callArgs[0][0], "templatePath");
-    strictEqual(component.innerHTML, undefined);
-    strictEqual(component.appendChild.callCount, 0);
+    strictEqual(renderVDOMDiffOn.callCount, 2);
+    strictEqual(getTemplateLocation.callCount, 0);
+    strictEqual(renderVDOMDiffOn.callArgs[0].length, 3);
+    strictEqual(renderVDOMDiffOn.callArgs[1][0], component);
+    strictEqual(renderVDOMDiffOn.callArgs[1][1], parseTemplateXMLResult2);
+    strictEqual(renderVDOMDiffOn.callArgs[1][2], parseTemplateXMLResult);
   });
 
 });

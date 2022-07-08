@@ -3,7 +3,7 @@ const {resolve} = require("path");
 const {strictEqual} = require("assert");
 const {distPath} = require("../setup-test.js");
 
-const testFilePath = resolve(distPath, "cjs", "router", "history.js");
+const testFilePath = resolve(distPath, "router", "history.js");
 
 const newFakePopStateEvent = fake(() => {
 
@@ -28,7 +28,11 @@ const fakeWindow = {
 
 describe("history.unit.test", () => {
 
+  let oldWindow, oldPopStateEvent;
+
   before(async () => {
+    oldWindow = globalThis.window;
+    oldPopStateEvent = globalThis.PopStateEvent;
     delete globalThis.window;
     delete globalThis.PopStateEvent;
     newFakePopStateEvent.reset();
@@ -41,6 +45,8 @@ describe("history.unit.test", () => {
   after(async () => {
     delete globalThis.window;
     delete globalThis.PopStateEvent;
+    globalThis.window = oldWindow;
+    globalThis.PopStateEvent = oldPopStateEvent;
   });
 
   it("historyPushPath should pushState on window and dispatch a new PopStateEvent", async () => {
@@ -68,7 +74,7 @@ describe("history.unit.test", () => {
     strictEqual(fakeWindow.history.pushState.callCount, 1);
     strictEqual(fakeWindow.history.pushState.callArgs[0].length, 3);
     strictEqual(fakeWindow.history.pushState.callArgs[0][0], null);
-    strictEqual(fakeWindow.history.pushState.callArgs[0][1], null);
+    strictEqual(fakeWindow.history.pushState.callArgs[0][1], "");
     strictEqual(fakeWindow.history.pushState.callArgs[0][2], `${BASEPATHRET}${path}`);
   });
 

@@ -1,11 +1,10 @@
-//import {windowDispatchEvent, windowPushState} from "../../template/utils/index.js";
-import {windowDispatchEvent} from "../../template/utils/index.js";
-
-const URLSearchParamsGetAll = URLSearchParams.prototype.getAll;
-const URLSearchParamsSet = URLSearchParams.prototype.set;
-const URLSearchParamsAppend = URLSearchParams.prototype.append;
-const URLSearchParamsDelete = URLSearchParams.prototype.delete;
-const URLSearchParamsToString = URLSearchParams.prototype.toString;
+import {
+  URLSearchParamsAppend,
+  URLSearchParamsDelete,
+  URLSearchParamsGetAll,
+  URLSearchParamsSet,
+  windowDispatchEvent
+} from "./common.js";
 
 export function getQueryValue(name: string, defaultValue?: string[] | string | null): string[] | string | null {
   const ret = URLSearchParamsGetAll.call(new URL(window.location.href).searchParams, name);
@@ -28,4 +27,20 @@ export function setQueryValue(name: string, value: string[] | string | null): vo
   }
   window.history.pushState(null, "", String(url));
   windowDispatchEvent(new PopStateEvent("popstate"));
+}
+
+export function nodeList2Array(childNodes?: NodeListOf<ChildNode>): Array<Node | HTMLElement> {
+  const childrenNodes = [];
+  if (childNodes) {
+    for (let i = 0; i < childNodes.length; i++) {
+      childrenNodes.push(childNodes[i])
+    }
+  }
+  return childrenNodes;
+}
+
+const DOMParserParseFromString = DOMParser.prototype.parseFromString;
+
+export function parseXML(xml: string): XMLDocument {
+  return DOMParserParseFromString.call(new DOMParser(), `<root>${xml}</root>`, "text/xml") as XMLDocument;
 }

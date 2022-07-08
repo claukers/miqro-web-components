@@ -4,7 +4,8 @@ coverage/
 *.log
 bla.sh
 log.txt
-dist/
+dist/cjs
+dist/esm
 test/data/*.log
 .idea
 #.vscode/

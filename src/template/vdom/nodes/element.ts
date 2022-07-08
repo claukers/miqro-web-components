@@ -1,6 +1,6 @@
 import {dataForEach, dataIf, dataIfn, dataOnAndOtherAttributes, dataRef} from "./attributes/index.js";
 import {parseChildNodes} from "./child-nodes.js";
-import {TemplateValues} from "../../utils/index.js";
+import {TemplateValues} from "../../../common/index.js";
 import {VDOMNode} from "./node.js";
 
 export class VDOMElement extends VDOMNode<HTMLElement> {

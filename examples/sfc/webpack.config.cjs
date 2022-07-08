@@ -8,9 +8,9 @@ const path = require('path');
 
 module.exports = {
   mode: "production",
-  entry: './examples/sfc/src/index.js',
+  entry: './dist/index.js',
   output: {
-    path: path.resolve(__dirname, 'examples', "sfc"),
+    path: path.resolve(__dirname),
     filename: 'app.bundle.min.js'/*,
     libraryTarget: "var",
     library: "WebComponents"*/

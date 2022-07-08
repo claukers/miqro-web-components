@@ -1,7 +1,14 @@
-import {windowAddEventListener, windowRemoveEventListener} from "../../template/utils/index.js";
-import {RenderFunctionArgs} from "../../template/utils/template.js";
-import {ContextCall, Effect, FunctionComponentMeta, SetFunction} from "../common.js";
-import {getQueryValue, setQueryValue} from "./utils.js";
+import {
+  ContextCall,
+  Effect,
+  FunctionComponentMeta,
+  getQueryValue,
+  RenderFunctionArgs,
+  SetFunction,
+  setQueryValue,
+  windowAddEventListener,
+  windowRemoveEventListener
+} from "../../common/index.js";
 
 export function useQuery(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string | string[]): [string[] | string | null, SetFunction<string[] | string | null>] {
   //context.name = name;

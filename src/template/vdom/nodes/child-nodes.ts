@@ -1,7 +1,7 @@
 import {renderCommentNode} from "./comment.js";
 import {renderElementNode} from "./element.js";
 import {renderTextNode} from "./text.js";
-import {TemplateValues} from "../../utils/index.js";
+import {TemplateValues} from "../../../common/index.js";
 import {VDOMNode} from "./node.js";
 
 export async function parseChildNodes(childNodes: NodeListOf<ChildNode>, values: TemplateValues): Promise<Array<VDOMNode>> {

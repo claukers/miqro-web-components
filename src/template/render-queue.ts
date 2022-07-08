@@ -1,32 +1,28 @@
-import {
-  RenderFunction,
-  RenderFunctionOutput,
-  TemplateValues
-} from "./utils/index.js";
-import {hasCache, render as realRender} from "./render.js";
-import {RenderEventListener} from "./utils/template.js";
+import {hasCache, render} from "./render.js";
 import {
   log,
   LOG_LEVEL,
+  RenderEventListener,
+  RenderFunction,
   weakMapDelete,
   weakMapGet,
   weakMapHas,
   weakMapSet
-} from "../utils.js";
+} from "../common/index.js";
 
-export function isRenderQueued(component: Node) {
-  return weakMapHas.call(refreshTimeouts, component);
+export function isRenderQueued(element: Node) {
+  return weakMapHas.call(refreshTimeouts, element);
 }
 
-export function cancelRender(component: Node) {
+export function cancelRender(element: Node) {
 
-  const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
+  const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, element) as RefreshTimeoutMapValue;
   if (oldRefreshTimeout && oldRefreshTimeout.timeout) {
     clearTimeout(oldRefreshTimeout.timeout);
     oldRefreshTimeout.abortController.abort();
     oldRefreshTimeout.timeout = null;
-    const element = component instanceof ShadowRoot && component.host ? component.host : component;
-    log(LOG_LEVEL.debug, "canceling render on %o", element);
+    const elementToRenderOn = element instanceof ShadowRoot && element.host ? element.host : element;
+    log(LOG_LEVEL.debug, "canceling render on %o", elementToRenderOn);
   }
 }
 
@@ -40,71 +36,68 @@ export function addRenderListener(component: Node, listener: RenderEventListener
 const RENDER_TIMEOUT = 60000;
 const RENDER_MS_WARNING = 50;
 
-export function render(component: Node, t: RenderFunction | RenderFunctionOutput, values?: TemplateValues, listener?: RenderEventListener, callback?: () => void): void {
-  cancelRender(component);
+export function queueRender(element: Node, renderFunction: RenderFunction, listener?: RenderEventListener, callback?: () => void): void {
+  cancelRender(element);
   const startMS = Date.now();
-  const element = (component instanceof ShadowRoot && component.host ? component.host : component) as HTMLElement;
-  const renderMode = !hasCache(component) ? "create" : "update";
-  log(LOG_LEVEL.trace, `queue render %s %o`, renderMode, element);
-  const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
+  const elementToRenderOn = (element instanceof ShadowRoot && element.host ? element.host : element) as HTMLElement;
+  const renderMode = !hasCache(element) ? "create" : "update";
+  log(LOG_LEVEL.trace, `queue render %s %o`, renderMode, elementToRenderOn);
+  const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, element) as RefreshTimeoutMapValue;
   const abortController = new AbortController();
   const eventTarget = oldRefreshTimeout ? oldRefreshTimeout.eventTarget : new EventTarget();
   const timeout = setTimeout(async function queueRenderTrigger() {
     const renderTimeout = setTimeout(function queueRenderTriggerTimeout() {
-      log(LOG_LEVEL.warn, `render %s %o max timeout %s`, renderMode, element, RENDER_TIMEOUT);
+      log(LOG_LEVEL.warn, `render %s %o max timeout %s`, renderMode, elementToRenderOn, RENDER_TIMEOUT);
       abortController.abort();
     }, RENDER_TIMEOUT);
     try {
-      log(LOG_LEVEL.trace, `render %s %o`, renderMode, element);
+      log(LOG_LEVEL.trace, `render %s %o`, renderMode, elementToRenderOn);
 
       if (abortController.signal.aborted) {
         return;
       }
-      const renderAction = await realRender(abortController, component, t, values);
+      const renderAction = await render(abortController, element, renderFunction);
       if (abortController.signal.aborted) {
         return;
       }
       if (renderAction) {
         const changesRendered = renderAction.apply();
-
-        try {
-          if (callback) {
-            callback();
-          }
-        } catch (e) {
-          log(LOG_LEVEL.error, e);
-        }
-
         if (changesRendered) {
           const tookMS = Date.now() - startMS;
           if (tookMS > RENDER_MS_WARNING) {
-            log(LOG_LEVEL.warn, `render %s %o took %sms!`, renderMode, element, tookMS);
+            log(LOG_LEVEL.warn, `render %s %o took %sms!`, renderMode, elementToRenderOn, tookMS);
           } else {
-            log(LOG_LEVEL.debug, `render %s %o took %sms`, renderMode, element, tookMS);
+            log(LOG_LEVEL.debug, `render %s %o took %sms`, renderMode, elementToRenderOn, tookMS);
           }
-
-          eventTarget.dispatchEvent(new CustomEvent<AbortSignal>("render", {
-            detail: abortController.signal
-          }));
         }
       }
+      eventTarget.dispatchEvent(new CustomEvent<AbortSignal>("render", {
+        detail: abortController.signal
+      }));
+      try {
+        if (callback) {
+          callback();
+        }
+      } catch (e) {
+        log(LOG_LEVEL.error, e);
+      }
     } catch (e) {
-      log(LOG_LEVEL.error, "error rendering %o %o", element, e);
+      log(LOG_LEVEL.error, "error rendering %o %o", elementToRenderOn, e);
     } finally {
       clearTimeout(renderTimeout);
-      const refreshTimeout = weakMapGet.call(refreshTimeouts, component) as RefreshTimeoutMapValue;
+      const refreshTimeout = weakMapGet.call(refreshTimeouts, element) as RefreshTimeoutMapValue;
       if (refreshTimeout) {
-        weakMapDelete.call(refreshTimeouts, component);
+        weakMapDelete.call(refreshTimeouts, element);
       }
     }
   }, 0);
-  weakMapSet.call(refreshTimeouts, component, {
+  weakMapSet.call(refreshTimeouts, element, {
     eventTarget,
     abortController,
     timeout
   } as RefreshTimeoutMapValue);
   if (listener) {
-    addRenderListener(component, listener);
+    addRenderListener(element, listener);
   }
 }
 

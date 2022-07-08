@@ -1,142 +1,191 @@
 # @miqro/web-components
 
-very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **pluggable** template and
-a **very basic template** influenced by ReactJS.
+very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **very basic template**
+system. heavily influenced by ReactJS Hooks.
 
-## [EXPERIMENTAL] Component Function's
+## define(name, func, [options])
 
-```typescript
-import {defineFunction} from "@miqro/web-components";
-
-defineFunction("my-element", async function () {
-  const [count, setCount] = this.useState(0);
-  this.useAs("label", this.useAttribute("label", ""));
-  this.useAs("count", count);
-  this.useAs("click", function (ev) {
-    ev.preventDefault();
-    setCount(count + 1);
-  });
-  return `<p data-on-click="{click}">clicked {count}</p><span>{label}</span>`;
-});
-```
-
-using ```async functions``` is supported but has some restrains in it's use of ```this.use``` functions.
-
-## Component class
-
-the ```Component``` class extends from ```HTMLElement``` so behaves as a standard web component.
+### ***func*** the render function.
 
 ```typescript
-// my-element.js
-import {Component} from "@miqro/web-components";
-
-// component external template
-customElements.define("my-element", class extends Component {
-  static template = "my-element.html";
-
-  click(ev) {
-    ev.preventDefault();
-    this.setState({
-      clickCount: this.state.clickCount ? this.state.clickCount + 1 : 1
-    });
-  }
-});
+type RenderFunction =
+  () =>
+    Promise<{ template?: string; values?: any } | string | undefined> |
+    { template?: string; values?: any } | string | undefined
 ```
 
-```html
-<!--my-element.html-->
-<button data-on-click="{this.click}">click me</button>
-<p data-if="{this.state.clickCount}">clickCount: {this.state.clickCount}</p>
-```
-
-### Lifecycle
-
-the ```Component``` class extends ```HTMLElement``` so has the same lifecycle as a standard WebComponent. The class
-implements the ```connectedCallback``` and ```disconnectedCallback``` to render the template and remove listeners
-attached to the element.
-
-- ```this.connectedCallback()``` ```->``` ```render template```
-- ```this.setState(partialState)``` ```->``` ```this.didUpdate(prevState)``` ```->``` ```render template```
-
-***Important Notice***
-
-when overriding the standard WebComponent callbacks like ```connectedCallback``` remember to
-call ```super.connectedCallback()```
-to maintain the ```Component's``` normal lifecycle.
-
-example
+### ***options*** [optional] object parameter.
 
 ```typescript
-class MyComponent extends Component {
-  connectedCallback() {
-    // do my stuff before this.render
-    // remember to call super to not alter the Component's lifecyle
-    super.connectedCallback();
-    // do my stuff after this.render is called
-  }
+interface Options {
+  shadowInit?: ShadowRootInit | boolean; // defaults to { mode: "closed" }
+  template?: string; // defaults to ""
 }
 ```
 
-#### this.didUpdate(prevState): boolean
-
-this callback is called when ```this.setState(...)``` function is invoked.
-
-can be overridden to stop the call to ```this.render()``` by returning ```false```. by default, it returns ```true```.
-
-***Consider implementing ```this.didUpdate(prevState)``` to avoid unnecessary re-renders.***
-
 example
 
 ```typescript
-customElements.define("custom-element", class extends Component {
-  didUpdate(prevState) {
-    return prevState.text !== this.state.text;
-  }
-
-  render() {
-    return "<p>{this.state.text}</p>";
-  }
-})
+define("my-element", function () {
+  return "<p>Hello World!</p>";
+});
 ```
 
-## Template
+### RenderFunctionThis
 
-### Built-in Template Engine
+#### this.useAs
 
-to use the build-in template system just return the html in the ```render()``` method.
-
-all renders are compared to the old render output and apply the difference similar to
-the [Reconciliation algorithm](https://reactjs.org/docs/reconciliation.html) from ReactJS to avoid re-creating the same
-HTMLElements.
-
-#### inline template example
+set a template value for the current render.
 
 ```typescript
-customElements.define("my-element", class extends Component {
-  render() {
-    return "<p>{this.dataset.someAttribute}</p> \
-      <p>{this.state.someStateValue}</p> \
-      <div>{children}</div>";
-  }
-})
+define("my-element", function () {
+  this.useAs("text", "Hello World!");
+  return "<p>{text}</p>";
+});
 ```
 
-#### external template file
+#### this.useState
 
-define the static attribute ```template``` to your component's class.
+create a state variable that you can alter using the set function. Calling the set function will re-render the
+component.
 
 ```typescript
-customElements.define("my-element", class extends Component {
-  static template = "somepath/template.html";
-})
+define("my-element", function () {
+  const defaultValue = "defaultValue";
+  const [value, setValue] = this.useState(defaultValue);
+  setTimeout(() => {
+    setValue("newValue");
+  }, 1000);
+});
 ```
+
+#### this.useQuery
+
+watch location.query changes on the custom element. Calling the set function will re-render the component and set
+location.query.
+
+```typescript
+define("my-element", function () {
+  const [offset, setOffset] = this.useQuery("offset", 0);
+});
+```
+
+#### this.useAttribute
+
+watch attribute changes on the custom element.
+
+```typescript
+define("my-element", function () {
+  const value = this.useAttribute("data-name", defaultValue);
+});
+```
+
+#### this.useJSONAttribute
+
+watch attribute changes on the custom element and return a parsed json from the value.
+
+```typescript
+define("my-element", function () {
+  const value = this.useJSONAttribute("data-name", {});
+});
+```
+
+consider using ```this.useSubscription``` to transfer objects instead.
+
+#### this.useSubscription
+
+helpers to listen a store subscription.
+
+```typescript
+define("my-element", function () {
+  this.useAs("dataName", this.useSubscription(store, s => s.data.name));
+});
+```
+
+#### this.useEffect
+
+hook a function to run after render and before re-render and disconnect.
+
+```typescript
+define("my-element", function () {
+  this.useEffect(() => {
+    return () => {
+    };
+  });
+});
+```
+
+#### this.useMountEffect
+
+hook a function to run after first render and before disconnect.
+
+```typescript
+define("my-element", function () {
+  this.useMountEffect(() => {
+    function listener() {
+    }
+
+    window.addEventListener("popstate", listener);
+    return () => {
+      window.removeEventListener("popstate", listener);
+    };
+  });
+});
+```
+
+## single file component
+
+**my-element.sfc**
 
 ```html
-<!--somepath/template.html-->
-<p>{this.dataset.someAttribute}</p>
-<p>{this.state.someStateValue}</p>
-<div>{children}</div>
+
+<my-element data-shadow-roow-mode="closed">
+  <template>
+    <p>Hello {name}!</p>
+  </template>
+  <script type="module">
+    export default function () {
+      this.useAs("name", "World");
+    }
+  </script>
+</my-element>
 ```
+
+**npx miqro sfc inputDir/ outputDir/**
+
+this will produce
+
+**my-element-component.js**
+
+```typescript
+export default function () {
+  this.useAs("name", "World");
+}
+```
+
+**my-element.js**
+
+```typescript
+import {define} from "@miqro/web-components";
+import render from "./index-component.js";
+
+define("my-component", render, {
+  shadowInit: {
+      mode: "closed"
+  },
+  template: "<p>{text}</p>"
+});
+```
+
+to use this element just import ```my-element.js```
+
+## template
+
+### built-in template engine
+
+to avoid flickering the re-renders of a component try to re-use the HTMLElements created in the previous renders.
+for this an algorithm similar to the [Reconciliation algorithm](https://reactjs.org/docs/reconciliation.html) from
+ReactJS is used.
 
 #### data-if
 
@@ -201,43 +250,7 @@ to include other templates into the current one use a comment like this.
 
 this will get the template in url ```common/other-template.html``` using fetch.
 
-#### Inline templates
-
-```typescript
-customElements.define("my-tag", class extends Component {
-  render() {
-    return "<p>{this.dataset.name}</p>"
-  }
-});
-```
-
-#### [EXPERIMENTAL] Separating template from the Component class
-
-```components/my-tag.html```
-
-```html
-<p>template</p>
-```
-
-```components/my-tag.ts```
-
-```typescript
-customElements.define("my-tag", class extends Component {
-  static template = "components/my-tag.html";
-});
-```
-
-or use include comment
-
-```typescript
-customElements.define("my-tag", class extends Component {
-  render() {
-    return `<!--{components/my-tag.html}--->`
-  }
-});
-```
-
-##### bundle templates
+##### cache templates on build
 
 to preload templates use the ```setCache``` function with an object and the templates.
 
@@ -260,113 +273,40 @@ will be included.
 setCache(require("./cache.json"));
 ```
 
-### Using external Template Engine
+### use other template engine
 
-to use an external template engine just return the html output of the template engine in the ```render()``` method.
+just use the custom engine to return an xml that implements the built-in template engine.
 
-for example using pug
-
-```npm install pug --save```
+for example with pug
 
 ```typescript
-import {render as pugRender} from "pug";
+const pug = require('pug');
+const fn = pug.compile('p. {name}', options);
 
-customElements.define("my-element", class extends Component {
-  render() {
-    return pugRender("p #{dataset.name}", this);
-  }
+define("my-tag", function () {
+  this.useAs("name", "Hello World!");
+  return fn({
+    ...
+  });
 })
 ```
 
-this will pass the ```pug``` **html output** to the **built-in** template.
+## debugging
 
-to avoid using the **built-in** template return **undefined**, this will render the built-in template attributes
-like ```data-ref``` ineffective.
-
-```typescript
-import {render as pugRender} from "pug";
-
-const pugTemplate = "p #{dataset.name}";
-
-customElements.define("my-element", class extends Component {
-  render() {
-    pugRender(this);
-    return;
-  }
-})
-```
-
-## watching attribute changes
-
-to watch for attribute changes use the standard ```attributeChangedCallback``` from the HTMLElement class to watch for
-attribute changes.
-
-to re-render the component's template call ```this.refresh()```.
+to enable the internal logging for debugging run this at the earliest on your program.
 
 ```typescript
-customElements.define("my-app", class extends Component {
-  static get observedAttributes() {
-    return ['data-name'];
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    this.refresh(); // this will re-render the component's template
-  }
-
-  render() {
-    return "<p>{this.dataset.name}</p>"
-  }
-});
-```
-
-## Use Component class without templates
-
-if static attribute ```Component.template``` isn't defined and ```component.render``` returns undefined no template is
-rendered.
-
-for example
-
-```typescript
-customElements.define("my-custom", class extends Component {
-  constructor() {
-    super();
-    this.state = {
-      clickCount: 0
-    };
-    const containerDiv = new HTMLDivElement();
-    containerDiv.classList.add("container");
-    this.p = new HTMLParagraphElement();
-    const button = new HTMLButtonElement();
-    button.textContent = "click me";
-    button.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      this.setState({
-        clickCount: this.state.clickCount + 1
-      });
-    });
-    containerDiv.appendChild(p);
-    containerDiv.appendChild(button);
-  }
-
-  // render is used instead of connectedCallback to listen to state changes
-  render() {
-    this.p.textContent = "clicked " + this.state.clickCount;
-  }
-});
+setLogLevel("debug");
+//setLogLevel("trace");
 ```
 
 ## Importing
 
+```npm install @miqro/web-components --save```
+
 this module is exported as a ```CommonJS```.
 
-when using a packer like webpack just import the module and the packer will take care of the rest like.
+when using a tool like webpack just import the module and the packer will take care of the rest like.
 
-```typescript
-import {Component, Router, RouteLink, historyPushPath} from "@miqro/web-components";
-```
-
-or
-
-```javascript
-const {Component, Router, RouteLink, historyPushPath} = require("@miqro/web-components");
-```
+you can also import the ***esm*** version located on ```dist/esm/index.js``` and a esm bundle
+on ```dist/esm.bundle.js```. No minified version is provided. 

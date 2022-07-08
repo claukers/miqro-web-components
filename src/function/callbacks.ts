@@ -1,7 +1,6 @@
-import {disconnect, RenderFunction} from "../template/index.js";
-import {FunctionComponentMeta} from "./common.js";
+import {disconnect} from "../template/index.js";
 import {renderFunction} from "./render.js";
-import {log, LOG_LEVEL, weakMapGet, weakMapHas, weakMapSet} from "../utils.js";
+import {FunctionComponentMeta, RenderFunction, weakMapGet, weakMapHas, weakMapSet} from "../common/index.js";
 import {attributeEffect, flushEffectCallbacks, flushEffects, queryEffect} from "./use/index.js";
 
 export function constructorCallback(element: HTMLElement, func: RenderFunction, shadowInit?: ShadowRootInit | boolean, template?: string): void {

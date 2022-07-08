@@ -8,19 +8,18 @@
   "scripts": {
     "prepare": "npm run build",
     "prebuild": "rm -Rf dist/;",
-    "tsc": "npm run prebuild && tsc",
     "build": "tsc && tsc -p tsconfig-esm.json",
-    "prebuild:sfc:example": "npm run build && npx miqro transpile:sfc -m \"./lib\" \"./examples/sfc/elements/\" \"./examples/sfc/src/\"",
-    "build:sfc:example": "webpack",
+    "postbuild": "deno bundle dist/esm/index.js dist/esm.bundle.js && cp dist/esm.bundle.js dist/esm.bundle.mjs",
+    "build:examples": "npm run build && mkdir examples/sfc/dist; npx miqro sfc -m \"../esm.bundle.js\" ./examples/sfc/src ./examples/sfc/dist && npx miqro generate:template:cache examples/sfc/dist examples/sfc/cache.json",
+    "postbuild:examples": "cd examples/sfc && webpack -c webpack.config.cjs && rm -Rf examples/sfc/dist;",
     "pretest": "npm run build",
     "test": "LOG_LEVEL=debug NODE_ENV=test miqro-test -r src/ -i -n "
   },
   "author": "claukers",
   "license": "ISC",
   "devDependencies": {
-    "webpack": "5.72.1",
-    "webpack-cli": "^4.9.2",
-    "@miqro/test": "0.2.2",
+    "@miqro/test": "../test",
+    "webpack-cli": "4.9.2",
     "miqro": "../miqro",
     "typescript": "4.6.3"
   },

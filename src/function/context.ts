@@ -1,4 +1,3 @@
-import {ContextCall, FunctionComponentContext, FunctionComponentMeta, FunctionComponentThis} from "./common.js";
 import {
   useAs,
   useAttribute,
@@ -9,20 +8,26 @@ import {
   useState,
   useSubscription
 } from "./use/index.js";
-import {RenderFunctionArgs} from "../template/utils/template.js";
+import {
+  ContextCall,
+  FunctionComponentContext,
+  FunctionComponentMeta,
+  RenderFunctionThis,
+  RenderFunctionArgs
+} from "../common/index.js";
 
 export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean, renderArgs: RenderFunctionArgs): FunctionComponentContext {
 
   let lock = false;
   const usage: ContextCall[] = [];
 
-  const FunctionContextSelf: Partial<FunctionComponentThis> = {
+  const FunctionContextSelf: Partial<RenderFunctionThis> = {
     element,
     shadowRoot: meta.shadowRoot
   };
 
-  function bindContextUseFunction<R = any>(name: string, useFunc: (this: FunctionComponentThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => any) {
-    const useFuncBound = useFunc.bind(FunctionContextSelf as FunctionComponentThis);
+  function bindContextUseFunction<R = any>(name: string, useFunc: (this: RenderFunctionThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => any) {
+    const useFuncBound = useFunc.bind(FunctionContextSelf as RenderFunctionThis);
 
     if (FunctionContextSelf[name]) {
       throw new Error("already bound");
@@ -76,6 +81,6 @@ export function createFunctionContext(element: HTMLElement, meta: FunctionCompon
         meta.contextCalls = usageSplice;
       }
     },
-    this: FunctionContextSelf as FunctionComponentThis
+    this: FunctionContextSelf as RenderFunctionThis
   }
 }

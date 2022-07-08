@@ -1,7 +1,13 @@
-import {mutationObserverDisconnect, mutationObserverObserve} from "../../template/utils/index.js";
-import {RenderFunctionArgs} from "../../template/utils/template.js";
-import {ContextCall, Effect, FunctionComponentMeta} from "../common.js";
-import {log, LOG_LEVEL} from "../../utils.js";
+import {
+  ContextCall,
+  Effect,
+  FunctionComponentMeta,
+  log,
+  LOG_LEVEL,
+  mutationObserverDisconnect,
+  mutationObserverObserve,
+  RenderFunctionArgs
+} from "../../common/index.js";
 
 function getAttribute(element: HTMLElement, name: string, defaultValue?: string) {
   const value = element.getAttribute(name);

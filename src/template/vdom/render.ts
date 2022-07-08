@@ -1,5 +1,5 @@
-import {IVDOMNode} from "./nodes/node";
-import {appendChildren, removeChildrenFrom} from "../utils";
+import {IVDOMNode} from "./nodes/index.js";
+import {appendChildren, removeChildrenFrom} from "../utils/index.js";
 
 export function renderVDOMDiffOn(root: Node, current?: IVDOMNode<Node>[], old?: IVDOMNode<Node>[]): boolean {
   // do some copying to not alter the original three
