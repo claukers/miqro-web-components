@@ -12,6 +12,8 @@ import {
   weakMapSet
 } from "../common/index.js";
 
+const lastTemplateMap = new WeakMap<Node, TemplateMapValue>();
+
 export type ApplyRenderCallback = () => boolean;
 
 export function disconnect(component: Node) {
@@ -104,8 +106,6 @@ interface TemplateMapValue {
   xmlDocument: XMLDocument;
   template: string;
 }
-
-const lastTemplateMap = new WeakMap<Node, TemplateMapValue>();
 
 function disconnectAll(nodes: IVDOMNode[]): void {
   for (const n of nodes) {

@@ -11,7 +11,7 @@ import {
   StoreListener,
   StoreOptions,
   StoreReducerMap
-} from "../common/index.js";
+} from "./common/index.js";
 
 export class Store<S = any> extends EventTarget implements IStore {
   private readonly listenerMap: Map<StoreListener<S>, ListenerInfo<S>>;

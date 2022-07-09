@@ -3,6 +3,8 @@ import {renderFunction} from "./render.js";
 import {RenderFunctionMeta, RenderFunction, weakMapGet, weakMapHas, weakMapSet} from "../common/index.js";
 import {attributeEffect, flushEffectCallbacks, flushEffects, queryEffect} from "./use/index.js";
 
+const metaMap = new WeakMap<HTMLElement, RenderFunctionMeta>();
+
 export function constructorCallback(element: HTMLElement, func: RenderFunction, shadowInit?: ShadowRootInit | boolean, template?: string): void {
   if (weakMapHas.call(metaMap, element)) {
     throw new Error("createHookContext called twice on element");
@@ -63,9 +65,6 @@ export function disconnectedCallback(element: HTMLElement): void {
   flushEffectCallbacks(meta.mountEffectCallbacks);
   return disconnect(meta.shadowRoot ? meta.shadowRoot : element);
 }
-
-const metaMap = new WeakMap<HTMLElement, RenderFunctionMeta>();
-
 
 function getMeta(element: HTMLElement): RenderFunctionMeta {
 

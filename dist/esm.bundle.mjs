@@ -736,6 +736,7 @@ async function renderElementNode(node, values) {
         }
     });
 }
+const lastTemplateMap = new WeakMap();
 function cancelRender(element) {
     const oldRefreshTimeout = weakMapGet.call(refreshTimeouts, element);
     if (oldRefreshTimeout && oldRefreshTimeout.timeout) {
@@ -822,7 +823,6 @@ function applyRender(abortController, element, template, xmlDocument, output) {
     }
     return false;
 }
-const lastTemplateMap = new WeakMap();
 function disconnectAll(nodes) {
     for (const n of nodes){
         const children = n.children;
@@ -1196,6 +1196,7 @@ function checkContextCallsForChangesAndAbort(element, meta, args) {
         }
     }
 }
+const metaMap = new WeakMap();
 function constructorCallback(element, func, shadowInit, template) {
     if (weakMapHas.call(metaMap, element)) {
         throw new Error("createHookContext called twice on element");
@@ -1250,7 +1251,6 @@ function disconnectedCallback(element) {
     flushEffectCallbacks(meta.mountEffectCallbacks);
     return disconnect(meta.shadowRoot ? meta.shadowRoot : element);
 }
-const metaMap = new WeakMap();
 function getMeta(element) {
     const meta = weakMapGet.call(metaMap, element);
     if (!meta) {

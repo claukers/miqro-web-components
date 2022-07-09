@@ -7,7 +7,7 @@ export {
 } from "./template/index.js";
 
 export {PathRouter, RouteLink, historyPushPath} from "./router/index.js";
-export {Store} from "./store/index.js";
+export {Store} from "./store.js";
 export {
   setLogLevel,
   Action,
