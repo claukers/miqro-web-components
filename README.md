@@ -219,7 +219,7 @@ to avoid rendering elements use ```data-if```.
 ***the value must be a boolean.***
 
 ```html
-<p data-if="{this.state.showDiv}"></p>
+<p data-if="{showDiv}"></p>
 ```
 
 #### data-for-each
@@ -231,7 +231,7 @@ to loop list. the value for ```data-for-each``` must be an Array or a function t
 ```html
 <!--data-for-each example-->
 <ul>
-  <li data-for-each="{this.state.list}">
+  <li data-for-each="{list}">
     {item.name}
   </li>
 </ul>
@@ -246,7 +246,7 @@ get the actual ```HTMLElement``` reference of an element rendered.
 for example this will call ```this.setDivRef``` with the p's ```HTMLElement``` reference.
 
 ```html
-<p data-ref="{this.setDivRef}"></p>
+<p data-ref="{setDivRef}"></p>
 ```
 
 #### data-on
@@ -256,13 +256,13 @@ to listen to the element's events.
 for example this will call ```addEventListener``` on ```click``` event.
 
 ```html
-<p data-on-click="{this.divClicked}"></p>
+<p data-on-click="{divClicked}"></p>
 ```
 
 or a custom event
 
 ```html
-<p data-on-custom-event="{this.customEventListener}"></p>
+<p data-on-custom-event="{customEventListener}"></p>
 ```
 
 #### include
@@ -289,7 +289,7 @@ setCache({
 
 consider auto generating a ```cache.json``` file with
 
-```npx miqro webcomponents:generate:cache src/ dist/cache.json```
+```npx miqro generate:cache src/ dist/cache.json```
 
 and then in your ```index``` file add the corresponding "require" so when you bundle or minify your app the templates
 will be included.
