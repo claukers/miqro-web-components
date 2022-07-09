@@ -1,27 +1,9 @@
 # @miqro/web-components
 
-very basic and ***experimental*** ```HTMLElements``` for creating dynamic components with a **very basic template**
-system. heavily influenced by ReactJS Hooks.
+very basic and ***experimental*** module for using the [WebComponents API](https://developer.mozilla.org/en-US/docs/Web/Web_Components) with a **very basic template**
+engine. heavily influenced by ReactJS Hooks.
 
 ## define(name, func, [options])
-
-### ***func*** the render function.
-
-```typescript
-type RenderFunction =
-  () =>
-    Promise<{ template?: string; values?: any } | string | undefined> |
-    { template?: string; values?: any } | string | undefined
-```
-
-### ***options*** [optional] object parameter.
-
-```typescript
-interface Options {
-  shadowInit?: ShadowRootInit | boolean; // defaults to { mode: "closed" }
-  template?: string; // defaults to ""
-}
-```
 
 example
 
@@ -31,7 +13,29 @@ define("my-element", function () {
 });
 ```
 
-### RenderFunctionThis
+### arguments
+
+define(name, func, [options])
+
+- ***func*** the render function.
+
+```typescript
+type RenderFunction =
+  () =>
+    Promise<{ template?: string; values?: any } | string | undefined> |
+    { template?: string; values?: any } | string | undefined
+```
+
+- ***options*** [optional] object parameter.
+
+```typescript
+interface Options {
+  shadowInit?: ShadowRootInit | boolean; // defaults to { mode: "closed" }
+  template?: string; // defaults to ""
+}
+```
+
+### Utils
 
 #### this.useAs
 
@@ -138,7 +142,6 @@ define("my-element", function () {
 **my-element.sfc**
 
 ```html
-
 <my-element data-shadow-roow-mode="closed">
   <template>
     <p>Hello {name}!</p>
@@ -300,7 +303,7 @@ setLogLevel("debug");
 //setLogLevel("trace");
 ```
 
-## Importing
+## importing
 
 ```npm install @miqro/web-components --save```
 
