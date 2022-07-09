@@ -10,8 +10,8 @@
     "prebuild": "rm -Rf dist/;",
     "build": "tsc && tsc -p tsconfig-esm.json",
     "postbuild": "deno bundle dist/esm/index.js dist/esm.bundle.js && cp dist/esm.bundle.js dist/esm.bundle.mjs",
-    "build:examples": "npm run build && mkdir examples/sfc/dist; npx miqro sfc -m \"../esm.bundle.js\" ./examples/sfc/src ./examples/sfc/dist && npx miqro generate:template:cache examples/sfc/dist examples/sfc/cache.json",
-    "postbuild:examples": "cd examples/sfc && webpack -c webpack.config.cjs && rm -Rf examples/sfc/dist;",
+    "build:examples": "npm run build && mkdir examples/sfc/dist; npx miqro sfc -m \"../esm.bundle.js\" ./examples/sfc/src ./examples/sfc/dist",
+    "postbuild:examples": "deno bundle examples/sfc/dist/index.js examples/sfc/app.bundle.min.js && rm -Rf examples/sfc/dist/;",
     "pretest": "npm run build",
     "test": "LOG_LEVEL=debug NODE_ENV=test miqro-test -r src/ -i -n "
   },
@@ -19,7 +19,6 @@
   "license": "ISC",
   "devDependencies": {
     "@miqro/test": "../test",
-    "webpack-cli": "4.9.2",
     "miqro": "../miqro",
     "typescript": "4.6.3"
   },

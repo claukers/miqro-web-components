@@ -9,7 +9,7 @@
   </template>
   <script type="module">
     export default function () {
-      this.useAs("te\"xt", "helloWorld");
+      this.useAs("text", "helloWorld");
     }
   </script>
 </my-component>
