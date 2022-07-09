@@ -22,12 +22,12 @@ export const mapGet = Map.prototype.get;
 export const mapSet = Map.prototype.set;
 export const mapDelete = Map.prototype.delete;
 
-export interface DefineOptions {
+export interface RenderFunctionOptions {
   shadowInit: ShadowRootInit | boolean;
   template: string;
 }
 
-export interface RenderFunctionWithOptions extends DefineOptions {
+export interface RenderFunctionWithOptions extends RenderFunctionOptions {
   render: RenderFunction;
 }
 
@@ -50,7 +50,7 @@ export type RenderFunction = (args: RenderFunctionArgs) => Promise<RenderFunctio
 
 export type RenderEventListener = (evt: CustomEvent<AbortSignal>) => void;
 
-export interface FunctionComponentMeta {
+export interface RenderFunctionMeta {
   lock: boolean;
   template?: string;
   templateChildren?: Node[];
@@ -109,12 +109,12 @@ export interface RenderFunctionThis {
   [name: string]: any;
 }
 
-export interface FunctionComponentContext {
+export interface RenderContext {
   this: RenderFunctionThis;
   validateAndLock: () => void;
 }
 
-export type UseFunctionCB<R = any> = (element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => R;
+export type UseFunctionCB<R = any> = (element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => R;
 
 export interface Action {
   type: string;

@@ -1,7 +1,7 @@
 import {
   ContextCall,
   Effect,
-  FunctionComponentMeta,
+  RenderFunctionMeta,
   log,
   LOG_LEVEL,
   mutationObserverDisconnect,
@@ -15,7 +15,7 @@ function getAttribute(element: HTMLElement, name: string, defaultValue?: string)
   return currentValue;
 }
 
-export function useAttribute(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string, watch = true) {
+export function useAttribute(element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string, watch = true) {
   //context.name = name;
   const currentValue = getAttribute(element, name, defaultValue);
   log(LOG_LEVEL.trace, "useAttribute %o with value = %o", element, currentValue);
@@ -34,13 +34,13 @@ export function useAttribute(element: HTMLElement, context: ContextCall, meta: F
   return currentValue;
 }
 
-export function useJSONAttribute(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string) {
+export function useJSONAttribute(element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string) {
   const value = useAttribute(element, context, meta, renderArgs, name, defaultValue);
   log(LOG_LEVEL.trace, "useJSONAttribute %o with value = %o", element, value);
   return typeof value === "string" && value !== "" ? JSON.parse(value) : value;
 }
 
-export function attributeEffect(element: HTMLElement, meta: FunctionComponentMeta): Effect {
+export function attributeEffect(element: HTMLElement, meta: RenderFunctionMeta): Effect {
   return function () {
     mutationObserverObserve.call(meta.observer, element, {
       attributes: true,

@@ -1,10 +1,10 @@
-import {ContextCall, Effect, FunctionComponentMeta, log, LOG_LEVEL, RenderFunctionArgs} from "../../common/index.js";
+import {ContextCall, Effect, RenderFunctionMeta, log, LOG_LEVEL, RenderFunctionArgs} from "../../common/index.js";
 
-export function useEffect(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, effect: Effect): void {
+export function useEffect(element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, effect: Effect): void {
   meta.effects.push(effect);
 }
 
-export function useMountEffect(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, effect: Effect): void {
+export function useMountEffect(element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, effect: Effect): void {
   if (context.firstRun) {
     meta.mountEffects.push(effect);
   }

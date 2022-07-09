@@ -1,14 +1,14 @@
-import {DefineOptions, RenderFunction, RenderFunctionWithOptions} from "../common/index.js";
+import {RenderFunctionOptions, RenderFunction, RenderFunctionWithOptions} from "../common/index.js";
 import {connectedCallback, constructorCallback, disconnectedCallback} from "./callbacks.js";
 
-const DEFAULT_OPTIONS: DefineOptions = {
+const DEFAULT_OPTIONS: RenderFunctionOptions = {
   shadowInit: {
     mode: "closed"
   },
   template: ""
 }
 
-export function define(tag: string, func: RenderFunction | RenderFunctionWithOptions, options?: Partial<DefineOptions>) {
+export function define(tag: string, func: RenderFunction | RenderFunctionWithOptions, options?: Partial<RenderFunctionOptions>) {
 
   if (typeof func !== "function" && options !== undefined) {
     throw new Error("bad arguments options cannot be passed if func is RenderFunctionWithOptions")

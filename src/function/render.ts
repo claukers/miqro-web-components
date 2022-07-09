@@ -1,7 +1,7 @@
 import {queueRender} from "../template/index.js";
 import {createFunctionContext} from "./context.js";
 import {
-  FunctionComponentMeta,
+  RenderFunctionMeta,
   log,
   LOG_LEVEL,
   nodeList2Array,
@@ -10,7 +10,7 @@ import {
 } from "../common/index.js";
 import {flushEffects} from "./use/index.js";
 
-export function renderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): void {
+export function renderFunction(element: HTMLElement, firstRun: boolean, meta: RenderFunctionMeta): void {
   return queueRender(
     meta.shadowRoot ? meta.shadowRoot : element,
     createRenderFunction(element, firstRun, meta),
@@ -21,7 +21,7 @@ export function renderFunction(element: HTMLElement, firstRun: boolean, meta: Fu
   );
 }
 
-function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: FunctionComponentMeta): RenderFunction {
+function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: RenderFunctionMeta): RenderFunction {
 
   return async function (args: RenderFunctionArgs) {
     if (args.abortController.signal.aborted) {
@@ -69,7 +69,7 @@ function createRenderFunction(element: HTMLElement, firstRun: boolean, meta: Fun
   }
 }
 
-function checkContextCallsForChangesAndAbort(element: HTMLElement, meta: FunctionComponentMeta, args: RenderFunctionArgs) {
+function checkContextCallsForChangesAndAbort(element: HTMLElement, meta: RenderFunctionMeta, args: RenderFunctionArgs) {
   let shouldAbort = false;
   let shouldRefresh = true;
   for (const call of meta.contextCalls) {

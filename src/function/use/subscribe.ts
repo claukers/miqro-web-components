@@ -1,7 +1,7 @@
 import {
   ContextCall,
   deepEquals,
-  FunctionComponentMeta,
+  RenderFunctionMeta,
   RenderFunctionThis,
   IStore,
   log,
@@ -10,7 +10,7 @@ import {
   Selector
 } from "../../common/index.js";
 
-export function useSubscription<R, S>(this: RenderFunctionThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, store: IStore<S>, selector: Selector<S, R>): R {
+export function useSubscription<R, S>(this: RenderFunctionThis, element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, store: IStore<S>, selector: Selector<S, R>): R {
   function listener(newValue: R) {
     log(LOG_LEVEL.trace, `useSubscription.listener for %s for %s`, context.name, element);
     renderArgs.abortController.abort();

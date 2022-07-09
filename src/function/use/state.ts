@@ -1,6 +1,6 @@
-import {ContextCall, FunctionComponentMeta, GetFunction, RenderFunctionArgs, SetFunction} from "../../common/index.js";
+import {ContextCall, RenderFunctionMeta, GetFunction, RenderFunctionArgs, SetFunction} from "../../common/index.js";
 
-export function useState<T>(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, defaultValue?: T): [T | undefined, SetFunction<T>, GetFunction<T>] {
+export function useState<T>(element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, defaultValue?: T): [T | undefined, SetFunction<T>, GetFunction<T>] {
   const key = context.name as string;
 
   function getValue() {

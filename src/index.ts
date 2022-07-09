@@ -16,7 +16,7 @@ export {
   StoreListener,
   Selector,
   StoreOptions,
-  DefineOptions,
+  RenderFunctionOptions as DefineOptions,
   RenderFunctionThis,
   RenderFunctionWithOptions
 } from "./common/index.js";

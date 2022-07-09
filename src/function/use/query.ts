@@ -1,7 +1,7 @@
 import {
   ContextCall,
   Effect,
-  FunctionComponentMeta,
+  RenderFunctionMeta,
   getQueryValue,
   RenderFunctionArgs,
   SetFunction,
@@ -10,7 +10,7 @@ import {
   windowRemoveEventListener
 } from "../../common/index.js";
 
-export function useQuery(element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string | string[]): [string[] | string | null, SetFunction<string[] | string | null>] {
+export function useQuery(element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, name: string, defaultValue?: string | string[]): [string[] | string | null, SetFunction<string[] | string | null>] {
   //context.name = name;
   const value = getQueryValue(name, defaultValue);
 
@@ -33,7 +33,7 @@ export function useQuery(element: HTMLElement, context: ContextCall, meta: Funct
   ];
 }
 
-export function queryEffect(meta: FunctionComponentMeta): Effect {
+export function queryEffect(meta: RenderFunctionMeta): Effect {
   return function () {
     const queryCalls = meta.contextCalls.filter(c => c.call === "useQuery");
 

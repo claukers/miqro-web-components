@@ -10,13 +10,13 @@ import {
 } from "./use/index.js";
 import {
   ContextCall,
-  FunctionComponentContext,
-  FunctionComponentMeta,
+  RenderContext,
+  RenderFunctionMeta,
   RenderFunctionThis,
   RenderFunctionArgs
 } from "../common/index.js";
 
-export function createFunctionContext(element: HTMLElement, meta: FunctionComponentMeta, firstRun: boolean, renderArgs: RenderFunctionArgs): FunctionComponentContext {
+export function createFunctionContext(element: HTMLElement, meta: RenderFunctionMeta, firstRun: boolean, renderArgs: RenderFunctionArgs): RenderContext {
 
   let lock = false;
   const usage: ContextCall[] = [];
@@ -26,7 +26,7 @@ export function createFunctionContext(element: HTMLElement, meta: FunctionCompon
     shadowRoot: meta.shadowRoot
   };
 
-  function bindContextUseFunction<R = any>(name: string, useFunc: (this: RenderFunctionThis, element: HTMLElement, context: ContextCall, meta: FunctionComponentMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => any) {
+  function bindContextUseFunction<R = any>(name: string, useFunc: (this: RenderFunctionThis, element: HTMLElement, context: ContextCall, meta: RenderFunctionMeta, renderArgs: RenderFunctionArgs, ...args: any[]) => any) {
     const useFuncBound = useFunc.bind(FunctionContextSelf as RenderFunctionThis);
 
     if (FunctionContextSelf[name]) {
