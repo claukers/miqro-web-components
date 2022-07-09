@@ -3,7 +3,29 @@
 very basic and ***experimental*** module for using the [WebComponents API](https://developer.mozilla.org/en-US/docs/Web/Web_Components) with a **very basic template**
 engine. heavily influenced by ReactJS Hooks.
 
-## define(name, func, [options])
+- [define](#define)
+  - [arguments](#define-arguments)
+  - [RenderFunction this](#renderfunction-this)
+    - [this.useAs](#use-as)
+    - [this.useState](#use-state)
+    - [this.useQuery](#use-query)
+    - [this.useAttribute](#use-attribute)
+    - [this.useJSONAttribute](#use-json-attribute)
+    - [this.useSubscription](#use-subscription)
+    - [this.useEffect](#use-effect)
+    - [this.useMountEffect](#use-mount-effect)
+- [template](#template)
+  - [data-if](#data-if)
+  - [data-for-each](#data-for-each)
+  - [data-ref](#data-ref)
+  - [data-on](#data-on)
+  - [include](#include)
+  - [use other template engine](#use-other-template-engine)
+- [single file component](#single-file-component)
+- [debugging](#debugging)
+- [importing](#importing)
+
+## define
 
 example
 
@@ -13,7 +35,7 @@ define("my-element", function () {
 });
 ```
 
-### arguments
+### define arguments
 
 define(name, func, [options])
 
@@ -35,9 +57,9 @@ interface Options {
 }
 ```
 
-### Utils
+### RenderFunction this
 
-#### this.useAs
+#### use as
 
 set a template value for the current render.
 
@@ -48,7 +70,7 @@ define("my-element", function () {
 });
 ```
 
-#### this.useState
+#### use state
 
 create a state variable that you can alter using the set function. Calling the set function will re-render the
 component.
@@ -63,7 +85,7 @@ define("my-element", function () {
 });
 ```
 
-#### this.useQuery
+#### use query
 
 watch location.query changes on the custom element. Calling the set function will re-render the component and set
 location.query.
@@ -74,7 +96,7 @@ define("my-element", function () {
 });
 ```
 
-#### this.useAttribute
+#### use attribute
 
 watch attribute changes on the custom element.
 
@@ -84,7 +106,7 @@ define("my-element", function () {
 });
 ```
 
-#### this.useJSONAttribute
+#### use json attribute
 
 watch attribute changes on the custom element and return a parsed json from the value.
 
@@ -96,7 +118,7 @@ define("my-element", function () {
 
 consider using ```this.useSubscription``` to transfer objects instead.
 
-#### this.useSubscription
+#### use subscription
 
 helpers to listen a store subscription.
 
@@ -106,7 +128,7 @@ define("my-element", function () {
 });
 ```
 
-#### this.useEffect
+#### use effect
 
 hook a function to run after render and before re-render and disconnect.
 
@@ -119,7 +141,7 @@ define("my-element", function () {
 });
 ```
 
-#### this.useMountEffect
+#### use mount effect
 
 hook a function to run after first render and before disconnect.
 
