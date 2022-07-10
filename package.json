@@ -1,6 +1,6 @@
 {
   "name": "@miqro/web-components",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "helpers for creating dynamic HTMLElements with a basic template system",
   "type": "commonjs",
   "types": "dist/cjs/index.d.ts",
