@@ -10,17 +10,15 @@
     "prebuild": "rm -Rf dist/;",
     "build": "tsc && tsc -p tsconfig-esm.json",
     "postbuild": "deno bundle dist/esm/index.js dist/esm.bundle.js && cp dist/esm.bundle.js dist/esm.bundle.mjs",
-    "build:examples": "npm run build && mkdir examples/sfc/dist; npx miqro sfc -m \"../esm.bundle.js\" ./examples/sfc/src ./examples/sfc/dist",
-    "postbuild:examples": "deno bundle examples/sfc/dist/index.js examples/sfc/app.bundle.min.js && rm -Rf examples/sfc/dist/;",
     "pretest": "npm run build",
     "test": "LOG_LEVEL=debug NODE_ENV=test miqro-test -r src/ -i -n "
   },
   "author": "claukers",
   "license": "ISC",
   "devDependencies": {
-    "@miqro/test": "../test",
-    "miqro": "../miqro",
-    "typescript": "4.6.3"
+    "@miqro/test": "0.2.4",
+    "miqro": "1.8.1",
+    "typescript": "4.7.4"
   },
   "engines": {
     "node": ">=16.0.0",

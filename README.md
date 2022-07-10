@@ -1,6 +1,6 @@
 # @miqro/web-components
 
-very basic and ***experimental*** module for using the [WebComponents API](https://developer.mozilla.org/en-US/docs/Web/Web_Components) with a **very basic template**
+very ***experimental*** module for using the [WebComponents API](https://developer.mozilla.org/en-US/docs/Web/Web_Components) with a **very basic template**
 engine. heavily influenced by ReactJS Hooks.
 
 - [define](#define)
@@ -21,7 +21,6 @@ engine. heavily influenced by ReactJS Hooks.
   - [data-on](#data-on)
   - [include](#include)
   - [use other template engine](#use-other-template-engine)
-- [single file component](#single-file-component)
 - [debugging](#debugging)
 - [importing](#importing)
 
@@ -158,51 +157,6 @@ define("my-element", function () {
   });
 });
 ```
-
-## single file component
-
-**my-element.sfc**
-
-```html
-<my-element data-shadow-roow-mode="closed">
-  <template>
-    <p>Hello {name}!</p>
-  </template>
-  <script type="module">
-    export default function () {
-      this.useAs("name", "World");
-    }
-  </script>
-</my-element>
-```
-
-**npx miqro sfc inputDir/ outputDir/**
-
-this will produce
-
-**my-element-component.js**
-
-```typescript
-export default function () {
-  this.useAs("name", "World");
-}
-```
-
-**my-element.js**
-
-```typescript
-import {define} from "@miqro/web-components";
-import render from "./index-component.js";
-
-define("my-component", render, {
-  shadowInit: {
-      mode: "closed"
-  },
-  template: "<p>{text}</p>"
-});
-```
-
-to use this element just import ```my-element.js```
 
 ## template
 
